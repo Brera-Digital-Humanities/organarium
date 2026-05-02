@@ -11,7 +11,7 @@
         "align": ["wide", "full"],
         "interactivity": true
     },
-    "textdomain": "ttf-child",
+    "textdomain": "featured-zoom",
     "editorScript": "file:./index.js",
     "viewScriptModule": "file:./view.js",
     "style": "file:./style-index.css",

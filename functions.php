@@ -6,11 +6,14 @@
 /**
  * Enqueue custom assets
  */
-function ttf_enqueue_custom_assets() {
-	
-    // Gli asset verranno gestiti automaticamente tramite register_block_type e il build di wp-scripts
+add_action( 'wp_enqueue_scripts', 'jerus_enqueue_styles' );
+
+function jerus_enqueue_styles() {
+	wp_enqueue_style( 
+		'grand-sunrise-style', 
+		get_stylesheet_uri()
+	);
 }
-add_action( 'wp_enqueue_scripts', 'ttf_enqueue_custom_assets' );
 
 /**
  * Registrazione Shortcode per visualizzare campi ACF
@@ -67,39 +70,8 @@ add_action( 'init', 'ttf_register_acf_shortcodes' );
  */
 add_action('init', 'ttf_register_custom_blocks');
 function ttf_register_custom_blocks() {
-    // Registra il blocco della timeline
-    register_block_type( 'ttf-child/timeline', array(
-        'render_callback' => 'ttf_render_timeline_block',
-    ));
 
-    // Registra il nuovo blocco Featured Zoom (caricando il metadata dal build)
+    register_block_type( __DIR__ . '/build/timeline' );
     register_block_type( __DIR__ . '/build/featured-zoom' );
 }
 
-/**
- * Render callback per la Timeline
- * Estrae i dati ACF (Free) e genera il markup
- */
-function ttf_render_timeline_block( $attributes, $content ) {
-    if ( ! function_exists( 'get_field' ) ) return '';
-
-    // Recuperiamo i campi ACF definiti per il post corrente
-    $data_opera = get_field('data');
-    $ubicazione = get_field('ubicazione');
-    $autore     = get_field('autore');
-
-    if ( ! $data_opera && ! $autore ) return '<p>Configura i campi ACF per vedere la timeline.</p>';
-
-    ob_start(); ?>
-    <div class="timeline-container">
-        <div class="timeline-item">
-            <span class="timeline-date"><?php echo esc_html($data_opera); ?></span>
-            <div class="timeline-content">
-                <strong><?php echo esc_html($autore); ?></strong><br>
-                <span><?php echo esc_html($ubicazione); ?></span>
-            </div>
-        </div>
-    </div>
-    <?php
-    return ob_get_clean();
-}

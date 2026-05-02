@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ttf-child/timeline",
+  "title": "Timeline 3D",
+  "category": "theme",
+  "icon": "calendar",
+  "description": "Timeline tridimensionale sfogliabile con filtri ACF.",
+  "supports": {
+    "html": false,
+    "interactivity": true
+  },
+  "attributes": {
+    "postSource": {
+      "type": "string",
+      "default": "all"
+    },
+    "allowedViews": {
+      "type": "string",
+      "default": "both"
+    }
+  },
+  "textdomain": "timeline",
+  "editorScript": "file:./index.js",
+  "viewScriptModule": "file:./view.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

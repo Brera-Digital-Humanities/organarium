@@ -1,7 +1,8 @@
 <?php
 // ── Attributi del blocco ──────────────────────────────────────────────────────
-$post_source   = $attributes['postSource']   ?? 'all';
-$allowed_views = $attributes['allowedViews'] ?? 'both';
+$post_source        = $attributes['postSource']        ?? 'all';
+$allowed_views      = $attributes['allowedViews']      ?? 'both';
+$selected_category  = (int) ( $attributes['selectedCategory'] ?? 0 );
 
 // ── Helper: etichetta breve (tronca tutto ciò che segue il primo "(" per le label lunghe) ──
 $short_label = static function ( string $label ): string {
@@ -26,6 +27,12 @@ if ( $post_source === 'current_category' ) {
             'terms'    => $term->term_id,
         ] ];
     }
+} elseif ( $post_source === 'fixed_category' && $selected_category > 0 ) {
+    $query_args['tax_query'] = [ [
+        'taxonomy' => 'category',
+        'field'    => 'term_id',
+        'terms'    => $selected_category,
+    ] ];
 }
 
 $query = new WP_Query( $query_args );

@@ -43,6 +43,10 @@ return array(
 			'allowedViews' => array(
 				'type' => 'string',
 				'default' => 'both'
+			),
+			'selectedCategory' => array(
+				'type' => 'number',
+				'default' => 0
 			)
 		),
 		'textdomain' => 'timeline',

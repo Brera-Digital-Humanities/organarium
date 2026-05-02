@@ -18,6 +18,10 @@
         "allowedViews": {
             "type": "string",
             "default": "both"
+        },
+        "selectedCategory": {
+            "type": "number",
+            "default": 0
         }
     },
     "textdomain": "timeline",

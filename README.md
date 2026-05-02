@@ -30,6 +30,14 @@ jerus-organo/
 
 ## Build
 
+**Prerequisito:** il progetto richiede Node.js 20. Attivare la versione corretta con nvm prima di qualsiasi altro comando:
+
+```bash
+nvm use 20
+```
+
+Installare le dipendenze e compilare:
+
 ```bash
 npm install
 npm run build      # build di produzione
@@ -37,6 +45,8 @@ npm run start      # watch mode per lo sviluppo
 ```
 
 Il flag `--experimental-modules` abilita i moduli ES6; `--blocks-manifest` genera automaticamente `build/blocks-manifest.php`.
+
+> I file nella cartella `build/` sono il risultato della compilazione e non vanno modificati a mano: le sorgenti si trovano in `src/`.
 
 ---
 

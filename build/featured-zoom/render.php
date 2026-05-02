@@ -5,10 +5,12 @@ $dida = get_field('didascalia_foto_in_primo_piano');
 
 if ($img_src): ?>
     <div <?php echo get_block_wrapper_attributes(['class' => 'wp-block-ttf-child-featured-zoom']); ?> 
-        data-wp-interactive="ttf-child/featured-zoom"
+        data-wp-interactive="featured-zoom"
         data-wp-context='{ "scale": 1, "translateX": 0, "translateY": 0, "isDragging": false, "startX": 0, "startY": 0 }'
     >
         <div class="zoom-image-container" 
+             style="overflow: hidden; position: relative;"
+             data-wp-bind--style="callbacks.containerStyle"
              data-wp-on--mousedown="actions.startDrag"
              data-wp-on--mousemove="actions.drag"
              data-wp-on-window--mouseup="actions.stopDrag"

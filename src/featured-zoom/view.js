@@ -1,10 +1,12 @@
 import { store, getContext } from '@wordpress/interactivity';
 
-store( 'ttf-child/featured-zoom', {
+store( 'featured-zoom', {
 	actions: {
 		zoomIn: () => {
 			const context = getContext();
-			context.scale += 0.5;
+			if ( context ) {
+				context.scale += 0.5;
+			}
 		},
 		zoomOut: () => {
 			const context = getContext();
@@ -19,10 +21,10 @@ store( 'ttf-child/featured-zoom', {
 		},
 		startDrag: ( e ) => {
 			const context = getContext();
-			// Se l'immagine non è zoomata, non attiviamo il drag
-			if ( context.scale <= 1 ) {
-				return;
-			}
+			
+			// Rimuoviamo il blocco scale <= 1 qui per permettere 
+			// il cambio del cursore, ma limiteremo il movimento in drag()
+			if ( context.scale <= 1 ) return;
 
 			e.preventDefault();
 			context.isDragging = true;
@@ -40,7 +42,7 @@ store( 'ttf-child/featured-zoom', {
 		},
 		drag: ( e ) => {
 			const context = getContext();
-			if ( ! context.isDragging ) return;
+			if ( ! context.isDragging || context.scale <= 1 ) return;
 
 			e.preventDefault();
 
@@ -57,16 +59,24 @@ store( 'ttf-child/featured-zoom', {
 			context.translateX = Math.max( -maxW, Math.min( maxW, nextX ) );
 			context.translateY = Math.max( -maxH, Math.min( maxH, nextY ) );
 
-			
+		
 		},
 	},
 	callbacks: {
 		imageStyle: () => {
 			const { scale, translateX, translateY, isDragging } = getContext();
-			const transition = isDragging ? 'none' : 'transform 0.2s ease-out';
-			
-			// IMPORTANTE: usiamo translate3d per assicurarci che il browser usi la GPU
-			return `transform: translate3d(${ translateX }px, ${ translateY }px, 0) scale(${ scale }); transition: ${ transition }; cursor: ${ scale > 1 ? ( isDragging ? 'grabbing' : 'grab' ) : 'default' };`;
+			return {
+				transform: `translate3d(${ translateX }px, ${ translateY }px, 0) scale(${ scale })`,
+				transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+			};
 		},
+		containerStyle: () => {
+			const { scale, isDragging } = getContext();
+			// Gestiamo il cursore sul contenitore perché l'immagine ha pointer-events: none
+			if ( scale > 1 ) {
+				return { cursor: isDragging ? 'grabbing' : 'grab' };
+			}
+			return { cursor: 'default' };
+		}
 	},
 } );

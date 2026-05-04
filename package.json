@@ -2,22 +2,24 @@
   "name": "jerus-organo",
   "version": "1.0.0",
   "main": "build/index.js",
-	"scripts": {
-		"build": "wp-scripts build --experimental-modules --blocks-manifest",
-		"format": "wp-scripts format",
-		"lint:css": "wp-scripts lint-style",
-		"lint:js": "wp-scripts lint-js",
-		"packages-update": "wp-scripts packages-update",
-		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --experimental-modules --blocks-manifest"
-	},
-	"dependencies": {
-		"@wordpress/interactivity": "latest"
-	},
-	"files": [
-		"[^.]*"
-	],
-	"devDependencies": {
-		"@wordpress/scripts": "^32.0.0"
-	}
+  "scripts": {
+    "build": "wp-scripts build --experimental-modules --blocks-manifest",
+    "format": "wp-scripts format",
+    "lint:css": "wp-scripts lint-style",
+    "lint:js": "wp-scripts lint-js",
+    "packages-update": "wp-scripts packages-update",
+    "plugin-zip": "wp-scripts plugin-zip",
+    "start": "wp-scripts start --experimental-modules --blocks-manifest"
+  },
+  "dependencies": {
+    "@wordpress/interactivity": "latest",
+    "leaflet": "^1.9.4"
+  },
+  "files": [
+    "[^.]*"
+  ],
+  "devDependencies": {
+    "@types/leaflet": "^1.9.21",
+    "@wordpress/scripts": "^32.0.0"
+  }
 }

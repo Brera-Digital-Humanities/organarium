@@ -23,6 +23,45 @@ return array(
 		'style' => 'file:./style-index.css',
 		'render' => 'file:./render.php'
 	),
+	'mappa-interattiva' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'ttf-child/mappa-interattiva',
+		'title' => 'Mappa Interattiva',
+		'category' => 'theme',
+		'icon' => 'location',
+		'description' => 'Mappa interattiva Leaflet con pin geolocalizzati degli articoli.',
+		'supports' => array(
+			'html' => false,
+			'align' => array(
+				'wide',
+				'full'
+			)
+		),
+		'attributes' => array(
+			'postSource' => array(
+				'type' => 'string',
+				'default' => 'all'
+			),
+			'selectedCategory' => array(
+				'type' => 'number',
+				'default' => 0
+			),
+			'mapHeight' => array(
+				'type' => 'number',
+				'default' => 520
+			),
+			'mapStyle' => array(
+				'type' => 'string',
+				'default' => 'natural'
+			)
+		),
+		'textdomain' => 'jerus-organo',
+		'editorScript' => 'file:./index.js',
+		'viewScript' => 'file:./view.js',
+		'style' => 'file:./style-index.css',
+		'render' => 'file:./render.php'
+	),
 	'timeline' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,

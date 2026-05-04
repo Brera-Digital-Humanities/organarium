@@ -2,10 +2,10 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/timeline/index.js"
-/*!*******************************!*\
-  !*** ./src/timeline/index.js ***!
-  \*******************************/
+/***/ "./src/mappa-interattiva/index.js"
+/*!****************************************!*\
+  !*** ./src/mappa-interattiva/index.js ***!
+  \****************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
@@ -17,8 +17,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/data */ "@wordpress/data");
 /* harmony import */ var _wordpress_data__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_data__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./style.scss */ "./src/timeline/style.scss");
-/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/timeline/block.json");
+/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./style.scss */ "./src/mappa-interattiva/style.scss");
+/* harmony import */ var _block_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./block.json */ "./src/mappa-interattiva/block.json");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react/jsx-runtime */ "react/jsx-runtime");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__);
 
@@ -44,10 +44,11 @@ __webpack_require__.r(__webpack_exports__);
       per_page: -1,
       _fields: 'id,name'
     }) ?? [], []);
-    const viewLabel = {
-      both: 'Timeline + Griglia',
-      timeline: 'Solo Timeline',
-      grid: 'Solo Griglia'
+    const styleLabels = {
+      natural: 'Chiaro naturale',
+      warm: 'Caldo bruciato',
+      teal: 'Freddo teal',
+      dark: 'Scuro terroso'
     };
     const sourceLabel = {
       all: 'Tutti i post',
@@ -88,31 +89,43 @@ __webpack_require__.r(__webpack_exports__);
               selectedCategory: Number(val)
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
-          title: "Visualizzazioni",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RadioControl, {
-            label: "Viste disponibili",
-            selected: attributes.allowedViews,
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.PanelBody, {
+          title: "Aspetto mappa",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.RangeControl, {
+            label: "Altezza mappa (px)",
+            value: attributes.mapHeight,
+            onChange: val => setAttributes({
+              mapHeight: val
+            }),
+            min: 300,
+            max: 900,
+            step: 20
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.SelectControl, {
+            label: "Filtro colore tile",
+            value: attributes.mapStyle,
             options: [{
-              label: 'Entrambe (timeline + griglia)',
-              value: 'both'
+              label: 'Chiaro naturale',
+              value: 'natural'
             }, {
-              label: 'Solo timeline',
-              value: 'timeline'
+              label: 'Caldo bruciato',
+              value: 'warm'
             }, {
-              label: 'Solo griglia',
-              value: 'grid'
+              label: 'Freddo teal',
+              value: 'teal'
+            }, {
+              label: 'Scuro terroso',
+              value: 'dark'
             }],
             onChange: val => setAttributes({
-              allowedViews: val
+              mapStyle: val
             })
-          })
+          })]
         })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("div", {
         ...blockProps,
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("p", {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsx)("strong", {
-            children: "Timeline 3D"
+            children: "Mappa Interattiva"
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxs)("p", {
           style: {
@@ -120,7 +133,7 @@ __webpack_require__.r(__webpack_exports__);
             opacity: 0.65,
             marginTop: '0.5rem'
           },
-          children: [sourceLabel[attributes.postSource] ?? sourceLabel.all, ' · ', viewLabel[attributes.allowedViews]]
+          children: [sourceLabel[attributes.postSource] ?? sourceLabel.all, ' · ', styleLabels[attributes.mapStyle] ?? styleLabels.natural, ' · ' + attributes.mapHeight + 'px']
         })]
       })]
     });
@@ -130,10 +143,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ },
 
-/***/ "./src/timeline/style.scss"
-/*!*********************************!*\
-  !*** ./src/timeline/style.scss ***!
-  \*********************************/
+/***/ "./src/mappa-interattiva/style.scss"
+/*!******************************************!*\
+  !*** ./src/mappa-interattiva/style.scss ***!
+  \******************************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
@@ -192,13 +205,13 @@ module.exports = window["wp"]["data"];
 
 /***/ },
 
-/***/ "./src/timeline/block.json"
-/*!*********************************!*\
-  !*** ./src/timeline/block.json ***!
-  \*********************************/
+/***/ "./src/mappa-interattiva/block.json"
+/*!******************************************!*\
+  !*** ./src/mappa-interattiva/block.json ***!
+  \******************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"ttf-child/timeline","title":"Timeline 3D","category":"theme","icon":"calendar","description":"Timeline tridimensionale sfogliabile con filtri ACF.","supports":{"html":false,"interactivity":true},"attributes":{"postSource":{"type":"string","default":"all"},"allowedViews":{"type":"string","default":"both"},"selectedCategory":{"type":"number","default":0}},"textdomain":"timeline","editorScript":"file:./index.js","viewScriptModule":"file:./view.js","style":"file:./style-index.css","render":"file:./render.php"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"ttf-child/mappa-interattiva","title":"Mappa Interattiva","category":"theme","icon":"location","description":"Mappa interattiva Leaflet con pin geolocalizzati degli articoli.","supports":{"html":false,"align":["wide","full"]},"attributes":{"postSource":{"type":"string","default":"all"},"selectedCategory":{"type":"number","default":0},"mapHeight":{"type":"number","default":520},"mapStyle":{"type":"string","default":"natural"}},"textdomain":"jerus-organo","editorScript":"file:./index.js","viewScript":"file:./view.js","style":"file:./style-index.css","render":"file:./render.php"}');
 
 /***/ }
 
@@ -318,8 +331,8 @@ module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/tru
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			"timeline/index": 0,
-/******/ 			"timeline/style-index": 0
+/******/ 			"mappa-interattiva/index": 0,
+/******/ 			"mappa-interattiva/style-index": 0
 /******/ 		};
 /******/ 		
 /******/ 		// no chunk on demand loading
@@ -369,7 +382,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/tru
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["timeline/style-index"], () => (__webpack_require__("./src/timeline/index.js")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["mappa-interattiva/style-index"], () => (__webpack_require__("./src/mappa-interattiva/index.js")))
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

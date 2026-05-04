@@ -8,7 +8,8 @@
     "description": "Mappa interattiva Leaflet con pin geolocalizzati degli articoli.",
     "supports": {
         "html": false,
-        "align": ["wide", "full"]
+        "align": ["wide", "full"],
+        "interactivity": true
     },
     "attributes": {
         "postSource": {
@@ -30,7 +31,7 @@
     },
     "textdomain": "jerus-organo",
     "editorScript": "file:./index.js",
-    "viewScript": "file:./view.js",
+    "viewScriptModule": "file:./view.js",
     "style": "file:./style-index.css",
     "render": "file:./render.php"
 }

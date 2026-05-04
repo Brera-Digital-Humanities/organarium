@@ -188,9 +188,8 @@ $context = [
                 <h5 class="filter-label">Categoria</h5>
                 <div class="pills">
                     <button class="pill"
-                            data-wp-context='{"filterGroup":"categoria","filterVal":"all"}'
-                            data-wp-class--active="state.isPillActive"
-                            data-wp-on--click="actions.togglePill">Tutte</button>
+                            data-wp-class--active="!state.hasActiveFilters"
+                            data-wp-on--click="actions.clearFilters">Tutte</button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pill"
                             data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ); ?>'

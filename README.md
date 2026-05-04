@@ -142,8 +142,8 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 - Pin SVG circolari (28×28 px: cerchio con punto centrale) con colori fissi indipendenti dalla categoria
 - **Raggruppamento coordinate**: più articoli con le stesse coordinate condividono un unico marker; la popup mostra tutte le card in sequenza separate da un divisore orizzontale
 - Popup card con thumbnail, campo `ubicazione` e titolo linkato (colore `accent-3 #6b2a0b`)
-- Sidebar filtri sempre visibile (350 px) con pill per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline (pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale)
-- Viewport automatico: `fitBounds` sui marker filtrati o vista sull'Italia intera se non ci sono dati
+- **Sidebar filtri laterale a scomparsa** (36 px → 450 px, toggle con testo verticale) con pill per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: pill disabilitate per combinazioni non disponibili, etichette ACF risolte tramite `get_field_object()`, badge filtri attivi con rimozione singola o globale
+- Viewport automatico: `fitBounds` sui marker filtrati oppure zoom sul singolo marker visibile
 - 4 stili CartoDB con CSS filter applicato al tile pane: `natural`, `warm`, `teal`, `dark`
 
 **Stili mappa disponibili:**
@@ -174,10 +174,26 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 | `materiale` | Select multipla | Filtro Materiale |
 | `tecniche` | Select multipla | Filtro Tecnica |
 
+**Interactivity API — store `mappa-interattiva`:**
+
+| Elemento | Descrizione |
+|---|---|
+| state `filtersOpen` | Apertura/chiusura sidebar laterale |
+| state `filterToggleLabel` | Etichetta dinamica del bottone toggle (`Filtra ↓ / ↑`) |
+| state `isPillActive/isPillDisabled` | Stato attivo e disponibilità condizionale delle pill |
+| state `hasActiveFilters` | Almeno un filtro attivo |
+| state `hasCategoriaFilter/Materiali/Tecniche` | Presenza di filtro per gruppo |
+| state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
+| action `toggleFilters/togglePill/clearFilters` | Gestione sidebar e filtri |
+| action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
+| callback `initMap` | Inizializzazione Leaflet (eseguito una volta via `data-wp-init`) |
+| callback `updateMarkers` | Aggiornamento marker al cambio filtri (reattivo via `data-wp-watch`) |
+
 **Architettura:**
 - Leaflet.js (v1.9.4) è **bundlato** direttamente in `view.js` tramite npm/webpack — nessuna dipendenza CDN per il JS
 - Il CSS di Leaflet è incluso in `style-index.css` via `@import url()` (CDN jsDelivr)
-- Nessuna dipendenza dalla WordPress Interactivity API: i filtri e la mappa sono gestiti da Leaflet e vanilla JS
+- Il blocco usa `viewScriptModule` (non `viewScript`) in `block.json`: necessario per il caricamento come ES module e per la risoluzione dell'import map `@wordpress/interactivity`
+- `initMap` imposta `ctx.mapInstance` in un `setTimeout` dopo `invalidateSize()`: questo aggiornamento reattivo del contesto riattiva automaticamente `updateMarkers` via `data-wp-watch`, senza chiamate esplicite
 - Il campo `posizione_per_mappa` è letto con `get_post_meta()` (non `get_field()`) perché ACF Extended con `return_format: leaflet` restituisce HTML anziché i dati grezzi delle coordinate
 
 ---
@@ -200,7 +216,7 @@ Registrati in `functions.php` per visualizzare i campi ACF nelle template:
 
 ## Tecnologie
 
-- **WordPress Interactivity API** (`@wordpress/interactivity`) — stato reattivo e binding dichiarativo (blocchi featured-zoom e timeline)
+- **WordPress Interactivity API** (`@wordpress/interactivity`) — stato reattivo e binding dichiarativo (blocchi featured-zoom, timeline e mappa-interattiva)
 - **Leaflet.js 1.9.4** — mappa interattiva con pin, popup e layer tile (blocco mappa-interattiva, bundlato via npm)
 - **wp-scripts 32** — build toolchain (Webpack, SCSS, ESM modules, `--experimental-modules`)
 - **CSS 3D transforms** — effetto prospettico del carousel timeline

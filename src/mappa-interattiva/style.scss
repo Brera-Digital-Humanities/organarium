@@ -5,60 +5,84 @@
      accent-3 #6b2a0b  accent-4 #8cbbba  accent-5 #f2f2e5
    ═══════════════════════════════════════════════════ */
 
-/* Leaflet CSS — caricato via CDN */
 @import url('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css');
 
-// ── Wrapper blocco ─────────────────────────────────────────────────────────
+// ── Wrapper blocco: flex orizzontale sidebar + mappa ──────────────────────
 .map-block-wrap {
     width: 100%;
-    padding: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+}
 
-    // Layout sidebar + mappa
-    &--has-sidebar {
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        gap: 0 2rem;
-        align-items: start;
+// ── Sidebar filtri (toggle laterale) ──────────────────────────────────────
+.map-sidebar {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    width: 36px;
+    overflow: hidden;
+    transition: width 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    border-right: 1px solid var(--wp--preset--color--contrast);
+
+    &.is-open {
+        width: 450px;
 
         @media (max-width: 767px) {
-            grid-template-columns: 1fr;
+            width: 220px;
         }
     }
-
-    .map-empty { grid-column: 1 / -1; }
 }
 
-// ── Sidebar filtri ─────────────────────────────────────────────────────────
-.map-sidebar {
-    padding-top: 0.25rem;
+// ── Bottone toggle (sempre visibile, testo verticale) ─────────────────────
+.map-sidebar__toggle {
+    flex-shrink: 0;
+    width: 36px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 1.25rem 0;
+    font-family: inherit;
+    font-size: var(--wp--preset--font-size--small, 0.75rem);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--wp--preset--color--contrast);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    transition: opacity 0.15s;
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
+
+    &:hover  { opacity: 0.65; }
+    &:focus  { outline: none; }
 }
 
-// ── Intestazione sidebar ───────────────────────────────────────────────────
-.map-sidebar__bar {
-    margin-bottom: 1rem;
-}
-
-// ── Filtri — identici alla timeline (stesse classi, stesso CSS) ────────────
-.map-sidebar .tl-filters {
-    padding-top: 0;
-}
-
-.map-sidebar .filter-row--col {
+// ── Pannello filtri (visibile solo quando is-open) ─────────────────────────
+.map-sidebar__panel {
+    flex: 1;
+    min-width: 220px;
+    overflow-y: auto;
+    padding: 1.25rem 1rem 1.5rem;
+    display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    margin-bottom: 1rem;
+    border-left: 1px solid var(--wp--preset--color--contrast);
 }
 
-.map-sidebar .filter-col {
+// ── Colonne filtro ─────────────────────────────────────────────────────────
+.map-sidebar__panel .filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
-    margin-bottom: 2rem;
 
     &.filter-col--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #8cbbba); }
     &.filter-col--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b); }
     &.filter-col--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
 }
 
-.map-sidebar .filter-label {
+.map-sidebar__panel .filter-label {
     font-size: var(--wp--preset--font-size--small);
     font-weight: 600;
     letter-spacing: 0.07em;
@@ -67,19 +91,19 @@
     margin: 0 0 0.5rem;
 }
 
-.map-sidebar .pills {
+.map-sidebar__panel .pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 9px;
+    gap: 6px;
 }
 
-.map-sidebar .pill {
+.map-sidebar__panel .pill {
     font-family: inherit;
-    font-size: var(--wp--preset--font-size--small, 0.85rem);
+    font-size: var(--wp--preset--font-size--small, 0.8rem);
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    padding: 0.25em 0.85em;
+    padding: 0.22em 0.8em;
     border-radius: 100px;
     border: 1px solid var(--wp--preset--color--contrast);
     color: var(--wp--preset--color--contrast);
@@ -89,13 +113,8 @@
     transition: background 0.15s;
 
     &:hover,
-    &.active {
-        background: var(--_pill-bg);
-        border: 1px solid var(--wp--preset--color--contrast);
-        outline: none;
-    }
-
-    &:focus { outline: none; }
+    &.active { background: var(--_pill-bg); }
+    &:focus  { outline: none; }
 
     &.disabled {
         opacity: 0.35;
@@ -104,61 +123,20 @@
     }
 }
 
-.map-sidebar .tl-divider {
-    height: 1px;
-    background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 40%, transparent);
-    margin: 0.75rem 0;
-}
-
-.map-sidebar .tl-bar {
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--wp--preset--color--contrast);
-    
-    .tl-btn {
-    font-family: inherit;
-    font-size: inherit;
-    color: var(--wp--preset--color--contrast);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: color 0.15s;
-    font-size: var(--wp--preset--font-size--small);
-    font-weight: 600;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-}
-}
-
-.map-sidebar .tl-active-filters {
+// ── Filtri attivi ──────────────────────────────────────────────────────────
+.map-sidebar__panel .tl-active-filters {
+    margin-top: auto;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
-    margin-top: 0.25rem;
+
+    &.tl-hidden { display: none; }
 }
 
-.map-sidebar .active-filter-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    padding: 0;
-    border: none;
-    background: none;
+.map-sidebar__panel .tl-btn--link {
     font-family: inherit;
-    font-size: var(--wp--preset--font-size--small, 0.85rem);
-    cursor: pointer;
-
-    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #8cbbba); }
-    &.filter-col--accent-1 { color: var(--wp--preset--color--accent-1, #f5cc5b); }
-    &.filter-col--accent-2 { color: var(--wp--preset--color--accent-2, #b85f29); }
-
-    &:focus { outline: none; }
-}
-
-.map-sidebar .map-clear-all {
-    font-family: inherit;
-    font-size: var(--wp--preset--font-size--small, 0.85rem);
+    font-size: var(--wp--preset--font-size--small, 0.8rem);
     font-weight: 600;
     letter-spacing: 0.07em;
     color: var(--wp--preset--color--contrast);
@@ -172,85 +150,87 @@
     &:focus { outline: none; }
 }
 
+.map-sidebar__panel .active-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: var(--wp--preset--font-size--small, 0.85rem);
+    cursor: pointer;
+
+    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #8cbbba); }
+    &.filter-col--accent-1 { color: var(--wp--preset--color--accent-1, #f5cc5b); }
+    &.filter-col--accent-2 { color: var(--wp--preset--color--accent-2, #b85f29); }
+    &:focus { outline: none; }
+
+    &.tl-hidden { display: none; }
+}
+
 // ── Canvas Leaflet ─────────────────────────────────────────────────────────
 .map-canvas {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
     z-index: 0;
-
-    // Assicura che i controlli Leaflet siano visibili
-    .leaflet-control-layers,
-    .leaflet-control-zoom {
-        font-family: inherit;
-    }
 }
 
-// ── Stato vuoto ────────────────────────────────────────────────────────────
-.map-empty {
-    text-align: center;
-    padding: 2rem;
-    opacity: 0.5;
-    font-size: 0.9em;
-    font-style: italic;
-}
-
-// ── Pin SVG (sostituisce l'icona default Leaflet) ──────────────────────────
+// ── Pin SVG ────────────────────────────────────────────────────────────────
 .map-pin-icon {
     background: none !important;
     border: none !important;
 
     svg {
         display: block;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
         transition: filter 0.2s;
     }
 
-    &:hover svg {
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
-    }
+    &:hover svg { filter: drop-shadow(0 4px 8px rgba(0,0,0,.45)); }
 }
 
-// ── Popup container (override stili default Leaflet) ───────────────────────
-.mp-container {
-    .leaflet-popup-content-wrapper {
-        padding: 0;
-        border-radius: 0;
-        overflow: hidden;
-        box-shadow: 0 6px 32px rgba(0, 0, 0, 0.14);
-        background: var(--wp--preset--color--accent-5, #f2f2e5);
-        border: none;
-    }
+// ── Info panel (overlay sulla mappa, 300 px da destra) ────────────────────
+.mp-info-panel {
+    position: absolute;
+    top: 0;
+    right: -30px;
+    bottom: 0;
+    width: 360px;
+    z-index: 1000;
+    background: var(--wp--preset--color--accent-5, #f2f2e5);
+    border-left: 1px solid color-mix(in srgb, var(--wp--preset--color--contrast, #111) 18%, transparent);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: -4px 0 20px rgba(0,0,0,.12);
 
-    .leaflet-popup-content {
-        margin: 0;
-        width: 250px !important;
-        color: var(--wp--preset--color--contrast, #111);
-        font-family: inherit;
-    }
-
-    .leaflet-popup-tip-container {
-        margin-top: -1px;
-    }
-
-    .leaflet-popup-tip {
-        background: var(--wp--preset--color--accent-5, #f2f2e5);
-        box-shadow: none;
-    }
-
-    .leaflet-popup-close-button {
-        color: var(--wp--preset--color--contrast, #111) !important;
-        font-size: 18px;
-        top: 6px;
-        right: 6px;
-        z-index: 1;
-        mix-blend-mode: multiply;
-    }
+    &.is-open { transform: translateX(-30px); }
 }
 
-// ── Contenuto popup (stile card timeline) ─────────────────────────────────
-.mp-popup {
-    font-family: inherit;
+.mp-info-panel__close {
+    position: sticky;
+    top: 0;
+    align-self: flex-end;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 0.5rem 0.75rem;
+    color: var(--wp--preset--color--contrast, #111);
+    z-index: 1;
+
+    &:hover  { opacity: 0.55; }
+    &:focus  { outline: none; }
 }
+
+.mp-info-panel__content { flex: 1; }
+
+// ── Card nel panel ─────────────────────────────────────────────────────────
 
 .mp-thumb {
     width: 100%;
@@ -265,24 +245,16 @@
         transition: transform 0.4s ease;
     }
 
-    &:hover img {
-        transform: scale(1.04);
-    }
-}
-
-.mp-card {
-    & + .mp-divider + .mp-card .mp-thumb { margin-top: 0; }
+    &:hover img { transform: scale(1.04); }
 }
 
 .mp-divider {
     height: 1px;
-    background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 15%, transparent);
+    background: var(--wp--preset--color--contrast, #111);
     margin: 0;
 }
 
-.mp-body {
-    padding: 0.75rem 1rem 0.9rem;
-}
+.mp-body { padding: 0.75rem 1rem 0.9rem; }
 
 .mp-ubicazione {
     display: block;
@@ -296,13 +268,21 @@
 .mp-title {
     display: block;
     font-weight: 700;
-    font-size: 1.1em;
+    font-size: 1em;
     line-height: 1.3;
     text-decoration: none;
-    color: var(--wp--preset--color--accent-3, #6b2a0b)!important;
+    color: var(--wp--preset--color--accent-3, #6b2a0b) !important;
 
     &:hover {
         text-decoration: underline;
         text-underline-offset: 2px;
     }
+}
+
+.mp-excerpt {
+    margin: 0.55rem 0 1.5rem;
+    font-size: 0.8em;
+    line-height: 1.55;
+    color: var(--wp--preset--color--contrast, #111);
+    opacity: 0.72;
 }

@@ -36,7 +36,8 @@ return array(
 			'align' => array(
 				'wide',
 				'full'
-			)
+			),
+			'interactivity' => true
 		),
 		'attributes' => array(
 			'postSource' => array(
@@ -58,7 +59,7 @@ return array(
 		),
 		'textdomain' => 'jerus-organo',
 		'editorScript' => 'file:./index.js',
-		'viewScript' => 'file:./view.js',
+		'viewScriptModule' => 'file:./view.js',
 		'style' => 'file:./style-index.css',
 		'render' => 'file:./render.php'
 	),

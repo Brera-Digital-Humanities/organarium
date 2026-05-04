@@ -211,7 +211,7 @@ module.exports = window["wp"]["data"];
   \******************************************/
 (module) {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"ttf-child/mappa-interattiva","title":"Mappa Interattiva","category":"theme","icon":"location","description":"Mappa interattiva Leaflet con pin geolocalizzati degli articoli.","supports":{"html":false,"align":["wide","full"]},"attributes":{"postSource":{"type":"string","default":"all"},"selectedCategory":{"type":"number","default":0},"mapHeight":{"type":"number","default":520},"mapStyle":{"type":"string","default":"natural"}},"textdomain":"jerus-organo","editorScript":"file:./index.js","viewScript":"file:./view.js","style":"file:./style-index.css","render":"file:./render.php"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"ttf-child/mappa-interattiva","title":"Mappa Interattiva","category":"theme","icon":"location","description":"Mappa interattiva Leaflet con pin geolocalizzati degli articoli.","supports":{"html":false,"align":["wide","full"],"interactivity":true},"attributes":{"postSource":{"type":"string","default":"all"},"selectedCategory":{"type":"number","default":0},"mapHeight":{"type":"number","default":520},"mapStyle":{"type":"string","default":"natural"}},"textdomain":"jerus-organo","editorScript":"file:./index.js","viewScriptModule":"file:./view.js","style":"file:./style-index.css","render":"file:./render.php"}');
 
 /***/ }
 

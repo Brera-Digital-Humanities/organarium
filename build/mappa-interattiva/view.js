@@ -1,5 +1,5 @@
-/******/ (() => { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
+import * as __WEBPACK_EXTERNAL_MODULE__wordpress_interactivity_8e89b257__ from "@wordpress/interactivity";
+/******/ var __webpack_modules__ = ({
 
 /***/ "./node_modules/leaflet/dist/leaflet-src.js"
 /*!**************************************************!*\
@@ -14520,398 +14520,370 @@
 //# sourceMappingURL=leaflet-src.js.map
 
 
+/***/ },
+
+/***/ "@wordpress/interactivity"
+/*!*******************************************!*\
+  !*** external "@wordpress/interactivity" ***!
+  \*******************************************/
+(module) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__wordpress_interactivity_8e89b257__;
+
 /***/ }
 
-/******/ 	});
+/******/ });
 /************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		if (!(moduleId in __webpack_modules__)) {
-/******/ 			delete __webpack_module_cache__[moduleId];
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
+/******/ // The module cache
+/******/ var __webpack_module_cache__ = {};
+/******/ 
+/******/ // The require function
+/******/ function __webpack_require__(moduleId) {
+/******/ 	// Check if module is in cache
+/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 	if (cachedModule !== undefined) {
+/******/ 		return cachedModule.exports;
 /******/ 	}
-/******/ 	
+/******/ 	// Create a new module (and put it into the cache)
+/******/ 	var module = __webpack_module_cache__[moduleId] = {
+/******/ 		// no module.id needed
+/******/ 		// no module.loaded needed
+/******/ 		exports: {}
+/******/ 	};
+/******/ 
+/******/ 	// Execute the module function
+/******/ 	if (!(moduleId in __webpack_modules__)) {
+/******/ 		delete __webpack_module_cache__[moduleId];
+/******/ 		var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 		e.code = 'MODULE_NOT_FOUND';
+/******/ 		throw e;
+/******/ 	}
+/******/ 	__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 
+/******/ 	// Return the exports of the module
+/******/ 	return module.exports;
+/******/ }
+/******/ 
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
+/******/ /* webpack/runtime/compat get default export */
+/******/ (() => {
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = (module) => {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			() => (module['default']) :
+/******/ 			() => (module);
+/******/ 		__webpack_require__.d(getter, { a: getter });
+/******/ 		return getter;
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/define property getters */
+/******/ (() => {
+/******/ 	// define getter functions for harmony exports
+/******/ 	__webpack_require__.d = (exports, definition) => {
+/******/ 		for(var key in definition) {
+/******/ 			if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
+/******/ 		}
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/hasOwnProperty shorthand */
+/******/ (() => {
+/******/ 	__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/make namespace object */
+/******/ (() => {
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = (exports) => {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/ })();
+/******/ 
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
-"use strict";
 /*!***************************************!*\
   !*** ./src/mappa-interattiva/view.js ***!
   \***************************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! leaflet */ "./node_modules/leaflet/dist/leaflet-src.js");
-/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/interactivity */ "@wordpress/interactivity");
+/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! leaflet */ "./node_modules/leaflet/dist/leaflet-src.js");
+/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_1__);
 
 
-// Fix percorsi immagini marker default di Leaflet con webpack
-delete (leaflet__WEBPACK_IMPORTED_MODULE_0___default().Icon).Default.prototype._getIconUrl;
+delete (leaflet__WEBPACK_IMPORTED_MODULE_1___default().Icon).Default.prototype._getIconUrl;
 const CARTO_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 const STYLES = {
   natural: {
-    name: 'Chiaro naturale',
-    bg: '#f5f0e8',
-    water: '#c8ddd6',
-    land: '#ede8de',
-    green: '#d4e4c8',
-    road_major: '#b8a898',
-    road_minor: '#cec5b8',
-    building: '#ddd8ce',
-    border: '#c8bfb0',
-    label: '#6b5040',
-    label2: '#8c7060',
     tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    filter: 'sepia(25%) saturate(0.9) brightness(1.02) hue-rotate(5deg)',
-    pin: '#b85f29',
-    pinStroke: '#6b2a0b',
-    pinText: '#fff',
-    swatches: ['#f5f0e8', '#c8ddd6', '#d4e4c8', '#b8a898', '#6b5040']
+    filter: 'sepia(25%) saturate(0.9) brightness(1.02) hue-rotate(5deg)'
   },
   warm: {
-    name: 'Caldo bruciato',
-    bg: '#f0e8d8',
-    water: '#b8cec8',
-    land: '#e8dece',
-    green: '#c8d8b8',
-    road_major: '#c8a878',
-    road_minor: '#d8c8a8',
-    building: '#d8cebc',
-    border: '#c0b098',
-    label: '#6b2a0b',
-    label2: '#b85f29',
     tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    filter: 'sepia(45%) saturate(1.1) brightness(0.98) hue-rotate(-5deg)',
-    pin: '#f5cc5b',
-    pinStroke: '#b85f29',
-    pinText: '#6b2a0b',
-    swatches: ['#f0e8d8', '#b8cec8', '#c8a878', '#f5cc5b', '#6b2a0b']
+    filter: 'sepia(45%) saturate(1.1) brightness(0.98) hue-rotate(-5deg)'
   },
   teal: {
-    name: 'Freddo teal',
-    bg: '#eaf4f0',
-    water: '#8cbbba',
-    land: '#e8f0ec',
-    green: '#c0d8cc',
-    road_major: '#a8c0b8',
-    road_minor: '#c8d8d0',
-    building: '#d0dcd8',
-    border: '#9cb8b0',
-    label: '#3a6858',
-    label2: '#5a8878',
     tileUrl: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    filter: 'sepia(10%) saturate(0.8) brightness(1.03) hue-rotate(140deg)',
-    pin: '#8cbbba',
-    pinStroke: '#3a6858',
-    pinText: '#fff',
-    swatches: ['#eaf4f0', '#8cbbba', '#c0d8cc', '#a8c0b8', '#3a6858']
+    filter: 'sepia(10%) saturate(0.8) brightness(1.03) hue-rotate(140deg)'
   },
   dark: {
-    name: 'Scuro terroso',
-    bg: '#2c2418',
-    water: '#3a5048',
-    land: '#3c3228',
-    green: '#384830',
-    road_major: '#5c5040',
-    road_minor: '#483c30',
-    building: '#403830',
-    border: '#6c5c48',
-    label: '#d4c8b0',
-    label2: '#a89880',
     tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    filter: 'sepia(35%) saturate(0.7) brightness(0.85) hue-rotate(5deg)',
-    pin: '#f5cc5b',
-    pinStroke: '#b85f29',
-    pinText: '#2c2418',
-    swatches: ['#2c2418', '#3a5048', '#5c5040', '#f5cc5b', '#d4c8b0']
+    filter: 'sepia(35%) saturate(0.7) brightness(0.85) hue-rotate(5deg)'
   }
 };
-const DEFAULT_CENTER = [41.9, 12.5];
-const DEFAULT_ZOOM = 6;
-function makeIcon(pin, pinStroke, pinText) {
-  const svg = '<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">' + '<circle cx="14" cy="14" r="13" fill="#b85f29" stroke="#6b2a0b" stroke-width="2"/>' + '<circle cx="14" cy="14" r="6" fill="#f5cc5b"/>' + '</svg>';
-  return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
+function makeIcon() {
+  const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#b85f29" stroke="#6b2a0b" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#f5cc5b"/></svg>`;
+  return leaflet__WEBPACK_IMPORTED_MODULE_1___default().divIcon({
     html: svg,
     className: 'map-pin-icon',
     iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -18]
+    iconAnchor: [14, 14]
   });
 }
-function esc(str) {
-  return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function makeIconSelected() {
+  const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#f5cc5b" stroke="#b85f29" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#6b2a0b"/></svg>`;
+  return leaflet__WEBPACK_IMPORTED_MODULE_1___default().divIcon({
+    html: svg,
+    className: 'map-pin-icon map-pin-icon--selected',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+}
+function esc(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 function makeCard(post) {
-  const thumb = post.thumb ? '<div class="mp-thumb"><img src="' + esc(post.thumb) + '" alt="' + esc(post.title) + '" loading="lazy"></div>' : '';
-  const ubicazione = post.ubicazione ? '<span class="mp-ubicazione">' + esc(post.ubicazione) + '</span>' : '';
-  return '<div class="mp-card">' + thumb + '<div class="mp-body">' + ubicazione + '<a class="mp-title" href="' + esc(post.url) + '">' + esc(post.title) + '</a>' + '</div>' + '</div>';
+  const thumb = post.thumb ? `<div class="mp-thumb"><a class="mp-title" href="${esc(post.url)}"><img src="${esc(post.thumb)}" alt="${esc(post.title)}" loading="lazy"></a></div>` : '';
+  const ubicazione = post.ubicazione ? `<span class="mp-ubicazione">${esc(post.ubicazione)}</span>` : '';
+  const excerpt = post.excerpt ? `<p class="mp-excerpt">${esc(post.excerpt)}</p>` : '';
+  return `<div class="mp-card">${thumb}<div class="mp-body">${ubicazione}<a class="mp-title" href="${esc(post.url)}">${esc(post.title)}</a>${excerpt}</div></div>`;
 }
-function makePopupHtml(group) {
-  return '<div class="mp-popup">' + group.map(makeCard).join('<div class="mp-divider"></div>') + '</div>';
-}
-function initMaps() {
-  document.querySelectorAll('.map-canvas').forEach(function (el) {
-    let config = {};
-    try {
-      config = JSON.parse(el.dataset.mapConfig || '{}');
-    } catch (e) {
-      return;
-    }
-    const style = STYLES[config.mapStyle] || STYLES.natural;
-    const posts = config.posts || [];
-    const tileLayer = leaflet__WEBPACK_IMPORTED_MODULE_0___default().tileLayer(style.tileUrl, {
-      attribution: CARTO_ATTR,
-      maxZoom: 20
-    });
-    const map = leaflet__WEBPACK_IMPORTED_MODULE_0___default().map(el, {
-      layers: [tileLayer]
-    });
-
-    // Applica il filtro CSS al tile pane
-    map.getPanes().tilePane.style.filter = style.filter;
-
-    // Mappa senza dati: mostra vista di default
-    if (!posts.length) {
-      map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-      return;
-    }
-
-    // Raggruppa post con stesse coordinate in un unico marker
-    const coordGroups = {};
-    posts.forEach(function (post) {
-      const key = post.lat.toFixed(6) + ',' + post.lng.toFixed(6);
-      if (!coordGroups[key]) coordGroups[key] = [];
-      coordGroups[key].push(post);
-    });
-
-    // Costruisce marker con popup (un marker per gruppo di coordinate)
-    const icon = makeIcon(style.pin, style.pinStroke, style.pinText);
-    const markerList = Object.values(coordGroups).map(function (group) {
-      const first = group[0];
-      const marker = leaflet__WEBPACK_IMPORTED_MODULE_0___default().marker([first.lat, first.lng], {
-        icon
-      }).bindPopup(makePopupHtml(group), {
-        maxWidth: 280,
-        maxHeight: 420,
-        className: 'mp-container'
+(0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('mappa-interattiva', {
+  state: {
+    // ── Filtri ────────────────────────────────────────────────────────────
+    get hasActiveFilters() {
+      const {
+        filters
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return filters.categoria !== 'all' || filters.materiali !== '' || filters.tecniche !== '';
+    },
+    get filtersOpen() {
+      return (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filtersOpen;
+    },
+    get filterToggleLabel() {
+      return (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filtersOpen ? 'Filtra ↑' : 'Filtra ↓';
+    },
+    // ── Stato di una singola pill (contesto locale: filterGroup + filterVal) ──
+    get isPillActive() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterGroup,
+        filterVal,
+        filters
+      } = ctx;
+      if (!filterGroup) return false;
+      if (filterGroup === 'categoria') return filters.categoria === filterVal;
+      if (filterGroup === 'materiali') return filters.materiali === filterVal;
+      if (filterGroup === 'tecniche') return filters.tecniche === filterVal;
+      return false;
+    },
+    // ── Disponibilità condizionale di una pill ────────────────────────────
+    get isValueAvailable() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterGroup,
+        filterVal,
+        posts,
+        filters
+      } = ctx;
+      if (!filterGroup) return true;
+      const filtered = posts.filter(post => {
+        const matchCat = filterGroup === 'categoria' ? true : filters.categoria === 'all' || post.categoria === filters.categoria;
+        const matchMat = filterGroup === 'materiali' ? true : filters.materiali === '' || post.materiale.includes(filters.materiali);
+        const matchTec = filterGroup === 'tecniche' ? true : filters.tecniche === '' || post.tecnica.includes(filters.tecniche);
+        return matchCat && matchMat && matchTec;
       });
-      marker._categoria = group.map(function (p) {
-        return p.categoria || '';
-      });
-      marker._materiale = [].concat(...group.map(function (p) {
-        return p.materiale || [];
-      }));
-      marker._tecnica = [].concat(...group.map(function (p) {
-        return p.tecnica || [];
-      }));
-      return marker;
-    });
-    const markerGroup = leaflet__WEBPACK_IMPORTED_MODULE_0___default().layerGroup(markerList).addTo(map);
-
-    // Adatta il viewport ai marker visibili
-    const coords = posts.map(function (p) {
-      return [p.lat, p.lng];
-    });
-    if (coords.length === 1) {
-      map.setView(coords[0], 13);
-    } else {
-      map.fitBounds(leaflet__WEBPACK_IMPORTED_MODULE_0___default().latLngBounds(coords), {
-        padding: [48, 48]
-      });
+      if (filterGroup === 'categoria') return filtered.some(p => p.categoria === filterVal);
+      if (filterGroup === 'materiali') return filtered.some(p => p.materiale.includes(filterVal));
+      if (filterGroup === 'tecniche') return filtered.some(p => p.tecnica.includes(filterVal));
+      return true;
+    },
+    get isPillDisabled() {
+      return !(0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('mappa-interattiva').state.isValueAvailable;
+    },
+    // ── Filtri attivi (per le etichette sotto il divider) ─────────────────
+    get hasCategoriaFilter() {
+      return (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.categoria !== 'all';
+    },
+    get hasMaterialiFilter() {
+      return (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.materiali !== '';
+    },
+    get hasTecnicheFilter() {
+      return (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.tecniche !== '';
+    },
+    get activeCategoriaLabel() {
+      const {
+        filters,
+        catOptions
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return catOptions?.find(o => o.value === filters.categoria)?.label ?? filters.categoria;
+    },
+    get activeMaterialiLabel() {
+      const {
+        filters,
+        matOptions
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return matOptions?.find(o => o.value === filters.materiali)?.label ?? filters.materiali;
+    },
+    get activeTecnicheLabel() {
+      const {
+        filters,
+        tecOptions
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return tecOptions?.find(o => o.value === filters.tecniche)?.label ?? filters.tecniche;
     }
-
-    // ── Filtri multi-gruppo (stessa logica timeline) ──────────────────────
-    const wrap = el.closest('.map-block-wrap');
-    if (!wrap) return;
-    const activeFilters = {
-      categoria: 'all',
-      materiale: 'all',
-      tecnica: 'all'
-    };
-    function matchesFilters(m) {
-      const okCat = activeFilters.categoria === 'all' || m._categoria.includes(activeFilters.categoria);
-      const okMat = activeFilters.materiale === 'all' || m._materiale.includes(activeFilters.materiale);
-      const okTec = activeFilters.tecnica === 'all' || m._tecnica.includes(activeFilters.tecnica);
-      return okCat && okMat && okTec;
+  },
+  actions: {
+    toggleFilters() {
+      (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filtersOpen = !(0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filtersOpen;
+    },
+    togglePill() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterGroup,
+        filterVal,
+        filters
+      } = ctx;
+      if (!filterGroup) return;
+      if (filterGroup === 'categoria') {
+        ctx.filters.categoria = filters.categoria === filterVal ? 'all' : filterVal;
+      } else if (filterGroup === 'materiali') {
+        ctx.filters.materiali = filters.materiali === filterVal ? '' : filterVal;
+      } else if (filterGroup === 'tecniche') {
+        ctx.filters.tecniche = filters.tecniche === filterVal ? '' : filterVal;
+      }
+    },
+    clearFilters() {
+      const {
+        filters
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      filters.categoria = 'all';
+      filters.materiali = '';
+      filters.tecniche = '';
+    },
+    clearCategoria() {
+      (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.categoria = 'all';
+    },
+    clearMateriali() {
+      (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.materiali = '';
+    },
+    clearTecniche() {
+      (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)().filters.tecniche = '';
     }
-
-    // Verifica se un valore è disponibile dato i filtri degli ALTRI gruppi
-    function isValueAvailable(group, val) {
-      if (val === 'all') return true;
-      return posts.some(function (post) {
-        const okCat = group === 'categoria' ? true : activeFilters.categoria === 'all' || post.categoria === activeFilters.categoria;
-        const okMat = group === 'materiale' ? true : activeFilters.materiale === 'all' || (post.materiale || []).includes(activeFilters.materiale);
-        const okTec = group === 'tecnica' ? true : activeFilters.tecnica === 'all' || (post.tecnica || []).includes(activeFilters.tecnica);
-        if (!okCat || !okMat || !okTec) return false;
-        if (group === 'categoria') return post.categoria === val;
-        if (group === 'materiale') return (post.materiale || []).includes(val);
-        if (group === 'tecnica') return (post.tecnica || []).includes(val);
-        return false;
-      });
-    }
-    function updatePillAvailability() {
-      wrap.querySelectorAll('.pill[data-filter-group]').forEach(function (btn) {
-        const val = btn.dataset.filterVal;
-        if (val === 'all') return;
-        const available = isValueAvailable(btn.dataset.filterGroup, val);
-        btn.disabled = !available;
-        btn.classList.toggle('disabled', !available);
-      });
-    }
-    function updateActiveFiltersUI() {
-      const hasActive = activeFilters.categoria !== 'all' || activeFilters.materiale !== 'all' || activeFilters.tecnica !== 'all';
-      const afSection = wrap.querySelector('.tl-active-filters');
-      if (afSection) afSection.style.display = hasActive ? '' : 'none';
-      ['categoria', 'materiale', 'tecnica'].forEach(function (group) {
-        const isActive = activeFilters[group] !== 'all';
-        const tag = wrap.querySelector('.map-clear-group[data-clear-group="' + group + '"]');
-        if (!tag) return;
-        tag.style.display = isActive ? '' : 'none';
-        if (isActive) {
-          const labelEl = tag.querySelector('.map-active-label');
-          if (labelEl) {
-            const pill = wrap.querySelector('.pill[data-filter-group="' + group + '"][data-filter-val="' + activeFilters[group] + '"]');
-            labelEl.textContent = pill ? pill.textContent.trim() : activeFilters[group];
-          }
+  },
+  callbacks: {
+    initMap() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        ref
+      } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      if (ctx.allMarkers) return;
+      const style = STYLES[ctx.mapStyle] || STYLES.natural;
+      const map = leaflet__WEBPACK_IMPORTED_MODULE_1___default().map(ref);
+      leaflet__WEBPACK_IMPORTED_MODULE_1___default().tileLayer(style.tileUrl, {
+        attribution: CARTO_ATTR
+      }).addTo(map);
+      map.getPanes().tilePane.style.filter = style.filter;
+      const panel = ref.closest('[data-wp-interactive]').querySelector('.mp-info-panel');
+      const panelContent = panel.querySelector('.mp-info-panel__content');
+      const defaultIcon = makeIcon();
+      const selectedIcon = makeIconSelected();
+      ctx._panel = panel;
+      ctx._defaultIcon = defaultIcon;
+      panel.querySelector('.mp-info-panel__close').addEventListener('click', () => {
+        panel.classList.remove('is-open');
+        if (ctx._selectedMarker) {
+          ctx._selectedMarker.setIcon(defaultIcon);
+          ctx._selectedMarker = null;
         }
       });
-    }
-    function syncPillActiveState(group) {
-      wrap.querySelectorAll('.pill[data-filter-group="' + group + '"]').forEach(function (b) {
-        b.classList.remove('active');
+      const coordGroups = {};
+      ctx.posts.forEach(post => {
+        const key = post.lat.toFixed(6) + ',' + post.lng.toFixed(6);
+        if (!coordGroups[key]) coordGroups[key] = [];
+        coordGroups[key].push(post);
       });
-      const activePill = wrap.querySelector('.pill[data-filter-group="' + group + '"][data-filter-val="' + activeFilters[group] + '"]');
-      if (activePill) activePill.classList.add('active');
-    }
-    function applyFilters() {
+      ctx.allMarkers = Object.values(coordGroups).map(group => {
+        const first = group[0];
+        const marker = leaflet__WEBPACK_IMPORTED_MODULE_1___default().marker([first.lat, first.lng], {
+          icon: defaultIcon
+        });
+        marker._filters = {
+          categoria: group.map(p => p.categoria || ''),
+          materiale: [].concat(...group.map(p => p.materiale || [])),
+          tecnica: [].concat(...group.map(p => p.tecnica || []))
+        };
+        marker.on('click', () => {
+          if (ctx._selectedMarker && ctx._selectedMarker !== marker) {
+            ctx._selectedMarker.setIcon(defaultIcon);
+          }
+          marker.setIcon(selectedIcon);
+          ctx._selectedMarker = marker;
+          panelContent.innerHTML = group.map(makeCard).join('<div class="mp-divider"></div>');
+          panel.classList.add('is-open');
+          panel.scrollTop = 0;
+        });
+        return marker;
+      });
+      ctx.markerGroup = leaflet__WEBPACK_IMPORTED_MODULE_1___default().layerGroup().addTo(map);
+
+      // Imposta mapInstance DOPO invalidateSize: il data-wp-watch su
+      // updateMarkers si ri-esegue automaticamente quando mapInstance cambia.
+      setTimeout(() => {
+        map.invalidateSize();
+        ctx.mapInstance = map;
+      }, 100);
+    },
+    updateMarkers() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        mapInstance,
+        markerGroup,
+        allMarkers,
+        filters
+      } = ctx;
+      if (!mapInstance) return;
       markerGroup.clearLayers();
-      const visible = markerList.filter(matchesFilters);
-      visible.forEach(function (m) {
-        markerGroup.addLayer(m);
+      const visible = allMarkers.filter(m => {
+        const okCat = filters.categoria === 'all' || m._filters.categoria.includes(filters.categoria);
+        const okMat = filters.materiali === '' || m._filters.materiale.includes(filters.materiali);
+        const okTec = filters.tecniche === '' || m._filters.tecnica.includes(filters.tecniche);
+        return okCat && okMat && okTec;
       });
+      visible.forEach(m => markerGroup.addLayer(m));
+      if (ctx._selectedMarker && !visible.includes(ctx._selectedMarker)) {
+        if (ctx._panel) ctx._panel.classList.remove('is-open');
+        ctx._selectedMarker.setIcon(ctx._defaultIcon);
+        ctx._selectedMarker = null;
+      }
       if (visible.length === 1) {
-        map.setView(visible[0].getLatLng(), map.getZoom());
+        mapInstance.setView(visible[0].getLatLng(), 13);
       } else if (visible.length > 1) {
-        map.fitBounds(leaflet__WEBPACK_IMPORTED_MODULE_0___default().latLngBounds(visible.map(function (m) {
-          return m.getLatLng();
-        })), {
+        mapInstance.fitBounds(leaflet__WEBPACK_IMPORTED_MODULE_1___default().latLngBounds(visible.map(m => m.getLatLng())), {
           padding: [48, 48]
         });
       }
-      updatePillAvailability();
-      updateActiveFiltersUI();
     }
-    function resetGroup(group) {
-      activeFilters[group] = 'all';
-      syncPillActiveState(group);
-    }
-
-    // Click su ogni pill
-    wrap.querySelectorAll('.pill[data-filter-group]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        const group = btn.dataset.filterGroup;
-        const val = btn.dataset.filterVal;
-        if (val === 'all') {
-          activeFilters[group] = 'all';
-        } else {
-          // Toggle: click sulla pill già attiva → reset
-          activeFilters[group] = activeFilters[group] === val ? 'all' : val;
-        }
-        syncPillActiveState(group);
-        applyFilters();
-      });
-    });
-
-    // Clear per singolo gruppo (click sul tag filtro attivo)
-    wrap.querySelectorAll('.map-clear-group').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        resetGroup(btn.dataset.clearGroup);
-        applyFilters();
-      });
-    });
-
-    // Azzera tutti i filtri
-    const clearAllBtn = wrap.querySelector('.map-clear-all');
-    if (clearAllBtn) {
-      clearAllBtn.addEventListener('click', function () {
-        resetGroup('categoria');
-        resetGroup('materiale');
-        resetGroup('tecnica');
-        applyFilters();
-      });
-    }
-  });
-}
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initMaps);
-} else {
-  initMaps();
-}
+  }
+});
 })();
 
-/******/ })()
-;
+
 //# sourceMappingURL=view.js.map

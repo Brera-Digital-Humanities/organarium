@@ -213,7 +213,7 @@
   border: none;
   background: none;
   font-family: inherit;
-  font-size: inherit;
+  font-size: 1rem;
   color: var(--_pill-bg, var(--wp--preset--color--contrast));
   cursor: pointer;
 }
@@ -224,7 +224,7 @@
    COUNTER
 ══════════════════════════════ */
 .tl-counter {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: 0.75em;
   letter-spacing: 0.06em;
   color: var(--wp--preset--color--contrast);
@@ -326,7 +326,7 @@
   transition: box-shadow 0.55s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .is-active .card-inner {
-  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.14), 0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14), 0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
 }
 .card-thumb {
   width: 100%;

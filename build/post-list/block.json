@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ttf-child/post-list",
+  "title": "Post List",
+  "category": "theme",
+  "icon": "list-view",
+  "description": "Lista post con filtri ACF e caricamento infinito.",
+  "supports": {
+    "html": false,
+    "interactivity": true
+  },
+  "attributes": {
+    "postSource": {
+      "type": "string",
+      "default": "all"
+    },
+    "selectedCategories": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "showFilters": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "post-list",
+  "editorScript": "file:./index.js",
+  "viewScriptModule": "file:./view.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

@@ -63,6 +63,43 @@ return array(
 		'style' => 'file:./style-index.css',
 		'render' => 'file:./render.php'
 	),
+	'post-list' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'ttf-child/post-list',
+		'title' => 'Post List',
+		'category' => 'theme',
+		'icon' => 'list-view',
+		'description' => 'Lista post con filtri ACF e caricamento infinito.',
+		'supports' => array(
+			'html' => false,
+			'interactivity' => true
+		),
+		'attributes' => array(
+			'postSource' => array(
+				'type' => 'string',
+				'default' => 'all'
+			),
+			'selectedCategories' => array(
+				'type' => 'array',
+				'items' => array(
+					'type' => 'number'
+				),
+				'default' => array(
+					
+				)
+			),
+			'showFilters' => array(
+				'type' => 'boolean',
+				'default' => true
+			)
+		),
+		'textdomain' => 'post-list',
+		'editorScript' => 'file:./index.js',
+		'viewScriptModule' => 'file:./view.js',
+		'style' => 'file:./style-index.css',
+		'render' => 'file:./render.php'
+	),
 	'timeline' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,

@@ -73,5 +73,6 @@ function ttf_register_custom_blocks() {
 
     register_block_type( __DIR__ . '/build/timeline' );
     register_block_type( __DIR__ . '/build/featured-zoom' );
+    register_block_type( __DIR__ . '/build/mappa-interattiva' );
 }
 

@@ -217,7 +217,7 @@
     border: none;
     background: none;
     font-family: inherit;
-    font-size: inherit;
+    font-size: 1rem;
     color: var(--_pill-bg, var(--wp--preset--color--contrast));
     cursor: pointer;
 
@@ -228,7 +228,7 @@
    COUNTER
 ══════════════════════════════ */
 .tl-counter {
-    margin: 0 0 1rem;
+    margin: 0;
     font-size: 0.75em;
     letter-spacing: 0.06em;
     color: var(--wp--preset--color--contrast);
@@ -341,7 +341,7 @@
 
     .is-active & {
         box-shadow:
-            0 16px 56px rgba(0,0,0,.14),
+            0 16px 40px rgba(0,0,0,.14),
             0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
     }
 }

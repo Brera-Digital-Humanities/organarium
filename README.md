@@ -20,7 +20,8 @@ jerus-organo/
 ├── src/
 │   ├── featured-zoom/        # Blocco zoom immagine in evidenza
 │   ├── timeline/             # Blocco timeline/griglia post
-│   └── mappa-interattiva/    # Blocco mappa Leaflet con pin geolocalizzati
+│   ├── mappa-interattiva/    # Blocco mappa Leaflet con pin geolocalizzati
+│   └── post-list/            # Blocco lista post con infinite scroll e filtri ACF
 ├── build/                    # File compilati (generati da wp-scripts)
 ├── functions.php             # Registrazione blocchi e shortcode ACF
 ├── style.css                 # Header child theme
@@ -198,6 +199,63 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 
 ---
 
+### 4. Post List (`ttf-child/post-list`)
+
+Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`.
+
+**Funzionalità:**
+
+- Card orizzontali: immagine 33% / aspect-ratio 4:3 + corpo testo (data, ubicazione, titolo, estratto, tag categoria)
+- Campi **Data** e **Ubicazione** raggruppati in un unico blocco meta con etichetta in grassetto, disposti uno sotto l'altro
+- Contatore risultati filtrati visibile nella barra superiore
+- **Filtri a scomparsa** con pill selezionabili per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: toggle singolo per gruppo, pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale; ogni cambio filtro azzera `visibleCount` a 10
+- **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare
+- Messaggi di stato: "Fine dei risultati" (tutti i post filtrati visibili) e "Nessun risultato trovato" (filtri senza corrispondenze)
+- Possibilità di **nascondere l'intera UI filtri** dall'editor: quando disattivata, la barra mostra solo il contatore
+
+**Attributi del blocco (configurabili dal Site Editor):**
+
+| Attributo | Valori | Descrizione |
+|---|---|---|
+| `postSource` | `all` / `current_category` / `fixed_categories` | Sorgente post da mostrare |
+| `selectedCategories` | Array di ID categoria | Categorie fisse (se `fixed_categories`) — selezione multipla tramite checkbox |
+| `showFilters` | `true` / `false` | Mostra o nasconde l'intera interfaccia filtri nel frontend |
+
+**Campi ACF utilizzati:**
+
+| Campo | Tipo | Uso |
+|---|---|---|
+| `data` | Testo | Mostrato nella meta-riga della card con etichetta "Data" |
+| `ubicazione` | Testo | Mostrato nella meta-riga della card con etichetta "Ubicazione" |
+| `categorie_generali` | Select | Filtro Categoria e tag card |
+| `materiale` | Select multipla | Filtro Materiale |
+| `tecniche` | Select multipla | Filtro Tecnica |
+
+**Interactivity API — store `post-list`:**
+
+| Elemento | Descrizione |
+|---|---|
+| state `filteredPosts` | Post filtrati per i tre gruppi ACF |
+| state `filteredCount` | Numero di post filtrati (mostrato nel contatore) |
+| state `isVisible` | Visibilità card: passa i filtri E il suo indice è < `visibleCount` (contesto locale: `postIndex`) |
+| state `hasMore` | Ci sono post filtrati oltre `visibleCount` |
+| state `showEndMessage/showEmptyMessage` | Messaggi di stato a fine lista o senza risultati |
+| state `filtersOpen/filterToggleLabel` | Apertura pannello filtri e label del pulsante |
+| state `hasActiveFilters` | Almeno un filtro attivo |
+| state `isPillActive/isPillDisabled` | Stato attivo e disponibilità condizionale delle pill |
+| state `hasCategoriaFilter/Materiali/Tecniche` | Presenza di filtro per gruppo |
+| state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
+| action `toggleFilters/clearFilters/togglePill` | Gestione pannello e filtri (ogni cambio resetta `visibleCount = 10`) |
+| action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
+| callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono |
+
+**Architettura:**
+- Tutti i post sono renderizzati server-side in PHP e passati nel context; JS controlla quanti sono visibili tramite `visibleCount`
+- Il context Preact è basato su segnali reattivi: `ctx` catturato in `callbacks.init` è leggibile/scrivibile dall'`IntersectionObserver` callback senza necessità di `getContext()`
+- La visibilità dei filtri è gestita interamente lato PHP (`$show_filters`): quando disattivata, il markup filtri non viene emesso
+
+---
+
 ## Shortcode ACF
 
 Registrati in `functions.php` per visualizzare i campi ACF nelle template:
@@ -216,7 +274,7 @@ Registrati in `functions.php` per visualizzare i campi ACF nelle template:
 
 ## Tecnologie
 
-- **WordPress Interactivity API** (`@wordpress/interactivity`) — stato reattivo e binding dichiarativo (blocchi featured-zoom, timeline e mappa-interattiva)
+- **WordPress Interactivity API** (`@wordpress/interactivity`) — stato reattivo e binding dichiarativo (blocchi featured-zoom, timeline, mappa-interattiva e post-list)
 - **Leaflet.js 1.9.4** — mappa interattiva con pin, popup e layer tile (blocco mappa-interattiva, bundlato via npm)
 - **wp-scripts 32** — build toolchain (Webpack, SCSS, ESM modules, `--experimental-modules`)
 - **CSS 3D transforms** — effetto prospettico del carousel timeline

@@ -112,17 +112,69 @@ $all_tec = array_map(
     $unique_multi( $posts_data, 'tecnica' )
 );
 
+// ── Century segments ──────────────────────────────────────────────────────────
+// Primo segmento accorpato: 200 a.C. → 100 d.C. (3 century-unit di larghezza).
+// Segmenti successivi: 100 → 1600, 1 century-unit ciascuno. Totale: 18 unit.
+$_build_seg = static function ( int $seg_min, int $seg_max, string $label, int $units ) use ( $posts_data ): array {
+    $dots_by_x = [];
+    foreach ( $posts_data as $pi => $post ) {
+        $sk = (int) $post['sort_key'];
+        if ( $sk >= $seg_min && $sk < $seg_max ) {
+            $x = (int) round( ( $sk - $seg_min ) / ( $seg_max - $seg_min ) * 100 );
+            $x = max( 0, min( 95, $x ) );
+            $dots_by_x[ $x ][] = $pi;
+        }
+    }
+    ksort( $dots_by_x );
+    return compact( 'seg_min', 'seg_max', 'label', 'units', 'dots_by_x' );
+};
+
+$century_segments   = [];
+$century_segments[] = $_build_seg( -200, 100, '200 a.C.', 1 );
+for ( $s = 100; $s <= 1600; $s += 100 ) {
+    $century_segments[] = $_build_seg( $s, $s + 100, (string) $s, 1 );
+}
+// Totale segmenti = 17 (tutti larghezza uguale)
+
+// ── Preferenze dal cookie di sessione ────────────────────────────────────────
+$_tl_prefs = [];
+if ( ! empty( $_COOKIE['tl_prefs'] ) ) {
+    $decoded = json_decode( wp_unslash( $_COOKIE['tl_prefs'] ), true );
+    if ( is_array( $decoded ) ) $_tl_prefs = $decoded;
+}
+
+$_pref_century_min  = isset( $_tl_prefs['centuryMin'] )  ? (int)  $_tl_prefs['centuryMin']  : -200;
+$_pref_century_max  = isset( $_tl_prefs['centuryMax'] )  ? (int)  $_tl_prefs['centuryMax']  : 100;
+$_pref_sort_asc     = isset( $_tl_prefs['sortAsc'] )     ? (bool) $_tl_prefs['sortAsc']     : true;
+$_pref_active_index = isset( $_tl_prefs['activeIndex'] ) ? (int)  $_tl_prefs['activeIndex'] : 0;
+$_pref_categoria   = sanitize_text_field( $_tl_prefs['categoria'] ?? 'all' );
+$_pref_materiali   = sanitize_text_field( $_tl_prefs['materiali'] ?? '' );
+$_pref_tecniche    = sanitize_text_field( $_tl_prefs['tecniche']  ?? '' );
+
+// Il viewMode dal cookie viene rispettato solo se la vista è permessa dal blocco
+if ( $allowed_views === 'timeline' ) {
+    $_pref_view_mode = 'timeline';
+} elseif ( $allowed_views === 'grid' ) {
+    $_pref_view_mode = 'grid';
+} elseif ( in_array( $_tl_prefs['viewMode'] ?? '', [ 'timeline', 'grid' ], true ) ) {
+    $_pref_view_mode = $_tl_prefs['viewMode'];
+} else {
+    $_pref_view_mode = 'timeline';
+}
+
 // ── Context Interactivity API ─────────────────────────────────────────────────
 $context = [
-    'posts'       => $posts_data,
-    'activeIndex' => 0,
-    'viewMode'    => $allowed_views === 'grid' ? 'grid' : 'timeline',
-    'filtersOpen' => false,
-    'sortAsc'     => true,
-    'filters'     => [
-        'categoria' => 'all',
-        'materiali' => '',
-        'tecniche'  => '',
+    'posts'            => $posts_data,
+    'activeIndex'      => $_pref_active_index,
+    'viewMode'         => $_pref_view_mode,
+    'filtersOpen'      => false,
+    'sortAsc'          => $_pref_sort_asc,
+    'activeCenturyMin' => $_pref_century_min,
+    'activeCenturyMax' => $_pref_century_max,
+    'filters'          => [
+        'categoria' => $_pref_categoria,
+        'materiali' => $_pref_materiali,
+        'tecniche'  => $_pref_tecniche,
     ],
     'catOptions'  => array_values( $all_cat ),
     'matOptions'  => array_values( $all_mat ),
@@ -134,6 +186,7 @@ $context = [
     data-wp-interactive="timeline-3d"
     data-wp-context='<?php echo wp_json_encode( $context ); ?>'
     data-wp-init="callbacks.init"
+    data-wp-watch="callbacks.savePrefs"
     <?php echo get_block_wrapper_attributes( [ 'class' => 'tl-wrap' ] ); ?>
 >
 
@@ -258,6 +311,32 @@ $context = [
                 data-wp-on--click="actions.clearTecniche">
             <span data-wp-text="state.activeTecnicheLabel"></span> ×
         </button>
+    </div>
+
+    <!-- ═══ CENTURY BAR ═══ -->
+    <div class="tl-century-bar">
+        <?php foreach ( $century_segments as $seg ) : ?>
+        <button class="century-seg"
+                type="button"
+                style="flex: 0 0 calc(100% / 17)"
+                data-wp-context='<?php echo wp_json_encode( [ 'segMin' => $seg['seg_min'], 'segMax' => $seg['seg_max'] ] ); ?>'
+                data-wp-class--is-active="state.isCenturyActive"
+                data-wp-on--click="actions.setCentury">
+            <div class="century-seg__head">
+                <span class="century-seg__label"><?php echo esc_html( $seg['label'] ); ?></span>
+            </div>
+            <div class="century-seg__dots">
+                <?php foreach ( $seg['dots_by_x'] as $x_pct => $indices ) : ?>
+                    <?php foreach ( $indices as $stack_i => $pi ) : ?>
+                    <div class="century-dot"
+                         data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $pi ] ); ?>'
+                         data-wp-class--is-active="state.isDotActive"
+                         style="left:<?php echo $x_pct; ?>%;top:<?php echo 4 + $stack_i * 8; ?>px"></div>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+        </button>
+        <?php endforeach; ?>
     </div>
 
     <?php if ( $allowed_views !== 'grid' ) : ?>

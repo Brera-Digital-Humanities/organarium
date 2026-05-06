@@ -84,9 +84,17 @@ Nel Site Editor il blocco mostra un segnaposto; l'interattività è disponibile 
 
 ### 2. Timeline 3D (`ttf-child/timeline`)
 
-Presenta i post in **due modalità di visualizzazione** selezionabili dall'utente: un carousel 3D con effetto prospettico e una griglia CSS. Supporta filtri multipli basati su campi ACF e ordinamento per data.
+Presenta i post in **due modalità di visualizzazione** selezionabili dall'utente: un carousel 3D con effetto prospettico e una griglia CSS. Supporta una barra di navigazione per secolo, filtri multipli basati su campi ACF e ordinamento per data. Le preferenze dell'utente (secolo, filtri, ordinamento, vista, card attiva) sono persistite in un cookie di sessione.
 
 **Funzionalità:**
+
+*Century Bar*
+- Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti** di larghezza uguale (1/17 del container ciascuno)
+- Ogni segmento corrisponde a un secolo; il primo è accorpato e copre 200 a.C. – 100 d.C. con etichetta `200 a.C.`
+- Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px) posizionati proporzionalmente al `sort_key` del post all'interno del range; dot sovrapposti vengono impilati verticalmente
+- Il segmento attivo è colorato con `accent-4`; il dot del post in evidenza nel carousel diventa `contrast` (nero)
+- Cliccando un segmento: carica i post del quel secolo, azzera tutti i filtri e chiude il pannello filtri
+- Su mobile (< 768 px) la barra si distribuisce su **due righe** (9 + 8 segmenti)
 
 *Vista Timeline*
 - Carousel 3D con prospettiva CSS (`perspective: 500vw`) e fino a 5 card visibili simultaneamente (attiva, prev/next, prev2/next2)
@@ -102,11 +110,17 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
   - **Categoria** (campo ACF `categorie_generali`)
   - **Materiale** (campo ACF `materiale`)
   - **Tecnica** (campo ACF `tecnica`)
+- I filtri agiscono sui post del **secolo selezionato** nella century bar
 - Badge filtri attivi con rimozione singola o globale
 - Indicatore contatore post visibili
 
 *Ordinamento*
 - Toggle ascendente/discendente con animazione FLIP basata su `sort_key` (campo ACF `data_per_la_timeline`)
+
+*Persistenza preferenze (cookie di sessione)*
+- Cookie `tl_prefs` (sessione, nessun `max-age`) scritto in JS tramite `callbacks.savePrefs` (`data-wp-watch`, reattivo)
+- Campi salvati: `centuryMin`, `centuryMax`, `viewMode`, `sortAsc`, `activeIndex`, `categoria`, `materiali`, `tecniche`
+- PHP legge il cookie al render e inizializza il context con le preferenze salvate; `viewMode` viene validato contro `allowedViews` del blocco
 
 **Attributi del blocco (configurabili dal Site Editor):**
 
@@ -119,11 +133,14 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 | Elemento | Descrizione |
 |---|---|
-| state `visiblePosts` | Post filtrati e ordinati |
+| state `visiblePosts` | Post filtrati per secolo attivo + filtri ACF, ordinati |
 | state `isViewTimeline/isViewGrid` | Modalità di vista attiva |
 | state `filtersOpen` | Apertura pannello filtri |
+| state `isCenturyActive` | Segmento century bar attivo (ctx locale: `segMin`) |
+| state `isDotActive` | Dot attivo — post corrisponde alla card in evidenza (ctx locale: `postIndex`) |
 | state `cardOffset/isActive/isPrev/isNext...` | Posizione card nel carousel |
 | state `markerLeft/scrubberThumbLeft` | Posizionamento scrubber |
+| action `setCentury` | Cambia secolo attivo, azzera filtri e chiude il pannello |
 | action `toggleFilters/clearFilters/togglePill` | Gestione filtri |
 | action `setViewTimeline/setViewGrid` | Cambio vista |
 | action `toggleSort` | Inversione ordinamento con FLIP |
@@ -131,6 +148,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 | action `scrubberPointerDown/Move` | Drag scrubber |
 | action `goToMarker` | Navigazione diretta da marker |
 | callback `init` | Setup navigazione da tastiera |
+| callback `savePrefs` | Scrittura cookie di sessione (reattivo via `data-wp-watch`) |
 
 ---
 
@@ -141,9 +159,10 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 **Funzionalità:**
 
 - Pin SVG circolari (28×28 px: cerchio con punto centrale) con colori fissi indipendenti dalla categoria
-- **Raggruppamento coordinate**: più articoli con le stesse coordinate condividono un unico marker; la popup mostra tutte le card in sequenza separate da un divisore orizzontale
-- Popup card con thumbnail, campo `ubicazione` e titolo linkato (colore `accent-3 #6b2a0b`)
-- **Sidebar filtri laterale a scomparsa** (36 px → 450 px, toggle con testo verticale) con pill per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: pill disabilitate per combinazioni non disponibili, etichette ACF risolte tramite `get_field_object()`, badge filtri attivi con rimozione singola o globale
+- **Clustering automatico** (Leaflet.markercluster): pin vicini vengono raggruppati in un cluster SVG che mostra il conteggio; si apre in spiderfication a zoom elevato o si scioglie in pin individuali a `disableClusteringAtZoom: 17`
+- **Raggruppamento coordinate**: più articoli con le stesse coordinate condividono un unico marker; cliccando si apre una sidebar laterale con le card degli articoli corrispondenti al periodo attivo (o tutti se nessun filtro periodo è attivo), separate da un divisore orizzontale
+- Card con thumbnail, campo `ubicazione` e titolo linkato (colore `accent-3 #6b2a0b`)
+- **Sidebar filtri laterale a scomparsa** (36 px → 450 px, toggle con testo verticale) con pill per **Categoria**, **Materiale**, **Tecnica** e **Periodo** — stessa logica della timeline: pill disabilitate per combinazioni non disponibili, etichette ACF risolte tramite `get_field_object()`, badge filtri attivi con rimozione singola o globale
 - Viewport automatico: `fitBounds` sui marker filtrati oppure zoom sul singolo marker visibile
 - 4 stili CartoDB con CSS filter applicato al tile pane: `natural`, `warm`, `teal`, `dark`
 

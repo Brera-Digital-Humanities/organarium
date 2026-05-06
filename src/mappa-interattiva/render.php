@@ -51,17 +51,19 @@ if ( $query->have_posts() ) {
         $materiali = (array) get_field( 'materiale', $pid );
         $tecniche  = (array) get_field( 'tecniche',  $pid );
 
+        $data_raw = get_field( 'data_per_la_timeline', $pid );
         $posts_data[] = [
-            'lat'        => $lat,
-            'lng'        => $lng,
-            'url'        => get_permalink(),
-            'title'      => get_the_title(),
-            'thumb'      => get_the_post_thumbnail_url( $pid, 'medium' ) ?: '',
-            'ubicazione' => get_field( 'ubicazione', $pid ) ?: '',
-            'excerpt'    => html_entity_decode( get_the_excerpt( $pid ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ?: '',
-            'categoria'  => get_field( 'categorie_generali', $pid ) ?? '',
-            'materiale'  => array_values( array_filter( $materiali ) ),
-            'tecnica'    => array_values( array_filter( $tecniche ) ),
+            'lat'              => $lat,
+            'lng'              => $lng,
+            'url'              => get_permalink(),
+            'title'            => get_the_title(),
+            'thumb'            => get_the_post_thumbnail_url( $pid, 'medium' ) ?: '',
+            'ubicazione'       => get_field( 'ubicazione', $pid ) ?: '',
+            'excerpt'          => html_entity_decode( get_the_excerpt( $pid ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ?: '',
+            'categoria'        => get_field( 'categorie_generali', $pid ) ?? '',
+            'materiale'        => array_values( array_filter( $materiali ) ),
+            'tecnica'          => array_values( array_filter( $tecniche ) ),
+            'data_per_timeline' => $data_raw ? (int) $data_raw : 0,
         ];
     }
     wp_reset_postdata();
@@ -118,16 +120,51 @@ $context = [
         'categoria' => 'all',
         'materiali' => '',
         'tecniche'  => '',
+        'periodo'   => '',
     ],
     'catOptions'  => array_values( $all_cat ),
     'matOptions'  => array_values( $all_mat ),
     'tecOptions'  => array_values( $all_tec ),
+    'periOptions' => [
+        [ 'value' => 'tardo-antico',     'label' => 'Tardo Antico' ],
+        [ 'value' => 'medioevo-moderno', 'label' => 'Medioevo / Moderno' ],
+    ],
 ];
 ?>
 
 <div class="map-block-wrap"
      data-wp-interactive="mappa-interattiva"
      data-wp-context='<?php echo wp_json_encode( $context ); ?>'>
+
+    <!-- ═══ FILTRI ATTIVI (barra sopra sidebar + mappa) ═══ -->
+    <div class="tl-active-filters">
+        <button class="tl-btn tl-btn--link"
+                data-wp-class--tl-hidden="!state.hasActiveFilters"
+                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
+        <button class="active-filter-tag filter-col--accent-4"
+                data-wp-class--tl-hidden="!state.hasCategoriaFilter"
+                data-wp-on--click="actions.clearCategoria">
+            <span data-wp-text="state.activeCategoriaLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-1"
+                data-wp-class--tl-hidden="!state.hasMaterialiFilter"
+                data-wp-on--click="actions.clearMateriali">
+            <span data-wp-text="state.activeMaterialiLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-2"
+                data-wp-class--tl-hidden="!state.hasTecnicheFilter"
+                data-wp-on--click="actions.clearTecniche">
+            <span data-wp-text="state.activeTecnicheLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-3"
+                data-wp-class--tl-hidden="!state.hasPeriodoFilter"
+                data-wp-on--click="actions.clearPeriodo">
+            <span data-wp-text="state.activePeriodoLabel"></span> ×
+        </button>
+    </div>
+
+    <!-- ═══ RIGA PRINCIPALE (sidebar + mappa + info panel) ═══ -->
+    <div class="map-main">
 
     <!-- ═══ SIDEBAR FILTRI (laterale) ═══ -->
     <div class="map-sidebar" data-wp-class--is-open="state.filtersOpen">
@@ -190,25 +227,22 @@ $context = [
             </div>
             <?php endif; ?>
 
-            <!-- ═══ FILTRI ATTIVI ═══ -->
-            <div class="tl-active-filters" data-wp-class--tl-hidden="!state.hasActiveFilters">
-                <button class="tl-btn tl-btn--link"
-                        data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
-                <button class="active-filter-tag filter-col--accent-4"
-                        data-wp-class--tl-hidden="!state.hasCategoriaFilter"
-                        data-wp-on--click="actions.clearCategoria">
-                    <span data-wp-text="state.activeCategoriaLabel"></span> ×
-                </button>
-                <button class="active-filter-tag filter-col--accent-1"
-                        data-wp-class--tl-hidden="!state.hasMaterialiFilter"
-                        data-wp-on--click="actions.clearMateriali">
-                    <span data-wp-text="state.activeMaterialiLabel"></span> ×
-                </button>
-                <button class="active-filter-tag filter-col--accent-2"
-                        data-wp-class--tl-hidden="!state.hasTecnicheFilter"
-                        data-wp-on--click="actions.clearTecniche">
-                    <span data-wp-text="state.activeTecnicheLabel"></span> ×
-                </button>
+            <div class="filter-col filter-col--accent-3">
+                <h5 class="filter-label">Periodo</h5>
+                <div class="pills">
+                    <button class="pill"
+                            data-wp-context='{"filterGroup":"periodo","filterVal":"tardo-antico"}'
+                            data-wp-class--active="state.isPillActive"
+                            data-wp-class--disabled="state.isPillDisabled"
+                            data-wp-bind--disabled="state.isPillDisabled"
+                            data-wp-on--click="actions.togglePill">Tardo Antico</button>
+                    <button class="pill"
+                            data-wp-context='{"filterGroup":"periodo","filterVal":"medioevo-moderno"}'
+                            data-wp-class--active="state.isPillActive"
+                            data-wp-class--disabled="state.isPillDisabled"
+                            data-wp-bind--disabled="state.isPillDisabled"
+                            data-wp-on--click="actions.togglePill">Medioevo / Moderno</button>
+                </div>
             </div>
 
         </div><!-- .map-sidebar__panel -->
@@ -225,5 +259,7 @@ $context = [
         <button class="mp-info-panel__close" aria-label="Chiudi">×</button>
         <div class="mp-info-panel__content"></div>
     </div>
+
+    </div><!-- .map-main -->
 
 </div><!-- .map-block-wrap -->

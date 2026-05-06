@@ -5,19 +5,29 @@
 /*!*************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/mappa-interattiva/style.scss (1) ***!
   \*************************************************************************************************************************************************************************************************************************************************************/
+@import url(https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css);
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/mappa-interattiva/style.scss (2) ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
 @charset "UTF-8";
 /* ═══════════════════════════════════════════════════
    Mappa Interattiva Block
    Palette dal tema Twenty Twenty-Five:
      accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #8cbbba  accent-5 #f2f2e5
+     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
    ═══════════════════════════════════════════════════ */
 .map-block-wrap {
   width: 100%;
   display: flex;
-  align-items: stretch;
+  flex-wrap: wrap;
   gap: 0;
+}
+.map-main {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: stretch;
   position: relative;
+  overflow: hidden;
 }
 .map-sidebar {
   flex-shrink: 0;
@@ -75,15 +85,19 @@
 }
 .map-sidebar__panel .filter-col {
   --_pill-bg: var(--wp--preset--color--contrast, #111);
+  max-width: 600px;
 }
 .map-sidebar__panel .filter-col.filter-col--accent-4 {
-  --_pill-bg: var(--wp--preset--color--accent-4, #8cbbba);
+  --_pill-bg: var(--wp--preset--color--accent-4, #56814A);
 }
 .map-sidebar__panel .filter-col.filter-col--accent-1 {
   --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b);
 }
 .map-sidebar__panel .filter-col.filter-col--accent-2 {
   --_pill-bg: var(--wp--preset--color--accent-2, #b85f29);
+}
+.map-sidebar__panel .filter-col.filter-col--accent-3 {
+  --_pill-bg: color-mix(in srgb, var(--wp--preset--color--accent-3, #6b2a0b) 30%, var(--wp--preset--color--accent-5, #f2f2e5));
 }
 .map-sidebar__panel .filter-label {
   font-size: var(--wp--preset--font-size--small);
@@ -124,18 +138,19 @@
   cursor: not-allowed;
   pointer-events: none;
 }
-.map-sidebar__panel .tl-active-filters {
-  margin-top: auto;
+.tl-active-filters {
+  flex: 0 0 100%;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  padding: 0.4rem 0 0.4rem 0;
+  min-height: 2.4rem;
+  border-bottom: 1px solid var(--wp--preset--color--contrast);
   font-size: 1rem;
 }
-.map-sidebar__panel .tl-active-filters.tl-hidden {
-  display: none;
-}
-.map-sidebar__panel .tl-btn--link {
+.tl-btn--link {
   font-size: var(--wp--preset--font-size--small);
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -148,10 +163,13 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.map-sidebar__panel .tl-btn--link:focus {
+.tl-btn--link:focus {
   outline: none;
 }
-.map-sidebar__panel .active-filter-tag {
+.tl-btn--link.tl-hidden {
+  display: none;
+}
+.active-filter-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.3em;
@@ -162,19 +180,22 @@
   font-size: 1rem;
   cursor: pointer;
 }
-.map-sidebar__panel .active-filter-tag.filter-col--accent-4 {
-  color: var(--wp--preset--color--accent-4, #8cbbba);
+.active-filter-tag.filter-col--accent-4 {
+  color: var(--wp--preset--color--accent-4, #56814A);
 }
-.map-sidebar__panel .active-filter-tag.filter-col--accent-1 {
+.active-filter-tag.filter-col--accent-1 {
   color: var(--wp--preset--color--accent-1, #f5cc5b);
 }
-.map-sidebar__panel .active-filter-tag.filter-col--accent-2 {
+.active-filter-tag.filter-col--accent-2 {
   color: var(--wp--preset--color--accent-2, #b85f29);
 }
-.map-sidebar__panel .active-filter-tag:focus {
+.active-filter-tag.filter-col--accent-3 {
+  color: var(--wp--preset--color--accent-3, #6b2a0b);
+}
+.active-filter-tag:focus {
   outline: none;
 }
-.map-sidebar__panel .active-filter-tag.tl-hidden {
+.active-filter-tag.tl-hidden {
   display: none;
 }
 .map-canvas {
@@ -182,6 +203,18 @@
   min-width: 0;
   background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
   z-index: 0;
+}
+.map-cluster-icon {
+  background: none !important;
+  border: none !important;
+}
+.map-cluster-icon svg {
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  transition: filter 0.2s;
+}
+.map-cluster-icon:hover svg {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
 }
 .map-pin-icon {
   background: none !important;

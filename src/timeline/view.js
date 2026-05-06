@@ -26,13 +26,15 @@ store( 'timeline-3d', {
 
         // ── Posts filtrati + ordinati per sort_key numerico ───────────────────
         get visiblePosts() {
-            const { posts, filters, sortAsc } = getContext();
+            const { posts, filters, sortAsc, activeCenturyMin, activeCenturyMax } = getContext();
             return posts
                 .filter( ( post ) => {
+                    const sk = post.sort_key ?? 0;
+                    const inCentury = sk >= activeCenturyMin && sk < activeCenturyMax;
                     const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
                     const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
                     const matchTec = filters.tecniche === '' || post.tecnica.includes( filters.tecniche );
-                    return matchCat && matchMat && matchTec;
+                    return inCentury && matchCat && matchMat && matchTec;
                 } )
                 .sort( ( a, b ) => sortAsc
                     ? ( a.sort_key ?? 0 ) - ( b.sort_key ?? 0 )
@@ -77,10 +79,12 @@ store( 'timeline-3d', {
         // Calcola se filterVal esiste in almeno un post filtrato dagli ALTRI gruppi
         get isValueAvailable() {
             const ctx = getContext();
-            const { filterGroup, filterVal, posts, filters } = ctx;
+            const { filterGroup, filterVal, posts, filters, activeCenturyMin, activeCenturyMax } = ctx;
             if ( ! filterGroup ) return true;
 
             const filtered = posts.filter( ( post ) => {
+                const sk = post.sort_key ?? 0;
+                if ( sk < activeCenturyMin || sk >= activeCenturyMax ) return false;
                 const matchCat = filterGroup === 'categoria'
                     ? true
                     : ( filters.categoria === 'all' || post.categoria === filters.categoria );
@@ -101,6 +105,22 @@ store( 'timeline-3d', {
 
         get isPillDisabled() {
             return ! store( 'timeline-3d' ).state.isValueAvailable;
+        },
+
+        // ── Century bar ───────────────────────────────────────────────────────
+        // Contesto locale del segmento: segMin / segMax
+        get isCenturyActive() {
+            const ctx = getContext();
+            return ctx.activeCenturyMin === ctx.segMin;
+        },
+
+        // Contesto locale del dot: postIndex
+        get isDotActive() {
+            const ctx = getContext();
+            const { state } = store( 'timeline-3d' );
+            const activePost = state.visiblePosts[ ctx.activeIndex ];
+            const dotPost    = ctx.posts?.[ ctx.postIndex ];
+            return !! ( dotPost && activePost && dotPost.id === activePost.id );
         },
 
         // ── Filtri attivi (per le etichette sotto il divider) ─────────────────
@@ -293,6 +313,17 @@ store( 'timeline-3d', {
             ctx.activeIndex = 0;
         },
 
+        setCentury() {
+            const ctx = getContext();
+            ctx.activeCenturyMin      = ctx.segMin;
+            ctx.activeCenturyMax      = ctx.segMax;
+            ctx.filters.categoria     = 'all';
+            ctx.filters.materiali     = '';
+            ctx.filters.tecniche      = '';
+            ctx.activeIndex           = 0;
+            ctx.filtersOpen           = false;
+        },
+
         setViewTimeline() {
             getContext().viewMode = 'timeline';
         },
@@ -386,6 +417,21 @@ store( 'timeline-3d', {
                 if ( e.key === 'ArrowRight' ) actions.next();
                 if ( e.key === 'ArrowLeft' )  actions.prev();
             } );
+        },
+
+        savePrefs() {
+            const ctx   = getContext();
+            const prefs = JSON.stringify( {
+                centuryMin:  ctx.activeCenturyMin,
+                centuryMax:  ctx.activeCenturyMax,
+                viewMode:    ctx.viewMode,
+                sortAsc:     ctx.sortAsc,
+                activeIndex: ctx.activeIndex,
+                categoria:   ctx.filters.categoria,
+                materiali:   ctx.filters.materiali,
+                tecniche:    ctx.filters.tecniche,
+            } );
+            document.cookie = 'tl_prefs=' + encodeURIComponent( prefs ) + '; path=/; SameSite=Lax';
         },
     },
 } );

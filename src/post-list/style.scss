@@ -2,7 +2,7 @@
    Post List Block
    Colori dal tema Twenty Twenty-Five:
      accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #8cbbba  accent-5 #f2f2e5
+     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
    ═══════════════════════════════════════════════════ */
 
 .pl-hidden { display: none !important; }
@@ -84,9 +84,10 @@
 .pl-filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
 
-    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #8cbbba); }
+    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
     &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b); }
     &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
+    max-width: 600px;
 }
 
 .pl-filter-label {

@@ -6,7 +6,7 @@
    Timeline Block
    Colori dal tema Twenty Twenty-Five:
      accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #8cbbba  accent-5 #f2f2e5
+     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
    ═══════════════════════════════════════════════════ */
 /* ── Utility ── */
 .sr-only {
@@ -140,13 +140,16 @@
   --_pill-bg: var(--wp--preset--color--contrast, #111);
 }
 .filter-col--accent-4 {
-  --_pill-bg: var(--wp--preset--color--accent-4, #8cbbba);
+  --_pill-bg: var(--wp--preset--color--accent-4, #56814A);
 }
 .filter-col--accent-1 {
   --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b);
 }
 .filter-col--accent-2 {
   --_pill-bg: var(--wp--preset--color--accent-2, #b85f29);
+}
+.filter-col {
+  max-width: 600px;
 }
 .filter-col .filter-label {
   font-size: var(--wp--preset--font-size--small);
@@ -244,8 +247,8 @@
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   /* Altezza full viewport */
-  height: 80vh;
-  height: 80svh; /* browser moderni: esclude la chrome bar del mobile */
+  height: 70vh;
+  height: 70svh; /* browser moderni: esclude la chrome bar del mobile */
   perspective: 500vw;
   perspective-origin: 50% 38%;
   position: relative;
@@ -266,7 +269,7 @@
   pointer-events: none;
   transition: transform 0.55s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1);
   /* ── Mobile: card larga quanto il device, solo carta attiva ── */
-  width: 92vw;
+  width: 87vw;
   transform: translate(-50%, -50%) translateZ(-600px) scale(0.35);
 }
 .timeline-card.is-active {
@@ -286,7 +289,7 @@
 }
 @media (min-width: 768px) {
   .timeline-card {
-    width: 35vw;
+    width: 33vw;
     transform: translate(-50%, -50%) translateZ(-400px) scale(0.35);
   }
   .timeline-card.is-prev {
@@ -326,7 +329,7 @@
   transition: box-shadow 0.55s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .is-active .card-inner {
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14), 0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.14), 0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
 }
 .card-thumb {
   width: 100%;
@@ -418,7 +421,7 @@
      -moz-user-select: none;
           user-select: none;
   touch-action: pan-y;
-  margin-top: 4rem;
+  margin-top: 2rem;
 }
 @media (min-width: 768px) {
   .tl-scrubber {
@@ -580,6 +583,92 @@
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+}
+/* ══════════════════════════════
+   CENTURY BAR
+══════════════════════════════ */
+.tl-century-bar {
+  display: flex;
+  width: 100%;
+  margin: 1.5rem 0;
+  position: relative;
+}
+@media (max-width: 767px) {
+  .tl-century-bar {
+    flex-wrap: wrap;
+  }
+}
+.century-seg {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0.4rem 0 0;
+  text-align: left;
+  color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 55%, transparent);
+  transition: color 0.2s;
+}
+@media (max-width: 767px) {
+  .century-seg {
+    flex: 0 0 11.1111111111% !important;
+  }
+}
+.century-seg.is-active {
+  color: var(--wp--preset--color--accent-4, #56814A);
+}
+.century-seg:hover:not(.is-active) {
+  color: var(--wp--preset--color--contrast, #111);
+}
+.century-seg:focus {
+  outline: none;
+}
+.century-seg__head {
+  position: relative;
+  padding-bottom: 6px;
+}
+.century-seg__head::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 6px;
+  background: currentColor;
+}
+.century-seg__label {
+  display: block;
+  font-size: var(--wp--preset--font-size--small);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+  font-family: inherit;
+  font-weight: 600;
+  padding-left: 2px;
+}
+.century-seg__dots {
+  position: relative;
+  border-top: 1px solid currentColor;
+  height: 32px;
+  overflow: visible;
+}
+.century-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.45;
+  transition: opacity 0.2s, background 0.2s;
+}
+.century-seg.is-active .century-dot {
+  opacity: 0.65;
+}
+.century-dot.is-active {
+  opacity: 1;
+  background: var(--wp--preset--color--contrast, #111);
 }
 
 /*# sourceMappingURL=style-index.css.map*/

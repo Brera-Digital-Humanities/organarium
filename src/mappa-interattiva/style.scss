@@ -2,18 +2,27 @@
    Mappa Interattiva Block
    Palette dal tema Twenty Twenty-Five:
      accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #8cbbba  accent-5 #f2f2e5
+     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
    ═══════════════════════════════════════════════════ */
 
 @import url('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css');
+@import url('https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css');
 
-// ── Wrapper blocco: flex orizzontale sidebar + mappa ──────────────────────
+// ── Wrapper blocco ────────────────────────────────────────────────────────
 .map-block-wrap {
     width: 100%;
     display: flex;
-    align-items: stretch;
+    flex-wrap: wrap;
     gap: 0;
+}
+
+// ── Riga principale (sidebar + mappa + info panel) ────────────────────────
+.map-main {
+    flex: 0 0 100%;
+    display: flex;
+    align-items: stretch;
     position: relative;
+    overflow: hidden;
 }
 
 // ── Sidebar filtri (toggle laterale) ──────────────────────────────────────
@@ -76,10 +85,12 @@
 // ── Colonne filtro ─────────────────────────────────────────────────────────
 .map-sidebar__panel .filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
+    max-width: 600px;
 
-    &.filter-col--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #8cbbba); }
+    &.filter-col--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
     &.filter-col--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b); }
     &.filter-col--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
+    &.filter-col--accent-3 { --_pill-bg: color-mix(in srgb, var(--wp--preset--color--accent-3, #6b2a0b) 30%, var(--wp--preset--color--accent-5, #f2f2e5)); }
 }
 
 .map-sidebar__panel .filter-label {
@@ -123,18 +134,21 @@
     }
 }
 
-// ── Filtri attivi ──────────────────────────────────────────────────────────
-.map-sidebar__panel .tl-active-filters {
-    margin-top: auto;
+// ── Filtri attivi (barra full-width sopra sidebar + mappa) ─────────────────
+.tl-active-filters {
+    flex: 0 0 100%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
+    padding: 0.4rem 0 0.4rem 0;
+    min-height: 2.4rem;
+    border-bottom: 1px solid var(--wp--preset--color--contrast);
     font-size: 1rem;
-    &.tl-hidden { display: none; }
 }
 
-.map-sidebar__panel .tl-btn--link {
+.tl-btn--link {
     font-size: var(--wp--preset--font-size--small);
     font-weight: 600;
     letter-spacing: .07em;
@@ -148,9 +162,10 @@
     text-underline-offset: 2px;
 
     &:focus { outline: none; }
+    &.tl-hidden { display: none; }
 }
 
-.map-sidebar__panel .active-filter-tag {
+.active-filter-tag {
     display: inline-flex;
     align-items: center;
     gap: 0.3em;
@@ -161,9 +176,10 @@
     font-size: 1rem;
     cursor: pointer;
 
-    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #8cbbba); }
+    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #56814A); }
     &.filter-col--accent-1 { color: var(--wp--preset--color--accent-1, #f5cc5b); }
     &.filter-col--accent-2 { color: var(--wp--preset--color--accent-2, #b85f29); }
+    &.filter-col--accent-3 { color: var(--wp--preset--color--accent-3, #6b2a0b); }
     &:focus { outline: none; }
 
     &.tl-hidden { display: none; }
@@ -175,6 +191,20 @@
     min-width: 0;
     background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
     z-index: 0;
+}
+
+// ── Cluster icon ───────────────────────────────────────────────────────────
+.map-cluster-icon {
+    background: none !important;
+    border: none !important;
+
+    svg {
+        display: block;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,.35));
+        transition: filter 0.2s;
+    }
+
+    &:hover svg { filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
 }
 
 // ── Pin SVG ────────────────────────────────────────────────────────────────

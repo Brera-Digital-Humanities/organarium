@@ -45,12 +45,7 @@ function ttf_register_acf_shortcodes() {
             $value_html = '';
 
             // Gestione specifica per il campo "fonti" (tipo Link di ACF)
-            if ( $acf_key === 'fonti' && is_array( $value ) ) {
-                $link_url    = esc_url( $value['url'] );
-                $link_title  = esc_html( $value['title'] );
-                $link_target = ! empty( $value['target'] ) ? esc_attr( $value['target'] ) : '_self';
-                $value_html  = "<a href='{$link_url}' target='{$link_target}' class='acf-link-field'>{$link_title}</a>";
-            } elseif ( $acf_key === 'provenienza' ) {
+            if ( $acf_key === 'fonti' || $acf_key === 'provenienza' ) {
                 // Gestione per il campo "provenienza" (tipo Rich Editor / WYSIWYG)
                 $value_html = wp_kses_post( $value );
             } else {

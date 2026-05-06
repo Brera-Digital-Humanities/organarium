@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(nvm use *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Read(//home/lo-bo/.nvm/versions/node/**)"
     ]
   }
 }

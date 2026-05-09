@@ -48,9 +48,19 @@ function esc( s ) {
         .replace( />/g, '&gt;' ).replace( /"/g, '&quot;' );
 }
 
+// Riferimenti non-reattivi per ctx: evitano che mutazioni come la selezione di
+// un marker (che è cosmetica, non un cambio di filtro) ri-attivino il watch di
+// updateMarkers e quindi il fitBounds/setView, che farebbe zoom-out indesiderato.
+const ctxRefs = new WeakMap();
+function getRefs( ctx ) {
+    let r = ctxRefs.get( ctx );
+    if ( ! r ) { r = {}; ctxRefs.set( ctx, r ); }
+    return r;
+}
+
 function makeCard( post ) {
     const thumb      = post.thumb      ? `<div class="mp-thumb"><a class="mp-title" href="${ esc(post.url) }"><img src="${ esc(post.thumb) }" alt="${ esc(post.title) }" loading="lazy"></a></div>` : '';
-    const ubicazione = post.ubicazione ? `<span class="mp-ubicazione">${ esc(post.ubicazione) }</span>` : '';
+    const ubicazione = post.ubicazione ? `<span class="mp-ubicazione">UBICAZIONE: ${ esc(post.ubicazione) }</span>` : '';
     const excerpt    = post.excerpt    ? `<p class="mp-excerpt">${ esc(post.excerpt) }</p>` : '';
     return `<div class="mp-card">${ thumb }<div class="mp-body">${ ubicazione }<a class="mp-title" href="${ esc(post.url) }">${ esc(post.title) }</a>${ excerpt }</div></div>`;
 }
@@ -222,14 +232,15 @@ store( 'mappa-interattiva', {
             const defaultIcon  = makeIcon();
             const selectedIcon = makeIconSelected();
 
-            ctx._panel       = panel;
-            ctx._defaultIcon = defaultIcon;
+            const refs = getRefs( ctx );
+            refs.panel       = panel;
+            refs.defaultIcon = defaultIcon;
 
             panel.querySelector( '.mp-info-panel__close' ).addEventListener( 'click', () => {
                 panel.classList.remove( 'is-open' );
-                if ( ctx._selectedMarker ) {
-                    ctx._selectedMarker.setIcon( defaultIcon );
-                    ctx._selectedMarker = null;
+                if ( refs.selectedMarker ) {
+                    refs.selectedMarker.setIcon( defaultIcon );
+                    refs.selectedMarker = null;
                 }
             } );
 
@@ -252,11 +263,11 @@ store( 'mappa-interattiva', {
                 };
 
                 marker.on( 'click', () => {
-                    if ( ctx._selectedMarker && ctx._selectedMarker !== marker ) {
-                        ctx._selectedMarker.setIcon( defaultIcon );
+                    if ( refs.selectedMarker && refs.selectedMarker !== marker ) {
+                        refs.selectedMarker.setIcon( defaultIcon );
                     }
                     marker.setIcon( selectedIcon );
-                    ctx._selectedMarker = marker;
+                    refs.selectedMarker = marker;
 
                     const { filters } = ctx;
                     const periodoActive = filters.periodo;
@@ -300,6 +311,8 @@ store( 'mappa-interattiva', {
             const { mapInstance, markerGroup, allMarkers, filters } = ctx;
             if ( ! mapInstance ) return;
 
+            const refs = getRefs( ctx );
+
             markerGroup.clearLayers();
 
             const visible = allMarkers.filter( ( m ) => {
@@ -314,10 +327,10 @@ store( 'mappa-interattiva', {
 
             visible.forEach( ( m ) => markerGroup.addLayer( m ) );
 
-            if ( ctx._selectedMarker && ! visible.includes( ctx._selectedMarker ) ) {
-                if ( ctx._panel ) ctx._panel.classList.remove( 'is-open' );
-                ctx._selectedMarker.setIcon( ctx._defaultIcon );
-                ctx._selectedMarker = null;
+            if ( refs.selectedMarker && ! visible.includes( refs.selectedMarker ) ) {
+                if ( refs.panel ) refs.panel.classList.remove( 'is-open' );
+                refs.selectedMarker.setIcon( refs.defaultIcon );
+                refs.selectedMarker = null;
             }
 
             if ( visible.length === 1 ) {

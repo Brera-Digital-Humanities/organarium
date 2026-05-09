@@ -27,6 +27,8 @@ function ttf_register_acf_shortcodes() {
         'dimensioni'          => array( 'sc' => 'acf_dimensioni', 'label' => 'Dimensioni' ),
         'provenienza'         => array( 'sc' => 'acf_provenienza', 'label' => 'Provenienza' ),
         'fonti'               => array( 'sc' => 'acf_fonti',      'label' => 'Fonti' ),
+        'trattato_completo'   => array( 'sc' => 'acf_trattato_completo',      'label' => 'Trattato completo' ),
+        'edizione'            => array( 'sc' => 'acf_edizione',      'label' => 'Edizione' ),
     );
 
     foreach ( $fields as $acf_key => $config ) {
@@ -45,15 +47,23 @@ function ttf_register_acf_shortcodes() {
             $value_html = '';
 
             // Gestione specifica per il campo "fonti" (tipo Link di ACF)
-            if ( $acf_key === 'fonti' || $acf_key === 'provenienza' ) {
+            if ( $acf_key === 'fonti' || $acf_key === 'provenienza' || $acf_key === 'trattato_completo') {
                 // Gestione per il campo "provenienza" (tipo Rich Editor / WYSIWYG)
                 $value_html = wp_kses_post( $value );
+                if($acf_key === 'fonti' ){
+                    return '<div style="border-top-color:var(--wp--preset--color--contrast);border-top-style:solid;border-top-width:1px;padding-bottom:0px;padding-top:15px;display: inline-block;width: 100%;"><div class="acf-field-wrapper ' . esc_attr( $config['sc'] ) . '">' . $label_html . $value_html . '</div></div>';
+                } elseif ( $acf_key === 'provenienza' ) {
+                    return '<div style="padding-top:0px;padding-bottom:15px;display: inline-block;width: 100%;"><div class="acf-field-wrapper ' . esc_attr( $config['sc'] ) . '">' . $label_html . $value_html . '</div></div>';
+                } else{
+                    return '<div style="border-bottom-color:var(--wp--preset--color--contrast);border-bottom-style:solid;border-bottom-width:1px;padding-top:0px;padding-bottom:15px;margin-bottom:20px;display: inline-block;width: 100%;"><div class="acf-field-wrapper ' . esc_attr( $config['sc'] ) . '">' . $label_html . $value_html . '</div></div>';  
+                }
             } else {
                 // Gestione standard per campi di testo semplice
                 $value_html = esc_html( $value );
+                return '<div style="border-bottom-color:var(--wp--preset--color--contrast);border-bottom-style:solid;border-bottom-width:1px;padding-top:0px;padding-bottom:15px;margin-bottom:20px;display: inline-block;width: 100%;"><div class="acf-field-wrapper ' . esc_attr( $config['sc'] ) . '">' . $label_html . $value_html . '</div></div>';
+
             }
 
-            return '<div class="acf-field-wrapper ' . esc_attr( $config['sc'] ) . '">' . $label_html . $value_html . '</div>';
         });
     }
 }
@@ -72,3 +82,7 @@ function ttf_register_custom_blocks() {
     register_block_type( __DIR__ . '/build/post-list' );
 }
 
+function custom_excerpt_length( $length ) {
+    return 85; 
+}
+add_filter( 'excerpt_length', 'custom_excerpt_length', 999 );

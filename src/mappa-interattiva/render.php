@@ -136,34 +136,7 @@ $context = [
      data-wp-interactive="mappa-interattiva"
      data-wp-context='<?php echo wp_json_encode( $context ); ?>'>
 
-    <!-- ═══ FILTRI ATTIVI (barra sopra sidebar + mappa) ═══ -->
-    <div class="tl-active-filters">
-        <button class="tl-btn tl-btn--link"
-                data-wp-class--tl-hidden="!state.hasActiveFilters"
-                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
-        <button class="active-filter-tag filter-col--accent-4"
-                data-wp-class--tl-hidden="!state.hasCategoriaFilter"
-                data-wp-on--click="actions.clearCategoria">
-            <span data-wp-text="state.activeCategoriaLabel"></span> ×
-        </button>
-        <button class="active-filter-tag filter-col--accent-1"
-                data-wp-class--tl-hidden="!state.hasMaterialiFilter"
-                data-wp-on--click="actions.clearMateriali">
-            <span data-wp-text="state.activeMaterialiLabel"></span> ×
-        </button>
-        <button class="active-filter-tag filter-col--accent-2"
-                data-wp-class--tl-hidden="!state.hasTecnicheFilter"
-                data-wp-on--click="actions.clearTecniche">
-            <span data-wp-text="state.activeTecnicheLabel"></span> ×
-        </button>
-        <button class="active-filter-tag filter-col--accent-3"
-                data-wp-class--tl-hidden="!state.hasPeriodoFilter"
-                data-wp-on--click="actions.clearPeriodo">
-            <span data-wp-text="state.activePeriodoLabel"></span> ×
-        </button>
-    </div>
-
-    <!-- ═══ RIGA PRINCIPALE (sidebar + mappa + info panel) ═══ -->
+    <!-- ═══ RIGA PRINCIPALE (sidebar + filtri attivi + mappa + info panel) ═══ -->
     <div class="map-main">
 
     <!-- ═══ SIDEBAR FILTRI (laterale) ═══ -->
@@ -241,24 +214,55 @@ $context = [
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
-                            data-wp-on--click="actions.togglePill">Medioevo / Moderno</button>
+                            data-wp-on--click="actions.togglePill">Medioevo</button>
                 </div>
             </div>
 
         </div><!-- .map-sidebar__panel -->
     </div><!-- .map-sidebar -->
 
-    <!-- ═══ MAPPA ═══ -->
-    <div class="map-canvas"
-         style="height:<?php echo $map_height; ?>px"
-         data-wp-init="callbacks.initMap"
-         data-wp-watch="callbacks.updateMarkers"></div>
-
-    <!-- ═══ INFO PANEL (overlay sulla mappa) ═══ -->
-    <div class="mp-info-panel">
-        <button class="mp-info-panel__close" aria-label="Chiudi">×</button>
-        <div class="mp-info-panel__content"></div>
+    <!-- ═══ FILTRI ATTIVI (full-width: sopra mappa su desktop, tra toggle e mappa su mobile) ═══ -->
+    <div class="tl-active-filters">
+        <button class="tl-btn tl-btn--link"
+                data-wp-class--tl-hidden="!state.hasActiveFilters"
+                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
+        <button class="active-filter-tag filter-col--accent-4"
+                data-wp-class--tl-hidden="!state.hasCategoriaFilter"
+                data-wp-on--click="actions.clearCategoria">
+            <span data-wp-text="state.activeCategoriaLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-1"
+                data-wp-class--tl-hidden="!state.hasMaterialiFilter"
+                data-wp-on--click="actions.clearMateriali">
+            <span data-wp-text="state.activeMaterialiLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-2"
+                data-wp-class--tl-hidden="!state.hasTecnicheFilter"
+                data-wp-on--click="actions.clearTecniche">
+            <span data-wp-text="state.activeTecnicheLabel"></span> ×
+        </button>
+        <button class="active-filter-tag filter-col--accent-3"
+                data-wp-class--tl-hidden="!state.hasPeriodoFilter"
+                data-wp-on--click="actions.clearPeriodo">
+            <span data-wp-text="state.activePeriodoLabel"></span> ×
+        </button>
     </div>
+
+    <!-- ═══ AREA MAPPA (canvas + info panel) ═══ -->
+    <div class="map-area" style="height:<?php echo $map_height; ?>px">
+
+        <!-- ═══ MAPPA ═══ -->
+        <div class="map-canvas"
+             data-wp-init="callbacks.initMap"
+             data-wp-watch="callbacks.updateMarkers"></div>
+
+        <!-- ═══ INFO PANEL (overlay sulla mappa) ═══ -->
+        <div class="mp-info-panel">
+            <button class="mp-info-panel__close" aria-label="Chiudi">×</button>
+            <div class="mp-info-panel__content"></div>
+        </div>
+
+    </div><!-- .map-area -->
 
     </div><!-- .map-main -->
 

@@ -22,6 +22,10 @@
     "selectedCategory": {
       "type": "number",
       "default": 0
+    },
+    "showScrubber": {
+      "type": "boolean",
+      "default": true
     }
   },
   "textdomain": "timeline",

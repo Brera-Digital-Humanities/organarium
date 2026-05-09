@@ -92,6 +92,10 @@ return array(
 			'showFilters' => array(
 				'type' => 'boolean',
 				'default' => true
+			),
+			'imageRatio' => array(
+				'type' => 'string',
+				'default' => '4/3'
 			)
 		),
 		'textdomain' => 'post-list',
@@ -124,6 +128,10 @@ return array(
 			'selectedCategory' => array(
 				'type' => 'number',
 				'default' => 0
+			),
+			'showScrubber' => array(
+				'type' => 'boolean',
+				'default' => true
 			)
 		),
 		'textdomain' => 'timeline',

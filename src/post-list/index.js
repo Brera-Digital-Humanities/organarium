@@ -61,6 +61,15 @@ registerBlockType( metadata.name, {
                             checked={ attributes.showFilters ?? true }
                             onChange={ ( val ) => setAttributes( { showFilters: val } ) }
                         />
+                        <SelectControl
+                            label="Proporzioni immagine"
+                            value={ attributes.imageRatio ?? '4/3' }
+                            options={ [
+                                { label: 'Orizzontale (4:3)', value: '4/3' },
+                                { label: 'Verticale (3:4)',   value: '3/4' },
+                            ] }
+                            onChange={ ( val ) => setAttributes( { imageRatio: val } ) }
+                        />
                     </PanelBody>
                 </InspectorControls>
 

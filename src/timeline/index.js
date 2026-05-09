@@ -1,6 +1,6 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, RadioControl } from '@wordpress/components';
+import { PanelBody, SelectControl, RadioControl, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import './style.scss';
 import metadata from './block.json';
@@ -65,6 +65,13 @@ registerBlockType( metadata.name, {
                             ] }
                             onChange={ ( val ) => setAttributes( { allowedViews: val } ) }
                         />
+                        { attributes.allowedViews !== 'grid' && (
+                            <ToggleControl
+                                label="Mostra scrubber"
+                                checked={ attributes.showScrubber ?? true }
+                                onChange={ ( val ) => setAttributes( { showScrubber: val } ) }
+                            />
+                        ) }
                     </PanelBody>
                 </InspectorControls>
 

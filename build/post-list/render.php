@@ -3,6 +3,8 @@
 $post_source         = $attributes['postSource']         ?? 'all';
 $selected_categories = array_filter( array_map( 'intval', $attributes['selectedCategories'] ?? [] ) );
 $show_filters        = (bool) ( $attributes['showFilters'] ?? true );
+$image_ratio         = ( ( $attributes['imageRatio'] ?? '4/3' ) === '3/4' ) ? '3/4' : '4/3';
+$img_ratio_class     = $image_ratio === '3/4' ? ' pl-card-img--portrait' : '';
 
 // ── Helper: tronca label dopo il primo " (" ───────────────────────────────────
 $short_label = static function ( string $label ): string {
@@ -14,8 +16,8 @@ $short_label = static function ( string $label ): string {
 $query_args = [
     'post_type'      => 'post',
     'posts_per_page' => -1,
-    'orderby'        => 'date',
-    'order'          => 'DESC',
+    'order_by'  => (int) get_field( 'data_per_la_timeline' ),
+    'order' => 'ASC',
 ];
 
 if ( $post_source === 'current_category' ) {
@@ -233,7 +235,7 @@ $context = [
             data-wp-class--pl-hidden="!state.isVisible"
         >
             <a class="pl-card-link" href="<?php echo esc_url( $post['url'] ); ?>">
-                <div class="pl-card-img<?php echo empty( $post['thumb'] ) ? ' pl-card-img--ph' : ''; ?>">
+                <div class="pl-card-img<?php echo $img_ratio_class; echo empty( $post['thumb'] ) ? ' pl-card-img--ph' : ''; ?>">
                     <?php if ( ! empty( $post['thumb'] ) ) : ?>
                     <img src="<?php echo esc_url( $post['thumb'] ); ?>"
                          alt="<?php echo esc_attr( $post['title'] ); ?>"

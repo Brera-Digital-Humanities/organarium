@@ -46,6 +46,10 @@ store( 'timeline-3d', {
             return store( 'timeline-3d' ).state.visiblePosts.length;
         },
 
+        get showScrubber() {
+            return store( 'timeline-3d' ).state.visiblePosts.length >= 3;
+        },
+
         get counterCurrent() {
             return getContext().activeIndex + 1;
         },
@@ -104,6 +108,31 @@ store( 'timeline-3d', {
         },
 
         get isPillDisabled() {
+            const { state } = store( 'timeline-3d' );
+            // "Disabled" = esiste nel secolo ma escluso dagli altri filtri attivi.
+            // Se non esiste affatto nel secolo va invece in stato "invisible".
+            return ! state.isValueAvailable && ! state.isPillInvisible;
+        },
+
+        // ── Pill invisibile: il valore non compare in alcun post del secolo attivo ─
+        get isPillInvisible() {
+            const ctx = getContext();
+            const { filterGroup, filterVal, posts, activeCenturyMin, activeCenturyMax } = ctx;
+            if ( ! filterGroup ) return false;
+
+            const inCentury = posts.filter( ( post ) => {
+                const sk = post.sort_key ?? 0;
+                return sk >= activeCenturyMin && sk < activeCenturyMax;
+            } );
+
+            if ( filterGroup === 'categoria' ) return ! inCentury.some( ( p ) => p.categoria === filterVal );
+            if ( filterGroup === 'materiali' ) return ! inCentury.some( ( p ) => p.materiale.includes( filterVal ) );
+            if ( filterGroup === 'tecniche' )  return ! inCentury.some( ( p ) => p.tecnica.includes( filterVal ) );
+            return false;
+        },
+
+        // Per il binding HTML `disabled`: bottone non cliccabile in entrambi gli stati
+        get isPillUnavailable() {
             return ! store( 'timeline-3d' ).state.isValueAvailable;
         },
 
@@ -149,6 +178,12 @@ store( 'timeline-3d', {
         get activeTecnicheLabel() {
             const { filters, tecOptions } = getContext();
             return tecOptions?.find( ( o ) => o.value === filters.tecniche )?.label ?? filters.tecniche;
+        },
+
+        get activeCenturyLabel() {
+            const { activeCenturyMin, activeCenturyMax } = getContext();
+            const from = activeCenturyMin < 0 ? `${ -activeCenturyMin } a.C.` : `${ activeCenturyMin }`;
+            return `${ from }–${ activeCenturyMax }`;
         },
 
         // ── Vista ─────────────────────────────────────────────────────────────
@@ -230,18 +265,17 @@ store( 'timeline-3d', {
         },
 
         // ── Scrubber ──────────────────────────────────────────────────────────
-        // Posizione % proporzionale alla data reale (contesto locale: postIndex)
+        // Posizione % proporzionale all'anno all'interno del secolo attivo
         get markerLeft() {
-            const ctx     = getContext();
-            const visible = store( 'timeline-3d' ).state.visiblePosts;
-            if ( visible.length <= 1 ) return '50%';
+            const ctx  = getContext();
             const post = ctx.posts?.[ ctx.postIndex ];
             if ( ! post ) return '0%';
-            const keys = visible.map( ( p ) => p.sort_key ?? 0 );
-            const min  = Math.min( ...keys );
-            const max  = Math.max( ...keys );
-            if ( min === max ) return '50%';
-            return ( ( ( post.sort_key ?? 0 ) - min ) / ( max - min ) * 100 ).toFixed( 2 ) + '%';
+            const min = ctx.activeCenturyMin;
+            const max = ctx.activeCenturyMax;
+            if ( max === min ) return '50%';
+            const sk  = post.sort_key ?? 0;
+            const pct = ( ( sk - min ) / ( max - min ) ) * 100;
+            return Math.max( 0, Math.min( 100, pct ) ).toFixed( 2 ) + '%';
         },
 
         // Etichetta sopra il marker — solo la data (contesto locale: postIndex)
@@ -255,14 +289,15 @@ store( 'timeline-3d', {
         get scrubberThumbLeft() {
             const ctx     = getContext();
             const visible = store( 'timeline-3d' ).state.visiblePosts;
-            if ( visible.length <= 1 ) return '50%';
+            if ( ! visible.length ) return '0%';
             const active = visible[ ctx.activeIndex ];
             if ( ! active ) return '0%';
-            const keys = visible.map( ( p ) => p.sort_key ?? 0 );
-            const min  = Math.min( ...keys );
-            const max  = Math.max( ...keys );
-            if ( min === max ) return '50%';
-            return ( ( ( active.sort_key ?? 0 ) - min ) / ( max - min ) * 100 ).toFixed( 2 ) + '%';
+            const min = ctx.activeCenturyMin;
+            const max = ctx.activeCenturyMax;
+            if ( max === min ) return '50%';
+            const sk  = active.sort_key ?? 0;
+            const pct = ( ( sk - min ) / ( max - min ) ) * 100;
+            return Math.max( 0, Math.min( 100, pct ) ).toFixed( 2 ) + '%';
         },
     },
 
@@ -408,14 +443,76 @@ store( 'timeline-3d', {
             const ctx = getContext();
             if ( ctx.activeIndex > 0 ) ctx.activeIndex--;
         },
+
     },
 
     callbacks: {
         init() {
+            const ctx = getContext();
+
+            // Replica della logica di state.visiblePosts senza chiamare getContext():
+            // accedere ai computed dello store da listener DOM plain rivaluta il getter
+            // e fallisce perché lo stack del contesto Interactivity è vuoto.
+            const visiblePosts = () => {
+                if ( ! ctx.posts ) return [];
+                return ctx.posts
+                    .filter( ( p ) => {
+                        const sk = p.sort_key ?? 0;
+                        if ( sk < ctx.activeCenturyMin || sk >= ctx.activeCenturyMax ) return false;
+                        if ( ctx.filters.categoria !== 'all' && p.categoria !== ctx.filters.categoria ) return false;
+                        if ( ctx.filters.materiali !== '' && ! p.materiale.includes( ctx.filters.materiali ) ) return false;
+                        if ( ctx.filters.tecniche !== '' && ! p.tecnica.includes( ctx.filters.tecniche ) ) return false;
+                        return true;
+                    } )
+                    .sort( ( a, b ) => ctx.sortAsc
+                        ? ( a.sort_key ?? 0 ) - ( b.sort_key ?? 0 )
+                        : ( b.sort_key ?? 0 ) - ( a.sort_key ?? 0 )
+                    );
+            };
+
+            const goNext = () => {
+                const vp = visiblePosts();
+                if ( ctx.activeIndex < vp.length - 1 ) ctx.activeIndex++;
+            };
+            const goPrev = () => {
+                if ( ctx.activeIndex > 0 ) ctx.activeIndex--;
+            };
+
+            // Tastiera
             document.addEventListener( 'keydown', ( e ) => {
-                const { actions } = store( 'timeline-3d' );
-                if ( e.key === 'ArrowRight' ) actions.next();
-                if ( e.key === 'ArrowLeft' )  actions.prev();
+                if ( e.key === 'ArrowRight' ) goNext();
+                if ( e.key === 'ArrowLeft' )  goPrev();
+            } );
+
+            // Rotella del mouse → next / prev
+            document.querySelector( '.timeline-view' )?.addEventListener( 'wheel', ( e ) => {
+                e.preventDefault();
+                if ( e.deltaY > 0 ) goNext();
+                else goPrev();
+            }, { passive: false } );
+
+            // Click su card non-attiva → portarla in primo piano.
+            // Il click bolla fino a .cards-container (le card non lo catturano per via del
+            // contesto 3D), quindi trovo la card sotto il punto via bounding rect.
+            document.querySelector( '.timeline-viewport' )?.addEventListener( 'click', ( e ) => {
+                let card = e.target.closest( '.timeline-card' );
+                if ( ! card ) {
+                    const hits = Array.from( document.querySelectorAll( '.timeline-card:not(.is-hidden)' ) )
+                        .filter( ( c ) => ! c.classList.contains( 'is-active' ) )
+                        .filter( ( c ) => {
+                            const r = c.getBoundingClientRect();
+                            return e.clientX >= r.left && e.clientX <= r.right
+                                && e.clientY >= r.top  && e.clientY <= r.bottom;
+                        } )
+                        .sort( ( a, b ) => parseInt( b.style.zIndex || '0', 10 ) - parseInt( a.style.zIndex || '0', 10 ) );
+                    card = hits[ 0 ];
+                }
+                if ( ! card || card.classList.contains( 'is-active' ) ) return;
+                e.preventDefault();
+                const postId = parseInt( card.dataset.postId, 10 );
+                if ( ! postId ) return;
+                const idx = visiblePosts().findIndex( ( p ) => p.id === postId );
+                if ( idx !== -1 ) ctx.activeIndex = idx;
             } );
         },
 

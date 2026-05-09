@@ -90,7 +90,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 *Century Bar*
 - Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti** di larghezza uguale (1/17 del container ciascuno)
-- Ogni segmento corrisponde a un secolo; il primo è accorpato e copre 200 a.C. – 100 d.C. con etichetta `200 a.C.`
+- Ogni segmento corrisponde a un secolo; il primo copre 200 a.C. – 0 con etichetta `200 a.C.`, il secondo copre 0 – 100 d.C. con etichetta `0`, gli altri seguono fino al segmento 1500 – 1600
 - Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px) posizionati proporzionalmente al `sort_key` del post all'interno del range; dot sovrapposti vengono impilati verticalmente
 - Il segmento attivo è colorato con `accent-4`; il dot del post in evidenza nel carousel diventa `contrast` (nero)
 - Cliccando un segmento: carica i post del quel secolo, azzera tutti i filtri e chiude il pannello filtri
@@ -98,8 +98,9 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 *Vista Timeline*
 - Carousel 3D con prospettiva CSS (`perspective: 500vw`) e fino a 5 card visibili simultaneamente (attiva, prev/next, prev2/next2)
-- Navigazione con pulsanti freccia e tastiera (←/→)
-- Scrubber timeline trascinabile (desktop) con marker per ogni post e label con l'anno
+- Navigazione con pulsanti freccia, tastiera (←/→) e **rotella del mouse** sulla viewport o sullo scrubber
+- **Click su una card non-attiva**: la porta in primo piano (hit-test via `getBoundingClientRect` sulle card non-attive, perché il contesto 3D `preserve-3d` non delega in modo affidabile i pointer event ai figli)
+- Scrubber timeline trascinabile (desktop) con marker per ogni post e label con l'anno; può essere nascosto dal Site Editor e si auto-nasconde quando i post visibili (dopo i filtri) sono meno di 3
 
 *Vista Griglia*
 - CSS Grid responsive (`auto-fill`, colonne da 360 px min)
@@ -111,6 +112,10 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
   - **Materiale** (campo ACF `materiale`)
   - **Tecnica** (campo ACF `tecnica`)
 - I filtri agiscono sui post del **secolo selezionato** nella century bar
+- Le pill hanno tre stati:
+  - **attiva** — selezionata
+  - **disabled** (opacity 0.35) — il valore esiste in almeno un post del secolo attivo ma è escluso dalla combinazione corrente degli altri filtri
+  - **invisible** (`display: none`) — il valore non compare in alcun post del secolo attivo; ricompare automaticamente cambiando secolo
 - Badge filtri attivi con rimozione singola o globale
 - Indicatore contatore post visibili
 
@@ -128,6 +133,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 |---|---|---|
 | `postSource` | `all` / `current_category` | Sorgente post da mostrare |
 | `allowedViews` | `both` / `timeline` / `grid` | Viste disponibili per l'utente |
+| `showScrubber` | `true` / `false` | Mostra o nasconde lo scrubber timeline (visibile solo se `allowedViews ≠ grid`) |
 
 **Interactivity API — store `timeline-3d`:**
 
@@ -140,6 +146,11 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 | state `isDotActive` | Dot attivo — post corrisponde alla card in evidenza (ctx locale: `postIndex`) |
 | state `cardOffset/isActive/isPrev/isNext...` | Posizione card nel carousel |
 | state `markerLeft/scrubberThumbLeft` | Posizionamento scrubber |
+| state `showScrubber` | Scrubber visibile solo se i post filtrati sono ≥ 3 |
+| state `isPillActive` | Pill selezionata (ctx locale: `filterGroup`, `filterVal`) |
+| state `isPillDisabled` | Pill grigia: il valore esiste nel secolo ma è escluso dagli altri filtri |
+| state `isPillInvisible` | Pill nascosta: il valore non compare in alcun post del secolo attivo |
+| state `isPillUnavailable` | Unione di disabled + invisible — usata per il binding HTML `disabled` del bottone |
 | action `setCentury` | Cambia secolo attivo, azzera filtri e chiude il pannello |
 | action `toggleFilters/clearFilters/togglePill` | Gestione filtri |
 | action `setViewTimeline/setViewGrid` | Cambio vista |
@@ -147,7 +158,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 | action `next/prev` | Navigazione carousel |
 | action `scrubberPointerDown/Move` | Drag scrubber |
 | action `goToMarker` | Navigazione diretta da marker |
-| callback `init` | Setup navigazione da tastiera |
+| callback `init` | Setup listener DOM plain (tastiera, rotella, click su card non-attiva); replica inline di `visiblePosts` usando il `ctx` catturato per evitare di rivalutare i computed dello store da fuori dal contesto reattivo della Interactivity API |
 | callback `savePrefs` | Scrittura cookie di sessione (reattivo via `data-wp-watch`) |
 
 ---
@@ -214,6 +225,7 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 - Il CSS di Leaflet è incluso in `style-index.css` via `@import url()` (CDN jsDelivr)
 - Il blocco usa `viewScriptModule` (non `viewScript`) in `block.json`: necessario per il caricamento come ES module e per la risoluzione dell'import map `@wordpress/interactivity`
 - `initMap` imposta `ctx.mapInstance` in un `setTimeout` dopo `invalidateSize()`: questo aggiornamento reattivo del contesto riattiva automaticamente `updateMarkers` via `data-wp-watch`, senza chiamate esplicite
+- I riferimenti che cambiano per effetto di interazioni cosmetiche (marker selezionato, pannello laterale, icona di default) sono tenuti **fuori** da `ctx` in una `WeakMap` keyed by `ctx`: scriverli su `ctx` farebbe scattare il `data-wp-watch` di `updateMarkers` e quindi un `fitBounds`/`setView` indesiderato (zoom-out al click su un pin singolo dopo aver aperto un cluster)
 - Il campo `posizione_per_mappa` è letto con `get_post_meta()` (non `get_field()`) perché ACF Extended con `return_format: leaflet` restituisce HTML anziché i dati grezzi delle coordinate
 
 ---
@@ -239,6 +251,7 @@ Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sin
 | `postSource` | `all` / `current_category` / `fixed_categories` | Sorgente post da mostrare |
 | `selectedCategories` | Array di ID categoria | Categorie fisse (se `fixed_categories`) — selezione multipla tramite checkbox |
 | `showFilters` | `true` / `false` | Mostra o nasconde l'intera interfaccia filtri nel frontend |
+| `imageRatio` | `4/3` / `3/4` | Proporzioni della thumbnail nelle card (orizzontale o verticale) |
 
 **Campi ACF utilizzati:**
 

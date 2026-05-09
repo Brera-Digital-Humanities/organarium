@@ -5,6 +5,11 @@
  Version:      1.0.0
 */
 
+body{
+  font-size: 20px!important;
+}
+
+
 a:focus{
     outline: none;
 }
@@ -25,4 +30,8 @@ a:focus{
 
 .btn-mappa a:hover, .btn-timeline a:hover, .btn-ricerca a:hover {
   background: var(--wp--preset--color--accent-1) !important;
+}
+
+.wp-block-navigation .wp-block-navigation-item .wp-block-navigation-item__content:hover{
+  color: var(--wp--preset--color--accent-3) !important;
 }

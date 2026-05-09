@@ -534,6 +534,47 @@ function _scrubberJump(event, ctx, visiblePosts) {
         passive: false
       });
 
+      // Swipe touch sulla viewport (mobile) → next / prev.
+      // Il CSS imposta touch-action: pan-y sulla viewport, così lo scroll
+      // verticale della pagina resta nativo e l'asse orizzontale è nostro.
+      // Soglia 50px e direzione prevalentemente orizzontale per non
+      // interpretare come swipe i tap o i piccoli movimenti.
+      const viewport = document.querySelector('.timeline-viewport');
+      if (viewport) {
+        let startX = 0,
+          startY = 0,
+          swiped = false;
+        viewport.addEventListener('touchstart', e => {
+          if (e.touches.length !== 1) return;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          swiped = false;
+        }, {
+          passive: true
+        });
+        viewport.addEventListener('touchmove', e => {
+          if (swiped || e.touches.length !== 1) return;
+          const dx = e.touches[0].clientX - startX;
+          const dy = e.touches[0].clientY - startY;
+          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            swiped = true;
+            if (dx < 0) goNext();else goPrev();
+          }
+        }, {
+          passive: true
+        });
+        // Sopprimi il click sintetico generato dal touchend dopo uno swipe,
+        // altrimenti il listener click sopra riporterebbe in primo piano la
+        // card sotto il dito.
+        viewport.addEventListener('click', e => {
+          if (swiped) {
+            e.stopPropagation();
+            e.preventDefault();
+            swiped = false;
+          }
+        }, true);
+      }
+
       // Click su card non-attiva → portarla in primo piano.
       // Il click bolla fino a .cards-container (le card non lo catturano per via del
       // contesto 3D), quindi trovo la card sotto il punto via bounding rect.

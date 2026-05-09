@@ -144,7 +144,7 @@
     &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
 
     @media (min-width: 767px) {
-        max-width: 33%;
+        max-width: 31%;
     }
 
     .filter-label {
@@ -302,6 +302,10 @@
     perspective-origin: 50% 38%;
     position: relative;
     overflow: hidden;
+
+    /* Mobile: lascia al browser solo lo scroll verticale (pan-y),
+       lo swipe orizzontale è gestito da JS per navigare il carousel. */
+    touch-action: pan-y;
 }
 
 .cards-container {
@@ -470,7 +474,9 @@
 
     &:hover:not(:disabled) {
         background: var(--wp--preset--color--contrast, #111);
-        color: var(--wp--preset--color--accent-5, #f2f2e5);
+        svg path {
+            stroke: #fff;
+        }
         border-color: var(--wp--preset--color--contrast, #111);
     }
 
@@ -575,10 +581,10 @@
 
     &.show {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
         gap: 30px;
     }
-    margin-top: 5rem;
+    margin-top: 3rem;
 }
 
 .grid-card {
@@ -586,10 +592,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.15s;
-    max-width: 100%;
-     @media (min-width: 768px) {
-        max-width: unset;
-    }
+
     &:hover {
         border-color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 35%, transparent);
     }
@@ -626,8 +629,6 @@
 }
 
 .gc-body {
-    padding: 0.65rem 0.75rem;
-}
 
 .gc-year {
      display: block;
@@ -653,6 +654,8 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+}
+
 
 .gc-tags {
      display: inline-block;

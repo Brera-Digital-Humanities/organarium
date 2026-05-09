@@ -1,0 +1,24 @@
+@use 'variables' as *;
+
+.btn-mappa,
+.btn-timeline {
+  position: relative;
+}
+
+.btn-mappa,
+.btn-timeline,
+.btn-ricerca {
+  a {
+    transition: .3s linear;
+
+    &:hover {
+      background: $color-accent-1 !important;
+    }
+  }
+}
+
+.wp-block-navigation {
+  .wp-block-navigation-item .wp-block-navigation-item__content:hover {
+    color: $color-accent-3 !important;
+  }
+}

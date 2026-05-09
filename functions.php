@@ -9,10 +9,22 @@
 add_action( 'wp_enqueue_scripts', 'jerus_enqueue_styles' );
 
 function jerus_enqueue_styles() {
-	wp_enqueue_style( 
-		'grand-sunrise-style', 
+	// Header del child theme (richiesto da WordPress)
+	wp_enqueue_style(
+		'jerus-header',
 		get_stylesheet_uri()
 	);
+
+	// Stile globale compilato da SCSS, dipende dal parent theme
+	$global_css = get_stylesheet_directory() . '/build/style/style-style.css';
+	if ( file_exists( $global_css ) ) {
+		wp_enqueue_style(
+			'jerus-global',
+			get_stylesheet_directory_uri() . '/build/style/style-style.css',
+			array( 'twentytwentyfive-style' ),
+			filemtime( $global_css )
+		);
+	}
 }
 
 /**

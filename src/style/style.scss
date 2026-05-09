@@ -1,0 +1,8 @@
+// Entry point dello stile globale del child theme.
+// Compilato da wp-scripts in build/style/style.css ed enqueued in functions.php.
+
+@use 'variables' as *;
+@use 'typography';
+@use 'layout';
+@use 'blocks';
+@use 'main-navbar';

@@ -3,6 +3,7 @@
 $post_source        = $attributes['postSource']        ?? 'all';
 $allowed_views      = $attributes['allowedViews']      ?? 'both';
 $selected_category  = (int) ( $attributes['selectedCategory'] ?? 0 );
+$show_scrubber      = (bool) ( $attributes['showScrubber']    ?? true );
 
 // ── Helper: etichetta breve (tronca tutto ciò che segue il primo "(" per le label lunghe) ──
 $short_label = static function ( string $label ): string {
@@ -113,14 +114,16 @@ $all_tec = array_map(
 );
 
 // ── Century segments ──────────────────────────────────────────────────────────
-// Primo segmento accorpato: 200 a.C. → 100 d.C. (3 century-unit di larghezza).
-// Segmenti successivi: 100 → 1600, 1 century-unit ciascuno. Totale: 18 unit.
+// Primo segmento: 200 a.C. → 0. Segmento 0 → 100 d.C. Segmenti 100 → 1500.
+// Tutti larghezza uguale (1/17 ciascuno). Totale: 17 segmenti.
 $_build_seg = static function ( int $seg_min, int $seg_max, string $label, int $units ) use ( $posts_data ): array {
-    $dots_by_x = [];
+    $dots_by_x   = [];
+    $bucket_size = 10;
     foreach ( $posts_data as $pi => $post ) {
         $sk = (int) $post['sort_key'];
         if ( $sk >= $seg_min && $sk < $seg_max ) {
-            $x = (int) round( ( $sk - $seg_min ) / ( $seg_max - $seg_min ) * 100 );
+            $bucket_start = $seg_min + intdiv( $sk - $seg_min, $bucket_size ) * $bucket_size;
+            $x = (int) round( ( $bucket_start - $seg_min ) / ( $seg_max - $seg_min ) * 100 );
             $x = max( 0, min( 95, $x ) );
             $dots_by_x[ $x ][] = $pi;
         }
@@ -130,8 +133,9 @@ $_build_seg = static function ( int $seg_min, int $seg_max, string $label, int $
 };
 
 $century_segments   = [];
-$century_segments[] = $_build_seg( -200, 100, '200 a.C.', 1 );
-for ( $s = 100; $s <= 1600; $s += 100 ) {
+$century_segments[] = $_build_seg( -200, 0, '200 a.C.', 1 );
+$century_segments[] = $_build_seg( 0, 100, '0', 1 );
+for ( $s = 100; $s <= 1500; $s += 100 ) {
     $century_segments[] = $_build_seg( $s, $s + 100, (string) $s, 1 );
 }
 // Totale segmenti = 17 (tutti larghezza uguale)
@@ -144,7 +148,7 @@ if ( ! empty( $_COOKIE['tl_prefs'] ) ) {
 }
 
 $_pref_century_min  = isset( $_tl_prefs['centuryMin'] )  ? (int)  $_tl_prefs['centuryMin']  : -200;
-$_pref_century_max  = isset( $_tl_prefs['centuryMax'] )  ? (int)  $_tl_prefs['centuryMax']  : 100;
+$_pref_century_max  = isset( $_tl_prefs['centuryMax'] )  ? (int)  $_tl_prefs['centuryMax']  : 0;
 $_pref_sort_asc     = isset( $_tl_prefs['sortAsc'] )     ? (bool) $_tl_prefs['sortAsc']     : true;
 $_pref_active_index = isset( $_tl_prefs['activeIndex'] ) ? (int)  $_tl_prefs['activeIndex'] : 0;
 $_pref_categoria   = sanitize_text_field( $_tl_prefs['categoria'] ?? 'all' );
@@ -248,7 +252,8 @@ $context = [
                             data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ); ?>'
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
-                            data-wp-bind--disabled="state.isPillDisabled"
+                            data-wp-class--invisible="state.isPillInvisible"
+                            data-wp-bind--disabled="state.isPillUnavailable"
                             data-wp-on--click="actions.togglePill"><?php echo esc_html( $opt['label'] ); ?></button>
                     <?php endforeach; ?>
                 </div>
@@ -264,7 +269,8 @@ $context = [
                             data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ); ?>'
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
-                            data-wp-bind--disabled="state.isPillDisabled"
+                            data-wp-class--invisible="state.isPillInvisible"
+                            data-wp-bind--disabled="state.isPillUnavailable"
                             data-wp-on--click="actions.togglePill"><?php echo esc_html( $opt['label'] ); ?></button>
                     <?php endforeach; ?>
                 </div>
@@ -280,7 +286,8 @@ $context = [
                             data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ); ?>'
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
-                            data-wp-bind--disabled="state.isPillDisabled"
+                            data-wp-class--invisible="state.isPillInvisible"
+                            data-wp-bind--disabled="state.isPillUnavailable"
                             data-wp-on--click="actions.togglePill"><?php echo esc_html( $opt['label'] ); ?></button>
                     <?php endforeach; ?>
                 </div>
@@ -293,8 +300,13 @@ $context = [
     <div class="tl-divider"></div>
 
     <!-- ═══ FILTRI ATTIVI ═══ -->
-    <div class="tl-active-filters" data-wp-class--tl-hidden="!state.hasActiveFilters">
+    <div class="tl-active-filters">
+    <p class="tl-counter">
+            <span data-wp-text="state.counterCurrent">1</span>&thinsp;/&thinsp;<span data-wp-text="state.visibleCount"><?php echo count( $posts_data ); ?></span>
+        </p>
+        <span class="tl-current-century">Anni: <span data-wp-text="state.activeCenturyLabel"></span></span>
         <button class="tl-btn tl-btn--link"
+                data-wp-class--tl-hidden="!state.hasActiveFilters"
                 data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
         <button class="active-filter-tag filter-col--accent-4"
                 data-wp-class--tl-hidden="!state.hasCategoriaFilter"
@@ -343,9 +355,7 @@ $context = [
     <!-- ═══ VISTA TIMELINE (carousel 3D, 5 card) ═══ -->
     <div class="timeline-view" data-wp-class--show="state.isViewTimeline">
 
-        <p class="tl-counter">
-            <span data-wp-text="state.counterCurrent">1</span>&thinsp;/&thinsp;<span data-wp-text="state.visibleCount"><?php echo count( $posts_data ); ?></span>
-        </p>
+        
 
         <div class="timeline-viewport">
             <div class="cards-container">
@@ -353,6 +363,7 @@ $context = [
                 <?php foreach ( $posts_data as $index => $post ) : ?>
                 <article
                     class="timeline-card"
+                    data-post-id="<?php echo (int) $post['id']; ?>"
                     data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $index ] ); ?>'
                     data-wp-class--is-hidden="!state.isVisible"
                     data-wp-class--is-active="state.isActive"
@@ -371,7 +382,7 @@ $context = [
                         </div>
                         <?php endif; ?>
                         <?php if ( ! empty( $post['data'] ) ) : ?>
-                        <time class="card-date"><?php echo esc_html( $post['data'] ); ?></time>
+                        <time class="card-date">DATA: <?php echo esc_html( $post['data'] ); ?></time>
                         <?php endif; ?>
                         <h3 class="card-title"><?php echo esc_html( $post['title'] ); ?></h3>
                         </a>
@@ -404,7 +415,9 @@ $context = [
         </nav>
 
         <!-- ═══ SCRUBBER ═══ -->
+        <?php if ( $show_scrubber ) : ?>
         <div class="tl-scrubber"
+             data-wp-class--tl-hidden="!state.showScrubber"
              data-wp-on--pointerdown="actions.scrubberPointerDown"
              data-wp-on--pointermove="actions.scrubberPointerMove">
             <div class="scrubber-track">
@@ -426,6 +439,7 @@ $context = [
 
             </div><!-- .scrubber-track -->
         </div><!-- .tl-scrubber -->
+        <?php endif; ?>
 
     </div><!-- .timeline-view -->
     <?php endif; ?>
@@ -449,7 +463,7 @@ $context = [
             </div>
             <div class="gc-body">
                 <?php if ( ! empty( $post['data'] ) ) : ?>
-                <div class="gc-year"><?php echo esc_html( $post['data'] ); ?></div>
+                <div class="gc-year">DATA: <?php echo esc_html( $post['data'] ); ?></div>
                 <?php endif; ?>
                 <div class="gc-title"><?php echo esc_html( $post['title'] ); ?></div>
                 <?php if ( ! empty( $post['excerpt'] ) ) : ?>

@@ -23,7 +23,7 @@
    WRAPPER
 ══════════════════════════════ */
 .tl-wrap {
-    padding: 2rem 0;
+    padding: 20px 0;
     width: 100%;
     font-family: inherit;
 }
@@ -142,7 +142,10 @@
     &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
     &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b); }
     &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
-    max-width: 600px;
+
+    @media (min-width: 767px) {
+        max-width: 33%;
+    }
 
     .filter-label {
         font-size: var(--wp--preset--font-size--small);
@@ -173,6 +176,20 @@
     white-space: nowrap;
     transition: background 0.15s;
 
+    /* === ANIMAZIONE COLLASSO PILL DISABILITATE (da valutare) ===
+    max-width: 20rem;
+    overflow: hidden;
+    transform-origin: center;
+    transition:
+        background 0.15s,
+        opacity 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+        max-width 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+        padding 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+        margin 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+        border-width 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+        transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    === */
+
     &:hover,
     &.active {
         background: var(--_pill-bg);
@@ -187,6 +204,22 @@
         opacity: 0.35;
         cursor: not-allowed;
         pointer-events: none;
+
+        /* === ANIMAZIONE COLLASSO (da valutare) ===
+        opacity: 0;
+        max-width: 0;
+        padding-left: 0;
+        padding-right: 0;
+        margin: 0 -3px;
+        border-width: 0;
+        transform: scale(0.85);
+        === */
+    }
+
+    /* Pill nascosta: il valore non esiste in nessun post del secolo selezionato.
+       Torna visibile cliccando un secolo che lo contiene. */
+    &.invisible {
+        display: none;
     }
 }
 
@@ -206,8 +239,20 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.5rem;
+    @media (min-width: 768px) {
+        gap: 1rem;
+    }
     margin-bottom: 1.25rem;
+}
+
+.tl-current-century {
+    color: var(--wp--preset--color--contrast);
+    font-size: var(--wp--preset--font-size--small);
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    line-height: 1.6rem;
 }
 
 .active-filter-tag {
@@ -250,8 +295,8 @@
     margin-left: calc(-50vw + 50%);
 
     /* Altezza full viewport */
-    height: 70vh;
-    height: 70svh; /* browser moderni: esclude la chrome bar del mobile */
+    height: 75vh;
+    height: 75svh; /* browser moderni: esclude la chrome bar del mobile */
 
     perspective: 500vw;
     perspective-origin: 50% 38%;
@@ -315,13 +360,15 @@
         &.is-prev2 {
             transform: translate(calc(-50% - 40vw), -50%) translateZ(-160px) rotateY(11deg) scale(0.65);
             opacity: 0.3;
-            pointer-events: none;
+            pointer-events: auto;
+            cursor: pointer;
         }
 
         &.is-next2 {
             transform: translate(calc(-50% + 40vw), -50%) translateZ(-160px) rotateY(-11deg) scale(0.65);
             opacity: 0.3;
-            pointer-events: none;
+            pointer-events: auto;
+            cursor: pointer;
         }
     }
 }
@@ -438,7 +485,7 @@
 ══════════════════════════════ */
 .tl-scrubber {
     display: none;
-    padding: 3rem 4rem 1.5rem;
+    padding: 3rem 7rem 1.5rem;
     overflow: hidden;
     cursor: pointer;
     user-select: none;
@@ -539,7 +586,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.15s;
-    max-width: 315px;
+    max-width: 100%;
      @media (min-width: 768px) {
         max-width: unset;
     }
@@ -624,8 +671,9 @@
 .tl-century-bar {
     display: flex;
     width: 100%;
-    margin: 1.5rem 0;
+    margin: 1.5rem 0 0;
     position: relative;
+    overflow: hidden;
 
     @media (max-width: 767px) {
         flex-wrap: wrap;
@@ -641,11 +689,11 @@
     cursor: pointer;
     padding: 0.4rem 0 0;
     text-align: left;
-    color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 55%, transparent);
+    color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 35%, transparent);
     transition: color 0.2s;
 
     @media (max-width: 767px) {
-        flex: 0 0 calc(100% / 9) !important;
+        flex: 0 0 calc(100% / 6) !important;
     }
 
     &.is-active {
@@ -679,6 +727,9 @@
 .century-seg__label {
     display: block;
     font-size: var(--wp--preset--font-size--small);
+    @media (max-width: 767px) {
+        font-size: 0.8rem;
+    }
     letter-spacing: 0.04em;
     white-space: nowrap;
     overflow: hidden;

@@ -33,6 +33,6 @@ if ($img_src): ?>
     </div>
     
     <?php if ($dida): ?>
-        <div class="has-medium-font-size"><?php echo esc_html($dida); ?></div>
+        <div class="has-medium-font-size"><?php echo  wp_kses_post($dida); ?></div>
     <?php endif; ?>
 <?php endif; ?>

@@ -15,7 +15,7 @@
    WRAPPER
 ══════════════════════════════ */
 .pl-wrap {
-  padding: 2rem 0;
+  padding: 1.4rem 0;
   width: 100%;
   font-family: inherit;
 }
@@ -92,8 +92,10 @@
 .pl-filter-col--accent-2 {
   --_pill-bg: var(--wp--preset--color--accent-2, #b85f29);
 }
-.pl-filter-col {
-  max-width: 600px;
+@media (min-width: 767px) {
+  .pl-filter-col {
+    max-width: 33%;
+  }
 }
 .pl-filter-label {
   font-size: var(--wp--preset--font-size--small);
@@ -118,7 +120,20 @@
   background: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: all 0.3s;
+  /* === ANIMAZIONE COLLASSO PILL DISABILITATE (da valutare) ===
+  max-width: 20rem;
+  overflow: hidden;
+  transform-origin: center;
+  transition:
+      background 0.15s,
+      opacity 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+      max-width 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+      padding 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+      margin 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+      border-width 0.35s cubic-bezier(0.23, 1, 0.32, 1),
+      transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  === */
 }
 .pl-pill:hover, .pl-pill.active {
   background: var(--_pill-bg);
@@ -132,6 +147,15 @@
   opacity: 0.35;
   cursor: not-allowed;
   pointer-events: none;
+  /* === ANIMAZIONE COLLASSO (da valutare) ===
+  opacity: 0;
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0 -3px;
+  border-width: 0;
+  transform: scale(0.85);
+  === */
 }
 /* ══════════════════════════════
    DIVISORE
@@ -181,15 +205,18 @@
 }
 .pl-card-link {
   display: flex;
-  gap: 1.25rem;
+  flex-direction: column;
+  gap: 1rem;
   padding: 2rem 0;
   text-decoration: none;
   color: inherit;
-  align-items: flex-start;
+  align-items: stretch;
   transition: opacity 0.15s;
 }
 @media (min-width: 768px) {
   .pl-card-link {
+    flex-direction: row;
+    align-items: flex-start;
     gap: 2rem;
   }
 }
@@ -198,10 +225,18 @@
 }
 .pl-card-img {
   flex-shrink: 0;
-  width: 33%;
+  width: 100%;
   aspect-ratio: 4/3;
   background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
   overflow: hidden;
+}
+@media (min-width: 768px) {
+  .pl-card-img {
+    width: 33%;
+  }
+}
+.pl-card-img--portrait {
+  aspect-ratio: 3/4;
 }
 .pl-card-img--ph {
   display: flex;
@@ -229,22 +264,18 @@
   padding: 0.1rem 0;
 }
 .pl-card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2em;
   font-size: 0.75em;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 75%, transparent);
 }
 .pl-card-meta__row {
-  display: flex;
-  gap: 0.5em;
   align-items: baseline;
 }
 .pl-card-meta__label {
   font-weight: 700;
   flex-shrink: 0;
+  padding-right: 5px;
 }
 .pl-card-date {
   font-size: 0.65em;
@@ -260,16 +291,7 @@
 .pl-card-excerpt {
   margin: 0;
   line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 70%, transparent);
-}
-@media (max-width: 480px) {
-  .pl-card-excerpt {
-    -webkit-line-clamp: 2;
-  }
 }
 .pl-card-tag {
   display: inline-block;

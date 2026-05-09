@@ -23,6 +23,10 @@
         "showFilters": {
             "type": "boolean",
             "default": true
+        },
+        "imageRatio": {
+            "type": "string",
+            "default": "4/3"
         }
     },
     "textdomain": "post-list",

@@ -1,6 +1,6 @@
 # Repertorio dell'Organo antico
 
-Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra tre blocchi Gutenberg custom: i primi due utilizzano la **WordPress Interactivity API**, il terzo integra **Leaflet.js** per la visualizzazione cartografica interattiva.
+Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra quattro blocchi Gutenberg custom: i primi tre utilizzano la **WordPress Interactivity API**, il quarto integra **Leaflet.js** per la visualizzazione cartografica interattiva.
 
 ---
 
@@ -21,10 +21,12 @@ jerus-organo/
 │   ├── featured-zoom/        # Blocco zoom immagine in evidenza
 │   ├── timeline/             # Blocco timeline/griglia post
 │   ├── mappa-interattiva/    # Blocco mappa Leaflet con pin geolocalizzati
-│   └── post-list/            # Blocco lista post con infinite scroll e filtri ACF
+│   ├── post-list/            # Blocco lista post con infinite scroll e filtri ACF
+│   └── style/                # Stile globale del child theme (SCSS)
 ├── build/                    # File compilati (generati da wp-scripts)
-├── functions.php             # Registrazione blocchi e shortcode ACF
-├── style.css                 # Header child theme
+├── functions.php             # Registrazione blocchi, shortcode ACF, enqueue stili
+├── style.css                 # Header child theme (regole in src/style/)
+├── webpack.config.js         # Estende wp-scripts per aggiungere l'entry SCSS globale
 └── package.json
 ```
 
@@ -48,7 +50,44 @@ npm run start      # watch mode per lo sviluppo
 
 Il flag `--experimental-modules` abilita i moduli ES6; `--blocks-manifest` genera automaticamente `build/blocks-manifest.php`.
 
+Il file `webpack.config.js` estende la configurazione di default di `@wordpress/scripts` per aggiungere un'entry dedicata allo stile globale (`src/style/style.scss` → `build/style/style-style.css`) accanto a quelle dei blocchi. Con `--experimental-modules` la config di default è un array (scripts + modules): l'entry globale viene aggiunta alla config "scripts".
+
 > I file nella cartella `build/` sono il risultato della compilazione e non vanno modificati a mano: le sorgenti si trovano in `src/`.
+
+---
+
+## Stile globale
+
+Lo stile generale del child theme è scritto in **SCSS** e compilato da `wp-scripts` insieme ai blocchi.
+
+**Struttura:**
+
+```
+src/style/
+├── style.scss          # Entry point (importa i parziali con @use)
+├── _variables.scss     # Alias delle CSS custom properties di TT5
+├── _typography.scss
+├── _layout.scss
+└── _blocks.scss        # Override blocchi core e selettori globali
+```
+
+- L'entry `src/style/style.scss` viene compilato in `build/style/style-style.css` (la convenzione di `mini-css-extract-plugin` usata da wp-scripts produce `<entry>-style.css`).
+- Il file alla radice `style.css` resta **solo** come header del child theme (richiesto da WordPress per riconoscere il tema). Tutte le regole sono migrate nei parziali SCSS.
+- `functions.php` enqueua il foglio compilato come dipendente di `twentytwentyfive-style`, così le regole del child cascano dopo quelle del parent senza bisogno di `!important` superflui. La versione è derivata da `filemtime()` per cache busting automatico.
+
+**Compatibilità con Twenty Twenty-Five:**
+
+TT5 è un block theme: la fonte di verità del design system è `theme.json`, che espone i preset come CSS custom properties (`--wp--preset--color--*`, `--wp--preset--font-family--*`, `--wp--preset--spacing--*`). Per restare compatibile, `_variables.scss` **non ridefinisce** i valori ma li aliasa:
+
+```scss
+$color-accent-1: var(--wp--preset--color--accent-1);
+$color-contrast: var(--wp--preset--color--contrast);
+$font-baloo:     var(--wp--preset--font-family--baloo-2);
+```
+
+Così cambi alla palette o alla tipografia in `theme.json` (o nel Site Editor) si propagano automaticamente all'SCSS senza dover ricompilare. Stili specifici di blocchi core andrebbero preferibilmente messi in `theme.json` → `styles.blocks.*`; l'SCSS è riservato a selettori complessi, hover/transizioni e regole che il Site Editor non copre.
+
+> Gli stili dei blocchi custom (`src/<block>/style.scss`) restano separati: wp-scripts li compila tramite il loro `block.json`.
 
 ---
 
@@ -91,14 +130,14 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 *Century Bar*
 - Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti** di larghezza uguale (1/17 del container ciascuno)
 - Ogni segmento corrisponde a un secolo; il primo copre 200 a.C. – 0 con etichetta `200 a.C.`, il secondo copre 0 – 100 d.C. con etichetta `0`, gli altri seguono fino al segmento 1500 – 1600
-- Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px) posizionati proporzionalmente al `sort_key` del post all'interno del range; dot sovrapposti vengono impilati verticalmente
+- Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px) posizionati proporzionalmente al `sort_key` del post all'interno del range; i dot vengono impilati verticalmente in base alle decine degli anni es. 0-9, 10-19
 - Il segmento attivo è colorato con `accent-4`; il dot del post in evidenza nel carousel diventa `contrast` (nero)
 - Cliccando un segmento: carica i post del quel secolo, azzera tutti i filtri e chiude il pannello filtri
-- Su mobile (< 768 px) la barra si distribuisce su **due righe** (9 + 8 segmenti)
+- Su mobile (< 768 px) la barra si distribuisce su **3 righe** (6 + 6 + 5 segmenti)
 
 *Vista Timeline*
 - Carousel 3D con prospettiva CSS (`perspective: 500vw`) e fino a 5 card visibili simultaneamente (attiva, prev/next, prev2/next2)
-- Navigazione con pulsanti freccia, tastiera (←/→) e **rotella del mouse** sulla viewport o sullo scrubber
+- Navigazione con pulsanti freccia, tastiera (←/→), **rotella del mouse** sulla viewport o sullo scrubber e **swipe touch** orizzontale sulla viewport (mobile): la viewport ha `touch-action: pan-y`, quindi lo scroll verticale della pagina resta nativo mentre l'asse orizzontale viene riconosciuto come navigazione del carousel (soglia 50 px, direzione prevalentemente orizzontale)
 - **Click su una card non-attiva**: la porta in primo piano (hit-test via `getBoundingClientRect` sulle card non-attive, perché il contesto 3D `preserve-3d` non delega in modo affidabile i pointer event ai figli)
 - Scrubber timeline trascinabile (desktop) con marker per ogni post e label con l'anno; può essere nascosto dal Site Editor e si auto-nasconde quando i post visibili (dopo i filtri) sono meno di 3
 
@@ -163,7 +202,65 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 ---
 
-### 3. Mappa Interattiva (`ttf-child/mappa-interattiva`)
+### 3. Post List (`ttf-child/post-list`)
+
+Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`.
+
+**Funzionalità:**
+
+- Card orizzontali: immagine 33% / aspect-ratio 4:3 + corpo testo (data, ubicazione, titolo, estratto, tag categoria)
+- Campi **Data** e **Ubicazione** raggruppati in un unico blocco meta con etichetta in grassetto, disposti uno sotto l'altro
+- Contatore risultati filtrati visibile nella barra superiore
+- **Filtri a scomparsa** con pill selezionabili per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: toggle singolo per gruppo, pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale; ogni cambio filtro azzera `visibleCount` a 10
+- **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare
+- Messaggi di stato: "Fine dei risultati" (tutti i post filtrati visibili) e "Nessun risultato trovato" (filtri senza corrispondenze)
+- Possibilità di **nascondere l'intera UI filtri** dall'editor: quando disattivata, la barra mostra solo il contatore
+
+**Attributi del blocco (configurabili dal Site Editor):**
+
+| Attributo | Valori | Descrizione |
+|---|---|---|
+| `postSource` | `all` / `current_category` / `fixed_categories` | Sorgente post da mostrare |
+| `selectedCategories` | Array di ID categoria | Categorie fisse (se `fixed_categories`) — selezione multipla tramite checkbox |
+| `showFilters` | `true` / `false` | Mostra o nasconde l'intera interfaccia filtri nel frontend |
+| `imageRatio` | `4/3` / `3/4` | Proporzioni della thumbnail nelle card (orizzontale o verticale) |
+
+**Campi ACF utilizzati:**
+
+| Campo | Tipo | Uso |
+|---|---|---|
+| `data` | Testo | Mostrato nella meta-riga della card con etichetta "Data" |
+| `ubicazione` | Testo | Mostrato nella meta-riga della card con etichetta "Ubicazione" |
+| `categorie_generali` | Select | Filtro Categoria e tag card |
+| `materiale` | Select multipla | Filtro Materiale |
+| `tecniche` | Select multipla | Filtro Tecnica |
+
+**Interactivity API — store `post-list`:**
+
+| Elemento | Descrizione |
+|---|---|
+| state `filteredPosts` | Post filtrati per i tre gruppi ACF |
+| state `filteredCount` | Numero di post filtrati (mostrato nel contatore) |
+| state `isVisible` | Visibilità card: passa i filtri E il suo indice è < `visibleCount` (contesto locale: `postIndex`) |
+| state `hasMore` | Ci sono post filtrati oltre `visibleCount` |
+| state `showEndMessage/showEmptyMessage` | Messaggi di stato a fine lista o senza risultati |
+| state `filtersOpen/filterToggleLabel` | Apertura pannello filtri e label del pulsante |
+| state `hasActiveFilters` | Almeno un filtro attivo |
+| state `isPillActive/isPillDisabled` | Stato attivo e disponibilità condizionale delle pill |
+| state `hasCategoriaFilter/Materiali/Tecniche` | Presenza di filtro per gruppo |
+| state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
+| action `toggleFilters/clearFilters/togglePill` | Gestione pannello e filtri (ogni cambio resetta `visibleCount = 10`) |
+| action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
+| callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono |
+
+**Architettura:**
+- Tutti i post sono renderizzati server-side in PHP e passati nel context; JS controlla quanti sono visibili tramite `visibleCount`
+- Il context Preact è basato su segnali reattivi: `ctx` catturato in `callbacks.init` è leggibile/scrivibile dall'`IntersectionObserver` callback senza necessità di `getContext()`
+- La visibilità dei filtri è gestita interamente lato PHP (`$show_filters`): quando disattivata, il markup filtri non viene emesso
+
+---
+
+### 4. Mappa Interattiva (`ttf-child/mappa-interattiva`)
 
 Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che ha il campo ACF `posizione_per_mappa` compilato. I pin aprono una popup con thumbnail, ubicazione e titolo linkato. Il filtro colore del layer tile è scelto dal redattore nel pannello del Site Editor; l'utente frontend non può cambiarlo.
 
@@ -227,64 +324,6 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 - `initMap` imposta `ctx.mapInstance` in un `setTimeout` dopo `invalidateSize()`: questo aggiornamento reattivo del contesto riattiva automaticamente `updateMarkers` via `data-wp-watch`, senza chiamate esplicite
 - I riferimenti che cambiano per effetto di interazioni cosmetiche (marker selezionato, pannello laterale, icona di default) sono tenuti **fuori** da `ctx` in una `WeakMap` keyed by `ctx`: scriverli su `ctx` farebbe scattare il `data-wp-watch` di `updateMarkers` e quindi un `fitBounds`/`setView` indesiderato (zoom-out al click su un pin singolo dopo aver aperto un cluster)
 - Il campo `posizione_per_mappa` è letto con `get_post_meta()` (non `get_field()`) perché ACF Extended con `return_format: leaflet` restituisce HTML anziché i dati grezzi delle coordinate
-
----
-
-### 4. Post List (`ttf-child/post-list`)
-
-Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`.
-
-**Funzionalità:**
-
-- Card orizzontali: immagine 33% / aspect-ratio 4:3 + corpo testo (data, ubicazione, titolo, estratto, tag categoria)
-- Campi **Data** e **Ubicazione** raggruppati in un unico blocco meta con etichetta in grassetto, disposti uno sotto l'altro
-- Contatore risultati filtrati visibile nella barra superiore
-- **Filtri a scomparsa** con pill selezionabili per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: toggle singolo per gruppo, pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale; ogni cambio filtro azzera `visibleCount` a 10
-- **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare
-- Messaggi di stato: "Fine dei risultati" (tutti i post filtrati visibili) e "Nessun risultato trovato" (filtri senza corrispondenze)
-- Possibilità di **nascondere l'intera UI filtri** dall'editor: quando disattivata, la barra mostra solo il contatore
-
-**Attributi del blocco (configurabili dal Site Editor):**
-
-| Attributo | Valori | Descrizione |
-|---|---|---|
-| `postSource` | `all` / `current_category` / `fixed_categories` | Sorgente post da mostrare |
-| `selectedCategories` | Array di ID categoria | Categorie fisse (se `fixed_categories`) — selezione multipla tramite checkbox |
-| `showFilters` | `true` / `false` | Mostra o nasconde l'intera interfaccia filtri nel frontend |
-| `imageRatio` | `4/3` / `3/4` | Proporzioni della thumbnail nelle card (orizzontale o verticale) |
-
-**Campi ACF utilizzati:**
-
-| Campo | Tipo | Uso |
-|---|---|---|
-| `data` | Testo | Mostrato nella meta-riga della card con etichetta "Data" |
-| `ubicazione` | Testo | Mostrato nella meta-riga della card con etichetta "Ubicazione" |
-| `categorie_generali` | Select | Filtro Categoria e tag card |
-| `materiale` | Select multipla | Filtro Materiale |
-| `tecniche` | Select multipla | Filtro Tecnica |
-
-**Interactivity API — store `post-list`:**
-
-| Elemento | Descrizione |
-|---|---|
-| state `filteredPosts` | Post filtrati per i tre gruppi ACF |
-| state `filteredCount` | Numero di post filtrati (mostrato nel contatore) |
-| state `isVisible` | Visibilità card: passa i filtri E il suo indice è < `visibleCount` (contesto locale: `postIndex`) |
-| state `hasMore` | Ci sono post filtrati oltre `visibleCount` |
-| state `showEndMessage/showEmptyMessage` | Messaggi di stato a fine lista o senza risultati |
-| state `filtersOpen/filterToggleLabel` | Apertura pannello filtri e label del pulsante |
-| state `hasActiveFilters` | Almeno un filtro attivo |
-| state `isPillActive/isPillDisabled` | Stato attivo e disponibilità condizionale delle pill |
-| state `hasCategoriaFilter/Materiali/Tecniche` | Presenza di filtro per gruppo |
-| state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
-| action `toggleFilters/clearFilters/togglePill` | Gestione pannello e filtri (ogni cambio resetta `visibleCount = 10`) |
-| action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
-| callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono |
-
-**Architettura:**
-- Tutti i post sono renderizzati server-side in PHP e passati nel context; JS controlla quanti sono visibili tramite `visibleCount`
-- Il context Preact è basato su segnali reattivi: `ctx` catturato in `callbacks.init` è leggibile/scrivibile dall'`IntersectionObserver` callback senza necessità di `getContext()`
-- La visibilità dei filtri è gestita interamente lato PHP (`$show_filters`): quando disattivata, il markup filtri non viene emesso
 
 ---
 

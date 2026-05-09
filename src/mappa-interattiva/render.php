@@ -133,6 +133,7 @@ $context = [
 ?>
 
 <div class="map-block-wrap"
+     style="--map-height:<?php echo $map_height; ?>px"
      data-wp-interactive="mappa-interattiva"
      data-wp-context='<?php echo wp_json_encode( $context ); ?>'>
 

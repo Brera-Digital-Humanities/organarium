@@ -3,7 +3,8 @@
     "allow": [
       "Bash(nvm use *)",
       "Bash(npm run *)",
-      "Read(//home/lo-bo/.nvm/versions/node/**)"
+      "Read(//home/lo-bo/.nvm/versions/node/**)",
+      "Bash(export PATH=\"/home/lo-bo/.nvm/versions/node/v20.19.5/bin:$PATH\")"
     ]
   }
 }

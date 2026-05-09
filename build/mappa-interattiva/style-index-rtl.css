@@ -41,6 +41,7 @@
   display: flex;
   flex-direction: row;
   width: 36px;
+  max-height: var(--map-height);
   overflow: hidden;
   transition: width 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   border-left: 1px solid var(--wp--preset--color--contrast);
@@ -60,7 +61,7 @@
   }
   .map-sidebar.is-open {
     width: 100%;
-    max-height: 70vh;
+    max-height: var(--map-height, 70vh);
   }
 }
 .map-sidebar__toggle {
@@ -119,7 +120,7 @@
     border-right: none;
     border-top: 1px solid var(--wp--preset--color--contrast);
     padding: 1.25rem 0 1.25rem;
-    overflow-y: hidden;
+    overflow-y: auto;
   }
 }
 .map-sidebar__panel .filter-col {

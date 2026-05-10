@@ -94,7 +94,7 @@ Così cambi alla palette o alla tipografia in `theme.json` (o nel Site Editor) s
 
 ## Modello dati ACF
 
-Il tema dipende da un singolo gruppo di campi **DETTAGLIO SCHEDA** (chiave `group_69dd43782c27d`) assegnato al post type `post`. Posizione `normal`, label sopra, `show_in_rest: 0`, nessun campo obbligatorio, nessuna logica condizionale. Questa sezione documenta la struttura del gruppo in modo da poterlo ricostruire manualmente da ACF → Field Groups.
+Il tema dipende da un singolo gruppo di campi **DETTAGLIO SCHEDA** assegnato al post type `post`. Posizione `normal`, label sopra, `show_in_rest: 0`, nessun campo obbligatorio, nessuna logica condizionale. Questa sezione documenta la struttura del gruppo in modo da poterlo ricostruire manualmente da ACF → Field Groups.
 
 **Campi del gruppo:**
 

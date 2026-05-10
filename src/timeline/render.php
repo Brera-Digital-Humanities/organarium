@@ -190,7 +190,8 @@ $context = [
     data-wp-interactive="timeline-3d"
     data-wp-context='<?php echo wp_json_encode( $context ); ?>'
     data-wp-init="callbacks.init"
-    data-wp-watch="callbacks.savePrefs"
+    data-wp-watch--save="callbacks.savePrefs"
+    data-wp-watch--lazy="callbacks.lazyLoadImages"
     <?php echo get_block_wrapper_attributes( [ 'class' => 'tl-wrap' ] ); ?>
 >
 
@@ -377,8 +378,9 @@ $context = [
                         <a class="card-link" href="<?php echo esc_url( $post['url'] ); ?>">
                         <?php if ( ! empty( $post['thumb'] ) ) : ?>
                         <div class="card-thumb">
-                            <img src="<?php echo esc_url( $post['thumb'] ); ?>"
-                                 alt="<?php echo esc_attr( $post['title'] ); ?>">
+                            <img data-src="<?php echo esc_url( $post['thumb'] ); ?>"
+                                 alt="<?php echo esc_attr( $post['title'] ); ?>"
+                                 loading="lazy">
                         </div>
                         <?php endif; ?>
                         <?php if ( ! empty( $post['data'] ) ) : ?>
@@ -464,9 +466,10 @@ $context = [
             <a class="gc-link" href="<?php echo esc_url( $post['url'] ); ?>">
             <div class="gc-img<?php echo empty( $post['thumb'] ) ? ' gc-img--ph' : ''; ?>">
                 <?php if ( ! empty( $post['thumb'] ) ) : ?>
-                <img src="<?php echo esc_url( $post['thumb'] ); ?>"
+                <img data-src="<?php echo esc_url( $post['thumb'] ); ?>"
                      alt="<?php echo esc_attr( $post['title'] ); ?>"
-                     class="gc-img-inner">
+                     class="gc-img-inner"
+                     loading="lazy">
                 <?php endif; ?>
             </div>
             <div class="gc-body">

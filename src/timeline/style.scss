@@ -402,15 +402,21 @@
     width: 100%;
     aspect-ratio: 16/9;
     overflow: hidden;
+    position: relative;
 
     img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
-        transition: transform 0.6s ease;
+        transition: transform 0.6s ease, opacity 0.4s ease;
 
         .is-active .card-inner:hover & { transform: scale(1.04); }
+
+        /* Lazy-load: finché data-src è presente l'immagine non ha src, quindi
+           il browser mostrerebbe alt + icona broken-image. Nascosta finché
+           non arriva il bitmap; il fade-in scatta alla rimozione di data-src. */
+        &[data-src] { opacity: 0; }
     }
 }
 
@@ -610,6 +616,7 @@
     aspect-ratio: 3/2;
     background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
     overflow: hidden;
+    position: relative;
 
     &--ph {
         display: flex;
@@ -621,11 +628,34 @@
     }
 }
 
+/* Spinner mostrato sul wrapper finché l'immagine in lazy-load non arriva.
+   La classe .is-loading è aggiunta da view.js prima di settare img.src e
+   rimossa al load/error. */
+.card-thumb.is-loading::after,
+.gc-img.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid color-mix(in srgb, var(--wp--preset--color--contrast, #111) 25%, transparent);
+    border-top-color: var(--wp--preset--color--accent-4, #56814A);
+    border-radius: 50%;
+    animation: tl-spin 0.8s linear infinite;
+}
+
+@keyframes tl-spin { to { transform: rotate(360deg); } }
+
 .gc-img-inner {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: opacity 0.4s ease;
+
+    &[data-src] { opacity: 0; }
 }
 
 .gc-body {

@@ -198,13 +198,14 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 | action `scrubberPointerDown/Move` | Drag scrubber |
 | action `goToMarker` | Navigazione diretta da marker |
 | callback `init` | Setup listener DOM plain (tastiera, rotella, click su card non-attiva); replica inline di `visiblePosts` usando il `ctx` catturato per evitare di rivalutare i computed dello store da fuori dal contesto reattivo della Interactivity API |
-| callback `savePrefs` | Scrittura cookie di sessione (reattivo via `data-wp-watch`) |
+| callback `savePrefs` | Scrittura cookie di sessione (reattivo via `data-wp-watch--save`) |
+| callback `lazyLoadImages` | Lazy-load delle thumbnail per secolo (reattivo via `data-wp-watch--lazy`): le `<img>` sono renderizzate con `data-src` invece di `src`; al cambio di `activeCenturyMin/Max` o filtri il callback seleziona `.timeline-card:not(.is-hidden) .card-thumb img[data-src]` (e analogo per la griglia), aggiunge `is-loading` al wrapper, setta `src = dataset.src` e rimuove `data-src` solo al `load`/`error`. CSS: `img[data-src] { opacity: 0 }` con `transition` su opacity → fade-in al rilascio dell'attributo, niente alt/icona broken-image durante il caricamento |
 
 ---
 
 ### 3. Post List (`ttf-child/post-list`)
 
-Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`.
+Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`. I post sono ordinati cronologicamente per il campo ACF `data_per_la_timeline` (`usort` lato PHP dopo la query, perché `WP_Query` non può ordinare nativamente su un meta numerico senza la chiave registrata).
 
 **Funzionalità:**
 
@@ -212,7 +213,8 @@ Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sin
 - Campi **Data** e **Ubicazione** raggruppati in un unico blocco meta con etichetta in grassetto, disposti uno sotto l'altro
 - Contatore risultati filtrati visibile nella barra superiore
 - **Filtri a scomparsa** con pill selezionabili per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: toggle singolo per gruppo, pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale; ogni cambio filtro azzera `visibleCount` a 10
-- **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare
+- **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare. Se il sentinel resta intersecato dopo l'incremento (es. pochi post o viewport alto, casi in cui l'observer non rifirerebbe perché notifica solo i cambi di stato), `loadMore()` si rilancia in `requestAnimationFrame` finché esce dal viewport o non ci sono più post
+- **Lazy-load thumbnail con fade-in**: le `<img>` sono renderizzate con `data-src` invece di `src`, quindi nessuna richiesta al browser al render iniziale. Quando `visibleCount` o i filtri cambiano, il callback `lazyLoadImages` seleziona le card non più nascoste, applica `is-loading` al wrapper (spinner CSS) e setta `src` solo allora; `data-src` viene rimosso al `load`/`error` e il CSS (`img[data-src] { opacity: 0 }` + `transition`) produce il fade-in
 - Messaggi di stato: "Fine dei risultati" (tutti i post filtrati visibili) e "Nessun risultato trovato" (filtri senza corrispondenze)
 - Possibilità di **nascondere l'intera UI filtri** dall'editor: quando disattivata, la barra mostra solo il contatore
 
@@ -251,7 +253,8 @@ Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sin
 | state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
 | action `toggleFilters/clearFilters/togglePill` | Gestione pannello e filtri (ogni cambio resetta `visibleCount = 10`) |
 | action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
-| callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono |
+| callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono. `loadMore()` ricorsivo (in `requestAnimationFrame`) per gestire il caso "sentinel ancora intersecato dopo l'incremento" |
+| callback `lazyLoadImages` | Lazy-load delle thumbnail (reattivo via `data-wp-watch--lazy`): all'incremento di `visibleCount` o al cambio filtri, seleziona `.pl-card:not(.pl-hidden) .pl-card-img img[data-src]`, applica `is-loading` al wrapper e setta `src = dataset.src`; `data-src` rimosso al `load`/`error` per innescare il fade-in via CSS |
 
 **Architettura:**
 - Tutti i post sono renderizzati server-side in PHP e passati nel context; JS controlla quanti sono visibili tramite `visibleCount`

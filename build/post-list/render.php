@@ -16,8 +16,8 @@ $short_label = static function ( string $label ): string {
 $query_args = [
     'post_type'      => 'post',
     'posts_per_page' => -1,
-    'order_by'  => (int) get_field( 'data_per_la_timeline' ),
-    'order' => 'ASC',
+    'orderby'        => 'date',
+    'order'          => 'ASC',
 ];
 
 if ( $post_source === 'current_category' ) {
@@ -58,6 +58,7 @@ if ( $query->have_posts() ) {
             'thumb'     => get_the_post_thumbnail_url( get_the_ID(), 'medium' ),
             'data'      => get_field( 'data' ),
             'ubicazione'=> get_field( 'ubicazione' ),
+            'sort_key'  => (int) get_field( 'data_per_la_timeline' ),
             'categoria' => get_field( 'categorie_generali' ) ?? '',
             'materiale' => array_values( array_filter( $materiali ) ),
             'tecnica'   => array_values( array_filter( $tecniche ) ),
@@ -65,6 +66,8 @@ if ( $query->have_posts() ) {
     }
     wp_reset_postdata();
 }
+
+usort( $posts_data, static fn( $a, $b ) => $a['sort_key'] <=> $b['sort_key'] );
 
 // ── Map valore→label dai field object ACF ────────────────────────────────────
 $acf_choices = static function ( string $field_name, $post_id ): array {
@@ -128,6 +131,7 @@ $context = [
     data-wp-interactive="post-list"
     data-wp-context='<?php echo wp_json_encode( $context ); ?>'
     data-wp-init="callbacks.init"
+    data-wp-watch--lazy="callbacks.lazyLoadImages"
     <?php echo get_block_wrapper_attributes( [ 'class' => 'pl-wrap' ] ); ?>
 >
 
@@ -237,7 +241,7 @@ $context = [
             <a class="pl-card-link" href="<?php echo esc_url( $post['url'] ); ?>">
                 <div class="pl-card-img<?php echo $img_ratio_class; echo empty( $post['thumb'] ) ? ' pl-card-img--ph' : ''; ?>">
                     <?php if ( ! empty( $post['thumb'] ) ) : ?>
-                    <img src="<?php echo esc_url( $post['thumb'] ); ?>"
+                    <img data-src="<?php echo esc_url( $post['thumb'] ); ?>"
                          alt="<?php echo esc_attr( $post['title'] ); ?>"
                          class="pl-card-img-inner"
                          loading="lazy">

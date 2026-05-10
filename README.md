@@ -1,6 +1,6 @@
 # Repertorio dell'Organo antico
 
-Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra quattro blocchi Gutenberg custom: i primi tre utilizzano la **WordPress Interactivity API**, il quarto integra **Leaflet.js** per la visualizzazione cartografica interattiva.
+Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra cinque blocchi Gutenberg custom: quattro interattivi basati sulla **WordPress Interactivity API** (`featured-zoom`, `timeline`, `post-list`, `mappa-interattiva` — quest'ultimo integra anche **Leaflet.js** per la visualizzazione cartografica) e uno dinamico server-side (`acf-field`) per la visualizzazione dei campi ACF nei template del singolo post.
 
 ---
 
@@ -22,9 +22,10 @@ jerus-organo/
 │   ├── timeline/             # Blocco timeline/griglia post
 │   ├── mappa-interattiva/    # Blocco mappa Leaflet con pin geolocalizzati
 │   ├── post-list/            # Blocco lista post con infinite scroll e filtri ACF
+│   ├── acf-field/            # Blocco generico per visualizzare un campo ACF
 │   └── style/                # Stile globale del child theme (SCSS)
 ├── build/                    # File compilati (generati da wp-scripts)
-├── functions.php             # Registrazione blocchi, shortcode ACF, enqueue stili
+├── functions.php             # Registrazione blocchi, enqueue stili, custom excerpt length
 ├── style.css                 # Header child theme (regole in src/style/)
 ├── webpack.config.js         # Estende wp-scripts per aggiungere l'entry SCSS globale
 └── package.json
@@ -330,19 +331,32 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 
 ---
 
-## Shortcode ACF
+### 5. Campo ACF (`ttf-child/acf-field`)
 
-Registrati in `functions.php` per visualizzare i campi ACF nelle template:
+Blocco generico che visualizza un singolo campo ACF con label e wrapper grafico. **Se il valore del campo è vuoto, il blocco non emette alcun markup**: niente wrapper, niente bordo, niente padding — la decisione "rendi/nascondi" è presa server-side e include l'intero `<div>` di contorno.
 
-| Shortcode | Campo ACF | Tipo |
+**Attributi del blocco (configurabili dal Site Editor):**
+
+| Attributo | Valori | Descrizione |
 |---|---|---|
-| `[acf_data]` | `data` | Testo |
-| `[acf_ubicazione]` | `ubicazione` | Testo |
-| `[acf_autore]` | `autore` | Testo |
-| `[acf_tecnica]` | `tecnica_e_materiali` | Testo |
-| `[acf_dimensioni]` | `dimensioni` | Testo |
-| `[acf_provenienza]` | `provenienza` | Rich text (WYSIWYG) |
-| `[acf_fonti]` | `fonti` | Link |
+| `fieldKey` | nome campo ACF | Campo da leggere con `get_field()` |
+| `label`    | string         | Etichetta in grassetto prima del valore (vuota = niente label) |
+| `variant`  | `standard` / `flush` / `top-border` | Wrapper grafico |
+
+**Varianti grafiche:**
+
+| Variante | Stili wrapper | Uso tipico |
+|---|---|---|
+| `standard`   | bordo inferiore + `padding-bottom: 15px` + `margin-bottom: 20px` | `data`, `ubicazione`, `autore`, `tecnica_e_materiali`, `dimensioni`, `edizione`, `trattato_completo` |
+| `flush`      | solo `padding-bottom: 15px`, niente bordi                        | `provenienza` (rich text inline che precede `fonti`) |
+| `top-border` | bordo superiore + `padding-top: 15px`                            | `fonti` (separatore prima del blocco link) |
+
+**Comportamento editor:** selezionando un campo dal `SelectControl` la label e la variante si auto-popolano con il preset registrato in `index.js` (mappa dei 9 campi noti). La label resta personalizzabile; il preset si applica solo finché coincide con un default registrato — se l'utente la modifica, cambiare campo non la sovrascrive.
+
+**Render:**
+- `wp_kses_post( $value )` per tutti i campi (sicuro sia per testo semplice sia per WYSIWYG, evita di duplicare branch testo/rich)
+- `get_block_wrapper_attributes()` per integrare className utente + classi specifiche `acf-field acf-field--{variant} acf-field--{fieldKey}`
+- `sanitize_html_class()` sul fieldKey usato come modifier CSS
 
 ---
 

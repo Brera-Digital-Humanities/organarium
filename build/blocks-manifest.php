@@ -1,6 +1,36 @@
 <?php
 // This file is generated. Do not modify it manually.
 return array(
+	'acf-field' => array(
+		'$schema' => 'https://schemas.wp.org/trunk/block.json',
+		'apiVersion' => 3,
+		'name' => 'ttf-child/acf-field',
+		'title' => 'Campo ACF',
+		'category' => 'theme',
+		'icon' => 'tag',
+		'description' => 'Visualizza un campo ACF con label e variante grafica. Se il valore è vuoto il blocco non emette alcun markup.',
+		'supports' => array(
+			'html' => false
+		),
+		'attributes' => array(
+			'fieldKey' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'label' => array(
+				'type' => 'string',
+				'default' => ''
+			),
+			'variant' => array(
+				'type' => 'string',
+				'default' => 'standard'
+			)
+		),
+		'textdomain' => 'acf-field',
+		'editorScript' => 'file:./index.js',
+		'style' => 'file:./style-index.css',
+		'render' => 'file:./render.php'
+	),
 	'featured-zoom' => array(
 		'$schema' => 'https://schemas.wp.org/trunk/block.json',
 		'apiVersion' => 3,

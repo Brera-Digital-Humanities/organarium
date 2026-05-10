@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ttf-child/acf-field",
+  "title": "Campo ACF",
+  "category": "theme",
+  "icon": "tag",
+  "description": "Visualizza un campo ACF con label e variante grafica. Se il valore è vuoto il blocco non emette alcun markup.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "fieldKey": {
+      "type": "string",
+      "default": ""
+    },
+    "label": {
+      "type": "string",
+      "default": ""
+    },
+    "variant": {
+      "type": "string",
+      "default": "standard"
+    }
+  },
+  "textdomain": "acf-field",
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php"
+}

@@ -243,28 +243,71 @@ __webpack_require__.r(__webpack_exports__);
       const root = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)().ref;
       const sentinel = root.querySelector('.pl-sentinel');
       if (!sentinel) return;
-      const observer = new IntersectionObserver(entries => {
-        if (!entries[0].isIntersecting) return;
-        // Ricalcola il conteggio filtrato direttamente da ctx
-        // evitando getContext() che non è disponibile qui.
+
+      // Conteggio filtrato calcolato da ctx (getContext() non è
+      // disponibile dentro callback asincroni).
+      const filteredCount = () => ctx.posts.filter(post => {
         const {
-          posts,
-          filters,
-          visibleCount
+          filters
         } = ctx;
-        const n = posts.filter(post => {
-          const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
-          const matchMat = filters.materiali === '' || post.materiale.includes(filters.materiali);
-          const matchTec = filters.tecniche === '' || post.tecnica.includes(filters.tecniche);
-          return matchCat && matchMat && matchTec;
-        }).length;
-        if (n > ctx.visibleCount) {
-          ctx.visibleCount += 10;
-        }
+        const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
+        const matchMat = filters.materiali === '' || post.materiale.includes(filters.materiali);
+        const matchTec = filters.tecniche === '' || post.tecnica.includes(filters.tecniche);
+        return matchCat && matchMat && matchTec;
+      }).length;
+
+      // IntersectionObserver notifica solo i cambi di stato: se dopo
+      // l'incremento il sentinel resta intersecato (es. pochi post,
+      // viewport alto), bisogna ricaricare in loop finché esce dal
+      // viewport o non ci sono più post.
+      const loadMore = () => {
+        if (filteredCount() <= ctx.visibleCount) return;
+        ctx.visibleCount += 10;
+        requestAnimationFrame(() => {
+          const rect = sentinel.getBoundingClientRect();
+          const inView = rect.top < window.innerHeight + 300 && rect.bottom > -300;
+          if (inView) loadMore();
+        });
+      };
+      const observer = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) loadMore();
       }, {
         rootMargin: '300px'
       });
       observer.observe(sentinel);
+    },
+    // Lazy-load delle thumbnail: i post con <img data-src> non hanno src
+    // e non vengono richiesti al browser. Quando cambiano filtri o
+    // visibleCount (infinite scroll) le card non più nascoste si
+    // caricano qui, con spinner sul wrapper finché arriva il bitmap.
+    // data-src viene rimosso solo a load completato, così il CSS può
+    // tenere opacity:0 finché l'immagine non è pronta (niente alt /
+    // icona broken-image accanto allo spinner).
+    lazyLoadImages() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      void ctx.visibleCount;
+      void ctx.filters.categoria;
+      void ctx.filters.materiali;
+      void ctx.filters.tecniche;
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.pl-card:not(.pl-hidden) .pl-card-img img[data-src]').forEach(img => {
+          const src = img.dataset.src;
+          if (!src) return;
+          const wrapper = img.parentElement;
+          wrapper?.classList.add('is-loading');
+          const done = () => {
+            wrapper?.classList.remove('is-loading');
+            img.removeAttribute('data-src');
+          };
+          img.addEventListener('load', done, {
+            once: true
+          });
+          img.addEventListener('error', done, {
+            once: true
+          });
+          img.src = src;
+        });
+      });
     }
   }
 });

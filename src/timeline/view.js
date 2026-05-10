@@ -552,6 +552,48 @@ store( 'timeline-3d', {
             } );
         },
 
+        // Lazy-load delle thumbnail: i post fuori dal secolo attivo hanno
+        // <img data-src="..."> senza src, quindi non vengono richieste al
+        // browser. Quando cambia il secolo (o filtri) le card non più
+        // nascoste si caricano qui, con spinner sul wrapper finché arriva
+        // il bitmap. Le card già caricate non hanno più data-src e vengono
+        // ignorate al successivo passaggio.
+        lazyLoadImages() {
+            const ctx = getContext();
+            // Tracking esplicito delle dipendenze reattive: il watch deve
+            // rifirare al cambio di secolo o filtri.
+            void ctx.activeCenturyMin;
+            void ctx.activeCenturyMax;
+            void ctx.filters.categoria;
+            void ctx.filters.materiali;
+            void ctx.filters.tecniche;
+
+            requestAnimationFrame( () => {
+                const imgs = document.querySelectorAll(
+                    '.timeline-card:not(.is-hidden) .card-thumb img[data-src],' +
+                    '.grid-card:not(.is-hidden) .gc-img img[data-src]'
+                );
+                imgs.forEach( ( img ) => {
+                    const src = img.dataset.src;
+                    if ( ! src ) return;
+                    const wrapper = img.parentElement;
+                    wrapper?.classList.add( 'is-loading' );
+                    // data-src rimosso solo a load completato: finché c'è
+                    // il CSS tiene opacity:0, evitando di mostrare il testo
+                    // alternativo / icona broken-image accanto allo spinner.
+                    // Al rilascio dell'attributo l'opacity torna a 1 con
+                    // la transizione → fade-in dell'immagine.
+                    const done = () => {
+                        wrapper?.classList.remove( 'is-loading' );
+                        img.removeAttribute( 'data-src' );
+                    };
+                    img.addEventListener( 'load',  done, { once: true } );
+                    img.addEventListener( 'error', done, { once: true } );
+                    img.src = src;
+                } );
+            } );
+        },
+
         savePrefs() {
             const ctx   = getContext();
             const prefs = JSON.stringify( {

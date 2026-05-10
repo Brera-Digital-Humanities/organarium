@@ -4,8 +4,6 @@ import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 import './style.scss';
 import metadata from './block.json';
 
-// Mappa dei 9 campi attuali con label e variante grafica di default
-// (replica le tre branch dello shortcode in functions.php).
 const FIELDS = [
     { key: 'data',                label: 'Data',                variant: 'standard' },
     { key: 'ubicazione',          label: 'Ubicazione',          variant: 'standard' },
@@ -35,9 +33,6 @@ registerBlockType( metadata.name, {
             },
         } );
 
-        // Quando l'utente cambia campo, riempie label e variant col preset
-        // del campo scelto — a meno che label sia stata personalizzata
-        // (cioè non corrisponde più ad alcun preset).
         const onFieldChange = ( fieldKey ) => {
             const preset    = FIELDS.find( ( f ) => f.key === fieldKey );
             const isPreset  = FIELDS.some( ( f ) => f.label === attributes.label );

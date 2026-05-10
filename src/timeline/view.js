@@ -109,8 +109,7 @@ store( 'timeline-3d', {
 
         get isPillDisabled() {
             const { state } = store( 'timeline-3d' );
-            // "Disabled" = esiste nel secolo ma escluso dagli altri filtri attivi.
-            // Se non esiste affatto nel secolo va invece in stato "invisible".
+            // Disabled = esiste nel secolo ma escluso dai filtri (vs invisible = assente nel secolo)
             return ! state.isValueAvailable && ! state.isPillInvisible;
         },
 
@@ -450,9 +449,7 @@ store( 'timeline-3d', {
         init() {
             const ctx = getContext();
 
-            // Replica della logica di state.visiblePosts senza chiamare getContext():
-            // accedere ai computed dello store da listener DOM plain rivaluta il getter
-            // e fallisce perché lo stack del contesto Interactivity è vuoto.
+            // Replica di state.visiblePosts senza getContext() (non usabile in listener DOM plain)
             const visiblePosts = () => {
                 if ( ! ctx.posts ) return [];
                 return ctx.posts
@@ -491,11 +488,7 @@ store( 'timeline-3d', {
                 else goPrev();
             }, { passive: false } );
 
-            // Swipe touch sulla viewport (mobile) → next / prev.
-            // Il CSS imposta touch-action: pan-y sulla viewport, così lo scroll
-            // verticale della pagina resta nativo e l'asse orizzontale è nostro.
-            // Soglia 50px e direzione prevalentemente orizzontale per non
-            // interpretare come swipe i tap o i piccoli movimenti.
+            // Swipe touch (mobile) — soglia 50px, asse prevalentemente orizzontale (touch-action:pan-y nel CSS)
             const viewport = document.querySelector( '.timeline-viewport' );
             if ( viewport ) {
                 let startX = 0, startY = 0, swiped = false;
@@ -515,9 +508,7 @@ store( 'timeline-3d', {
                         else goPrev();
                     }
                 }, { passive: true } );
-                // Sopprimi il click sintetico generato dal touchend dopo uno swipe,
-                // altrimenti il listener click sopra riporterebbe in primo piano la
-                // card sotto il dito.
+                // Sopprime il click sintetico post-swipe
                 viewport.addEventListener( 'click', ( e ) => {
                     if ( swiped ) {
                         e.stopPropagation();
@@ -527,9 +518,7 @@ store( 'timeline-3d', {
                 }, true );
             }
 
-            // Click su card non-attiva → portarla in primo piano.
-            // Il click bolla fino a .cards-container (le card non lo catturano per via del
-            // contesto 3D), quindi trovo la card sotto il punto via bounding rect.
+            // Click su card non-attiva → in primo piano (hit-test via bounding rect, le card non catturano per il 3D)
             document.querySelector( '.timeline-viewport' )?.addEventListener( 'click', ( e ) => {
                 let card = e.target.closest( '.timeline-card' );
                 if ( ! card ) {
@@ -552,16 +541,10 @@ store( 'timeline-3d', {
             } );
         },
 
-        // Lazy-load delle thumbnail: i post fuori dal secolo attivo hanno
-        // <img data-src="..."> senza src, quindi non vengono richieste al
-        // browser. Quando cambia il secolo (o filtri) le card non più
-        // nascoste si caricano qui, con spinner sul wrapper finché arriva
-        // il bitmap. Le card già caricate non hanno più data-src e vengono
-        // ignorate al successivo passaggio.
+        // Lazy-load thumbnail: data-src→src solo a load completato, spinner sul wrapper via CSS
         lazyLoadImages() {
             const ctx = getContext();
-            // Tracking esplicito delle dipendenze reattive: il watch deve
-            // rifirare al cambio di secolo o filtri.
+            // Dipendenze reattive esplicite per il watch
             void ctx.activeCenturyMin;
             void ctx.activeCenturyMax;
             void ctx.filters.categoria;
@@ -578,11 +561,7 @@ store( 'timeline-3d', {
                     if ( ! src ) return;
                     const wrapper = img.parentElement;
                     wrapper?.classList.add( 'is-loading' );
-                    // data-src rimosso solo a load completato: finché c'è
-                    // il CSS tiene opacity:0, evitando di mostrare il testo
-                    // alternativo / icona broken-image accanto allo spinner.
-                    // Al rilascio dell'attributo l'opacity torna a 1 con
-                    // la transizione → fade-in dell'immagine.
+                    // data-src rimosso solo a load completato → fade-in CSS
                     const done = () => {
                         wrapper?.classList.remove( 'is-loading' );
                         img.removeAttribute( 'data-src' );

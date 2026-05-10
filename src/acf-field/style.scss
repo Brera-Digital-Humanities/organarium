@@ -1,8 +1,4 @@
-/* ═══════════════════════════════════════════════════
-   Campo ACF — sostituzione degli shortcode `[acf_*]`
-   Tre varianti corrispondenti ai tre rami dello
-   shortcode originale in functions.php.
-   ═══════════════════════════════════════════════════ */
+/* Campo ACF — tre varianti grafiche */
 
 .acf-field {
     display: inline-block;
@@ -15,24 +11,19 @@
         margin-right: 0.3em;
     }
 
-    /* Standard — bordo inferiore + margine: usato dalla maggior parte dei
-       campi (data, ubicazione, autore, tecnica, dimensioni, edizione,
-       trattato_completo). */
+    /* Standard — bordo inferiore + margine */
     &--standard {
         border-bottom: 1px solid var(--wp--preset--color--contrast);
         padding-bottom: 15px;
         margin-bottom: 20px !important;
     }
 
-    /* Flush — solo padding, niente bordi: usato per `provenienza` (rich text
-       inline che precede `fonti`, separatore visivo è il top-border di
-       fonti). */
+    /* Flush — solo padding, senza bordi */
     &--flush {
         padding-bottom: 15px;
     }
 
-    /* Top-border — bordo superiore + padding-top: usato per `fonti`,
-       agisce da separatore prima del blocco link. */
+    /* Top-border — bordo superiore + padding-top */
     &--top-border {
         border-top: 1px solid var(--wp--preset--color--contrast);
         padding-top: 15px;

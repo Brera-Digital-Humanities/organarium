@@ -69,7 +69,7 @@ store( 'post-list', {
             return false;
         },
 
-        // Pill disponibile se filterVal esiste in almeno un post filtrato dagli altri gruppi
+        // Pill disponibile se filterVal esiste in almeno un post degli altri gruppi
         get isValueAvailable() {
             const ctx = getContext();
             const { filterGroup, filterVal, posts, filters } = ctx;
@@ -176,16 +176,13 @@ store( 'post-list', {
     callbacks: {
 
         init() {
-            // Cattura il contesto reattivo durante l'esecuzione della direttiva.
-            // Le proprietà di ctx sono Preact signals: leggibili e scrivibili
-            // ovunque, anche dentro callback asincroni come IntersectionObserver.
+            // ctx catturato qui per restare accessibile nei callback asincroni
             const ctx      = getContext();
             const root     = getElement().ref;
             const sentinel = root.querySelector( '.pl-sentinel' );
             if ( ! sentinel ) return;
 
-            // Conteggio filtrato calcolato da ctx (getContext() non è
-            // disponibile dentro callback asincroni).
+            // Conteggio filtrato (getContext() non è disponibile in callback async)
             const filteredCount = () => ctx.posts.filter( ( post ) => {
                 const { filters } = ctx;
                 const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
@@ -194,10 +191,7 @@ store( 'post-list', {
                 return matchCat && matchMat && matchTec;
             } ).length;
 
-            // IntersectionObserver notifica solo i cambi di stato: se dopo
-            // l'incremento il sentinel resta intersecato (es. pochi post,
-            // viewport alto), bisogna ricaricare in loop finché esce dal
-            // viewport o non ci sono più post.
+            // Loop manuale: IntersectionObserver notifica solo i cambi di stato
             const loadMore = () => {
                 if ( filteredCount() <= ctx.visibleCount ) return;
                 ctx.visibleCount += 10;
@@ -216,13 +210,7 @@ store( 'post-list', {
             observer.observe( sentinel );
         },
 
-        // Lazy-load delle thumbnail: i post con <img data-src> non hanno src
-        // e non vengono richiesti al browser. Quando cambiano filtri o
-        // visibleCount (infinite scroll) le card non più nascoste si
-        // caricano qui, con spinner sul wrapper finché arriva il bitmap.
-        // data-src viene rimosso solo a load completato, così il CSS può
-        // tenere opacity:0 finché l'immagine non è pronta (niente alt /
-        // icona broken-image accanto allo spinner).
+        // Lazy-load thumbnail: data-src→src solo dopo load completato (spinner via CSS)
         lazyLoadImages() {
             const ctx = getContext();
             void ctx.visibleCount;

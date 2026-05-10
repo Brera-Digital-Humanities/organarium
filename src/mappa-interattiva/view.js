@@ -48,9 +48,7 @@ function esc( s ) {
         .replace( />/g, '&gt;' ).replace( /"/g, '&quot;' );
 }
 
-// Riferimenti non-reattivi per ctx: evitano che mutazioni come la selezione di
-// un marker (che è cosmetica, non un cambio di filtro) ri-attivino il watch di
-// updateMarkers e quindi il fitBounds/setView, che farebbe zoom-out indesiderato.
+// Refs non-reattivi: evita che la selezione marker ritrigghi updateMarkers (zoom-out indesiderato)
 const ctxRefs = new WeakMap();
 function getRefs( ctx ) {
     let r = ctxRefs.get( ctx );
@@ -68,7 +66,7 @@ function makeCard( post ) {
 store( 'mappa-interattiva', {
     state: {
 
-        // ── Filtri ────────────────────────────────────────────────────────────
+        // Filtri
         get hasActiveFilters() {
             const { filters } = getContext();
             return filters.categoria !== 'all' || filters.materiali !== '' || filters.tecniche !== '' || filters.periodo !== '';
@@ -82,7 +80,7 @@ store( 'mappa-interattiva', {
             return getContext().filtersOpen ? 'Filtra ↑' : 'Filtra ↓';
         },
 
-        // ── Stato di una singola pill (contesto locale: filterGroup + filterVal) ──
+        // Stato singola pill (ctx locale: filterGroup + filterVal)
         get isPillActive() {
             const ctx = getContext();
             const { filterGroup, filterVal, filters } = ctx;
@@ -94,7 +92,7 @@ store( 'mappa-interattiva', {
             return false;
         },
 
-        // ── Disponibilità condizionale di una pill ────────────────────────────
+        // Disponibilità condizionale pill
         get isValueAvailable() {
             const ctx = getContext();
             const { filterGroup, filterVal, posts, filters } = ctx;
@@ -132,7 +130,7 @@ store( 'mappa-interattiva', {
             return ! store( 'mappa-interattiva' ).state.isValueAvailable;
         },
 
-        // ── Filtri attivi (per le etichette sotto il divider) ─────────────────
+        // Filtri attivi (label sotto divider)
         get hasCategoriaFilter() {
             return getContext().filters.categoria !== 'all';
         },
@@ -298,8 +296,7 @@ store( 'mappa-interattiva', {
                 animate:               true,
             } ).addTo( map );
 
-            // Imposta mapInstance DOPO invalidateSize: il data-wp-watch su
-            // updateMarkers si ri-esegue automaticamente quando mapInstance cambia.
+            // mapInstance va settata dopo invalidateSize → triggera il watch updateMarkers
             setTimeout( () => {
                 map.invalidateSize();
                 ctx.mapInstance = map;

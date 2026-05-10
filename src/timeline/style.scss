@@ -1,9 +1,4 @@
-/* ═══════════════════════════════════════════════════
-   Timeline Block
-   Colori dal tema Twenty Twenty-Five:
-     accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
-   ═══════════════════════════════════════════════════ */
+/* Timeline — palette TT5 (accent-1 #f5cc5b, accent-2 #b85f29, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #f2f2e5) */
 
 /* ── Utility ── */
 .sr-only {
@@ -216,8 +211,7 @@
         === */
     }
 
-    /* Pill nascosta: il valore non esiste in nessun post del secolo selezionato.
-       Torna visibile cliccando un secolo che lo contiene. */
+    /* Pill nascosta */
     &.invisible {
         display: none;
     }
@@ -303,8 +297,7 @@
     position: relative;
     overflow: hidden;
 
-    /* Mobile: lascia al browser solo lo scroll verticale (pan-y),
-       lo swipe orizzontale è gestito da JS per navigare il carousel. */
+    /* Mobile: solo scroll verticale al browser; swipe orizzontale gestito da JS */
     touch-action: pan-y;
 }
 
@@ -413,9 +406,7 @@
 
         .is-active .card-inner:hover & { transform: scale(1.04); }
 
-        /* Lazy-load: finché data-src è presente l'immagine non ha src, quindi
-           il browser mostrerebbe alt + icona broken-image. Nascosta finché
-           non arriva il bitmap; il fade-in scatta alla rimozione di data-src. */
+        /* Lazy-load: nascosta finché data-src è presente; fade-in alla rimozione */
         &[data-src] { opacity: 0; }
     }
 }
@@ -628,9 +619,7 @@
     }
 }
 
-/* Spinner mostrato sul wrapper finché l'immagine in lazy-load non arriva.
-   La classe .is-loading è aggiunta da view.js prima di settare img.src e
-   rimossa al load/error. */
+/* Spinner durante lazy-load (.is-loading gestita da view.js) */
 .card-thumb.is-loading::after,
 .gc-img.is-loading::after {
     content: '';

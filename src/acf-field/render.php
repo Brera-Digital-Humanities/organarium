@@ -1,19 +1,16 @@
 <?php
-// ── Attributi del blocco ──────────────────────────────────────────────────────
 $field_key = $attributes['fieldKey'] ?? '';
 $label     = $attributes['label']    ?? '';
 $variant   = in_array( $attributes['variant'] ?? '', [ 'standard', 'flush', 'top-border' ], true )
     ? $attributes['variant']
     : 'standard';
 
-// ── Early return: nessun campo selezionato o ACF non disponibile ─────────────
 if ( ! $field_key || ! function_exists( 'get_field' ) ) {
     return;
 }
 
 $value = get_field( $field_key );
 
-// ── Early return: valore vuoto → nessun markup, niente wrapper grafico ───────
 if ( empty( $value ) ) {
     return;
 }

@@ -5,7 +5,7 @@ $allowed_views      = $attributes['allowedViews']      ?? 'both';
 $selected_category  = (int) ( $attributes['selectedCategory'] ?? 0 );
 $show_scrubber      = (bool) ( $attributes['showScrubber']    ?? true );
 
-// ── Helper: etichetta breve (tronca tutto ciò che segue il primo "(" per le label lunghe) ──
+// Tronca la descrizione tra parentesi dalla label
 $short_label = static function ( string $label ): string {
     $pos = strpos( $label, ' (' );
     return $pos !== false ? trim( substr( $label, 0, $pos ) ) : trim( $label );
@@ -64,10 +64,7 @@ if ( $query->have_posts() ) {
     wp_reset_postdata();
 }
 
-// ── Map valore→label dai field object ACF ────────────────────────────────────
-// get_field_object con false usa il $post globale: su pagine statiche questo è
-// un 'page' che non ha i campi custom, quindi le choices risultano vuote.
-// Passando un ID reale dei post trovati si ottengono sempre le choices corrette.
+// Map valore→label ACF — richiede $post_id reale (su pagine statiche $post globale = page senza i custom field)
 $acf_choices = static function ( string $field_name, $post_id ): array {
     if ( ! function_exists( 'get_field_object' ) ) return [];
     $obj = get_field_object( $field_name, $post_id );
@@ -113,9 +110,7 @@ $all_tec = array_map(
     $unique_multi( $posts_data, 'tecnica' )
 );
 
-// ── Century segments ──────────────────────────────────────────────────────────
-// Primo segmento: 200 a.C. → 0. Segmento 0 → 100 d.C. Segmenti 100 → 1500.
-// Tutti larghezza uguale (1/17 ciascuno). Totale: 17 segmenti.
+// Century segments — 17 segmenti larghezza uguale (200 a.C.→0, 0→100, poi 100→1500 a passi di 100)
 $_build_seg = static function ( int $seg_min, int $seg_max, string $label, int $units ) use ( $posts_data ): array {
     $dots_by_x   = [];
     $bucket_size = 10;
@@ -138,9 +133,8 @@ $century_segments[] = $_build_seg( 0, 100, '0', 1 );
 for ( $s = 100; $s <= 1500; $s += 100 ) {
     $century_segments[] = $_build_seg( $s, $s + 100, (string) $s, 1 );
 }
-// Totale segmenti = 17 (tutti larghezza uguale)
 
-// ── Preferenze dal cookie di sessione ────────────────────────────────────────
+// Preferenze dal cookie di sessione
 $_tl_prefs = [];
 if ( ! empty( $_COOKIE['tl_prefs'] ) ) {
     $decoded = json_decode( wp_unslash( $_COOKIE['tl_prefs'] ), true );
@@ -155,7 +149,7 @@ $_pref_categoria   = sanitize_text_field( $_tl_prefs['categoria'] ?? 'all' );
 $_pref_materiali   = sanitize_text_field( $_tl_prefs['materiali'] ?? '' );
 $_pref_tecniche    = sanitize_text_field( $_tl_prefs['tecniche']  ?? '' );
 
-// Il viewMode dal cookie viene rispettato solo se la vista è permessa dal blocco
+// viewMode dal cookie rispettato solo se permesso dal blocco
 if ( $allowed_views === 'timeline' ) {
     $_pref_view_mode = 'timeline';
 } elseif ( $allowed_views === 'grid' ) {

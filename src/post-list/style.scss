@@ -1,9 +1,4 @@
-/* ═══════════════════════════════════════════════════
-   Post List Block
-   Colori dal tema Twenty Twenty-Five:
-     accent-1 #f5cc5b  accent-2 #b85f29
-     accent-3 #6b2a0b  accent-4 #56814A  accent-5 #f2f2e5
-   ═══════════════════════════════════════════════════ */
+/* Post List — palette TT5 (accent-1 #f5cc5b, accent-2 #b85f29, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #f2f2e5) */
 
 .pl-hidden { display: none !important; }
 
@@ -258,14 +253,11 @@
     display: block;
     transition: opacity 0.4s ease;
 
-    /* Lazy-load: finché data-src è presente l'immagine non ha src; nascosta
-       per evitare alt + icona broken-image, fade-in alla rimozione. */
+    /* Lazy-load: data-src presente → nascosta (no broken-image), fade-in alla rimozione */
     &[data-src] { opacity: 0; }
 }
 
-/* Spinner mostrato sul wrapper finché l'immagine in lazy-load non arriva.
-   La classe .is-loading è aggiunta da view.js prima di settare img.src e
-   rimossa al load/error. */
+/* Spinner durante lazy-load (.is-loading gestita da view.js) */
 .pl-card-img.is-loading::after {
     content: '';
     position: absolute;

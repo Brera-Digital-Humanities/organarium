@@ -22,14 +22,12 @@ store( 'featured-zoom', {
 		startDrag: ( e ) => {
 			const context = getContext();
 			
-			// Rimuoviamo il blocco scale <= 1 qui per permettere 
-			// il cambio del cursore, ma limiteremo il movimento in drag()
 			if ( context.scale <= 1 ) return;
 
 			e.preventDefault();
 			context.isDragging = true;
 			
-			// Calcoliamo l'offset iniziale
+			
 			context.startX = e.clientX - context.translateX;
 			context.startY = e.clientY - context.translateY;
 			
@@ -72,7 +70,7 @@ store( 'featured-zoom', {
 		},
 		containerStyle: () => {
 			const { scale, isDragging } = getContext();
-			// Gestiamo il cursore sul contenitore perché l'immagine ha pointer-events: none
+			// Cursore gestito sul contenitore (img ha pointer-events:none)
 			if ( scale > 1 ) {
 				return { cursor: isDragging ? 'grabbing' : 'grab' };
 			}

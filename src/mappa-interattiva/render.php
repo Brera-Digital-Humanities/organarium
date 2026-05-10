@@ -3,13 +3,13 @@ $map_height = (int) ( $attributes['mapHeight'] ?? 520 );
 $map_style  = in_array( $attributes['mapStyle'] ?? '', [ 'natural', 'warm', 'teal', 'dark' ], true )
               ? $attributes['mapStyle'] : 'natural';
 
-// ── Helper: label breve (tronca descrizione tra parentesi) ────────────────────
+// Tronca descrizione tra parentesi dalla label
 $short_label = static function ( string $label ): string {
     $pos = strpos( $label, ' (' );
     return $pos !== false ? trim( substr( $label, 0, $pos ) ) : trim( $label );
 };
 
-// ── Query posts ───────────────────────────────────────────────────────────────
+// Query posts
 $query_args = [
     'post_type'      => 'post',
     'posts_per_page' => -1,
@@ -69,7 +69,7 @@ if ( $query->have_posts() ) {
     wp_reset_postdata();
 }
 
-// ── Mappa valore→label ACF (uguale alla timeline) ─────────────────────────────
+// Mappa valore→label ACF
 $acf_choices = static function ( string $field_name, $post_id ): array {
     if ( ! function_exists( 'get_field_object' ) ) return [];
     $obj = get_field_object( $field_name, $post_id );
@@ -80,7 +80,7 @@ $cat_choices = $acf_choices( 'categorie_generali', $first_post_id );
 $mat_choices = $acf_choices( 'materiale',          $first_post_id );
 $tec_choices = $acf_choices( 'tecniche',           $first_post_id );
 
-// ── Valori unici per i filtri ─────────────────────────────────────────────────
+// Valori unici per i filtri
 $unique_vals = static function ( array $data, string $key ): array {
     return array_values( array_unique( array_filter( array_column( $data, $key ) ) ) );
 };
@@ -111,7 +111,7 @@ $all_tec = array_map(
     $unique_multi( $posts_data, 'tecnica' )
 );
 
-// ── Context Interactivity API ─────────────────────────────────────────────────
+// Context Interactivity API
 $context = [
     'mapStyle'    => $map_style,
     'posts'       => $posts_data,
@@ -137,10 +137,10 @@ $context = [
      data-wp-interactive="mappa-interattiva"
      data-wp-context='<?php echo wp_json_encode( $context ); ?>'>
 
-    <!-- ═══ RIGA PRINCIPALE (sidebar + filtri attivi + mappa + info panel) ═══ -->
+    <!-- Riga principale -->
     <div class="map-main">
 
-    <!-- ═══ SIDEBAR FILTRI (laterale) ═══ -->
+    <!-- Sidebar filtri -->
     <div class="map-sidebar" data-wp-class--is-open="state.filtersOpen">
 
         <button class="map-sidebar__toggle"
@@ -222,7 +222,7 @@ $context = [
         </div><!-- .map-sidebar__panel -->
     </div><!-- .map-sidebar -->
 
-    <!-- ═══ FILTRI ATTIVI (full-width: sopra mappa su desktop, tra toggle e mappa su mobile) ═══ -->
+    <!-- Filtri attivi -->
     <div class="tl-active-filters">
         <button class="tl-btn tl-btn--link"
                 data-wp-class--tl-hidden="!state.hasActiveFilters"
@@ -249,15 +249,14 @@ $context = [
         </button>
     </div>
 
-    <!-- ═══ AREA MAPPA (canvas + info panel) ═══ -->
+    <!-- Area mappa -->
     <div class="map-area" style="height:<?php echo $map_height; ?>px">
 
-        <!-- ═══ MAPPA ═══ -->
         <div class="map-canvas"
              data-wp-init="callbacks.initMap"
              data-wp-watch="callbacks.updateMarkers"></div>
 
-        <!-- ═══ INFO PANEL (overlay sulla mappa) ═══ -->
+        <!-- Info panel (overlay) -->
         <div class="mp-info-panel">
             <button class="mp-info-panel__close" aria-label="Chiudi">×</button>
             <div class="mp-info-panel__content"></div>

@@ -24,7 +24,7 @@ jerus-organo/
 │   ├── post-list/            # Blocco lista post con infinite scroll e filtri ACF
 │   ├── acf-field/            # Blocco generico per visualizzare un campo ACF
 │   └── style/                # Stile globale del child theme (SCSS)
-├── build/                    # File compilati (generati da wp-scripts)
+├── build/                    # File compilati (generati da wp-scripts, non versionati)
 ├── functions.php             # Registrazione blocchi, enqueue stili, custom excerpt length
 ├── style.css                 # Header child theme (regole in src/style/)
 ├── webpack.config.js         # Estende wp-scripts per aggiungere l'entry SCSS globale
@@ -53,7 +53,7 @@ Il flag `--experimental-modules` abilita i moduli ES6; `--blocks-manifest` gener
 
 Il file `webpack.config.js` estende la configurazione di default di `@wordpress/scripts` per aggiungere un'entry dedicata allo stile globale (`src/style/style.scss` → `build/style/style-style.css`) accanto a quelle dei blocchi. Con `--experimental-modules` la config di default è un array (scripts + modules): l'entry globale viene aggiunta alla config "scripts".
 
-> I file nella cartella `build/` sono il risultato della compilazione e non vanno modificati a mano: le sorgenti si trovano in `src/`.
+> I file nella cartella `build/` sono il risultato della compilazione e non vanno modificati a mano: le sorgenti si trovano in `src/`. **`build/` non è committata nel repository**: dopo `git clone` è obbligatorio eseguire `npm install && npm run build` prima di attivare il tema, altrimenti `register_block_type()` non trova i blocchi compilati e WordPress mostra un errore.
 
 ---
 
@@ -89,6 +89,61 @@ $font-baloo:     var(--wp--preset--font-family--baloo-2);
 Così cambi alla palette o alla tipografia in `theme.json` (o nel Site Editor) si propagano automaticamente all'SCSS senza dover ricompilare. Stili specifici di blocchi core andrebbero preferibilmente messi in `theme.json` → `styles.blocks.*`; l'SCSS è riservato a selettori complessi, hover/transizioni e regole che il Site Editor non copre.
 
 > Gli stili dei blocchi custom (`src/<block>/style.scss`) restano separati: wp-scripts li compila tramite il loro `block.json`.
+
+---
+
+## Modello dati ACF
+
+Il tema dipende da un singolo gruppo di campi **DETTAGLIO SCHEDA** (chiave `group_69dd43782c27d`) assegnato al post type `post`. Posizione `normal`, label sopra, `show_in_rest: 0`, nessun campo obbligatorio, nessuna logica condizionale. Questa sezione documenta la struttura del gruppo in modo da poterlo ricostruire manualmente da ACF → Field Groups.
+
+**Campi del gruppo:**
+
+| Nome (machine) | Tipo ACF | Label | Uso |
+|---|---|---|---|
+| `data`                          | text         | DATA VISUALIZZATA            | Data leggibile mostrata nelle card e nelle schede (es. "ca. 1450", "XII sec."). Decoupled da `data_per_la_timeline` per consentire stringhe descrittive |
+| `ubicazione`                    | text         | UBICAZIONE                   | Luogo di conservazione attuale; visualizzato nelle card di lista, mappa e popup |
+| `autore`                        | text         | AUTORE                       | Attribuzione, libera. Mostrato solo nella scheda dettaglio |
+| `tecnica_e_materiali`           | text         | TECNICA E MATERIALI          | Descrizione testuale estesa (versione discorsiva, distinta dalle scelte controllate `materiale` / `tecniche`) |
+| `dimensioni`                    | text         | DIMENSIONI                   | Misure libere |
+| `provenienza`                   | wysiwyg      | PROVENIENZA                  | Storia delle collocazioni precedenti, rich text full toolbar |
+| `trattato_completo`             | wysiwyg      | TRATTATO COMPLETO            | Trattazione discorsiva dell'opera, rich text |
+| `edizione`                      | text         | EDIZIONE                     | Riferimento bibliografico breve |
+| `fonti`                         | wysiwyg      | FONTI                        | Bibliografia / link, rich text. Visualizzato con bordo superiore come separatore |
+| `data_per_la_timeline`          | number       | DATA NUMERICA PER LA TIMELINE| **Anno come intero**; valori negativi per a.C. (es. `-200`). Chiave di ordinamento per timeline e post-list e di posizionamento dei dot nella century bar |
+| `posizione_per_mappa`           | open_street_map (ACF Extended) | POSIZIONE PER MAPPA | Coordinate del marker mappa. `return_format: "leaflet"`, `zoom: 12`, layer iniziale `OpenStreetMap.Mapnik`. Letto in PHP con `get_post_meta()` per ottenere i dati grezzi (vedi blocco mappa-interattiva) |
+| `didascalia_foto_in_primo_piano`| wysiwyg      | DIDASCALIA FOTO IN PRIMO PIANO | Caption della featured image, mostrata dal blocco `featured-zoom` |
+| `categorie_generali`            | radio        | CATEGORIE PER GENERALI       | Categoria tipologica (single-choice). Filtro nei blocchi timeline / post-list / mappa-interattiva. Vedi tabella sotto |
+| `materiale`                     | checkbox     | MATERIALI                    | Materiali prevalenti (multi-choice). Filtro multiplo. Vedi tabella sotto |
+| `tecniche`                      | radio        | TECNICHE                     | Tecnica esecutiva (single-choice, `allow_null: 1`). Filtro. Vedi tabella sotto |
+
+### Scelte controllate
+
+I tre campi a scelta usano `return_format: "value"`, quindi PHP riceve la chiave (la colonna sinistra). Le label sono risolte a runtime con `get_field_object()` e — per `categorie_generali`, dove la label include una descrizione tra parentesi — abbreviate con un helper PHP che tronca al primo `(`.
+
+**`categorie_generali`** (radio, single-choice, layout verticale):
+
+| Value | Label |
+|---|---|
+| `pittura`     | Pittura su Supporto Mobile *(opere mobili o parte dell'arredo dell'organo: olio, tempera, tela, tavola — pale d'altare, portelle)* |
+| `monumentale` | Decorazione Murale e Architettonica *(parte integrante di un edificio: affresco, stucco, intonaco — organo nel suo contesto spaziale, angeli musicanti)* |
+| `plastica`    | Arti Plastiche e Scultoree *(terracotta anche invetriata, marmo, pietra, bronzo — oggetti tridimensionali)* |
+| `grafica`     | Grafica e Disegno su Carta *(incisione, sanguigna, matita, tecnica mista — disegni di studio e stampe di diffusione)* |
+| `vitree`      | Arti Applicate e Decorative *(vetro, mosaico, intarsio — rese più stilizzate per il vincolo del materiale)* |
+
+**`materiale`** (checkbox, multi-choice, layout verticale):
+
+`tela`, `legno`, `intonaco`, `calce`, `pietra`, `terracotta`, `marmo`, `bronzo`, `carta`, `tessuto`, `vetro`, `piombo` — label = capitalizzazione del value.
+
+**`tecniche`** (radio, single-choice, `allow_null: 1`):
+
+`affresco`, `stucco`, `mosaico`, `scultura`, `modellato`, `bassorilievo`, `incisione`, `disegno`, `vetrata`, `miniatura`, `arazzo` — label = capitalizzazione del value.
+
+### Note di implementazione
+
+- **`data_per_la_timeline`** deve essere intero. La timeline costruisce 17 segmenti di secolo nel range `[-200, 1600)` e posiziona i dot in proporzione al valore; valori fuori range sono ignorati. La post-list ordina con `usort` PHP su questo campo (più affidabile di `WP_Query` su meta numerico senza chiave registrata).
+- **`posizione_per_mappa`** richiede **ACF Extended**: il tipo `open_street_map` non è nel core di ACF. `return_format: "leaflet"` fa sì che `get_field()` restituisca HTML del widget invece dei dati grezzi, perciò il blocco mappa-interattiva legge il campo con `get_post_meta()` per accedere a `lat`/`lng`.
+- **WYSIWYG vs text**: `provenienza`, `trattato_completo`, `fonti`, `didascalia_foto_in_primo_piano` permettono HTML; il blocco `acf-field` li renderizza con `wp_kses_post`. Gli altri campi text vengono passati alla stessa funzione, sicura anche su testo semplice.
+- **`show_in_rest: 0`** sul gruppo: i campi non sono esposti via REST API. Se in futuro servisse l'editing dal block editor con bindings nativi, va impostato a `1` su tutti i campi rilevanti e abilitato `allow_in_bindings`.
 
 ---
 

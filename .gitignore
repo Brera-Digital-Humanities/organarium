@@ -1,1 +1,52 @@
-node_modules
+# Dipendenze
+node_modules/
+vendor/
+
+# Output di build (ricompilare con `npm run build`)
+build/
+
+# Configurazione WordPress (mai committare)
+wp-config.php
+wp-config-sample.php
+.htaccess
+.htpasswd
+
+# Variabili d'ambiente
+.env
+.env.*
+!.env.example
+
+# Dump e file di database
+*.sql
+*.sql.gz
+*.sqlite
+*.sqlite3
+
+# Log
+*.log
+debug.log
+error_log
+
+# Backup e file temporanei
+*.bak
+*.swp
+*.swo
+*.tmp
+*~
+backup/
+backups/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+.directory
+desktop.ini
+
+# IDE / editor
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Configurazioni locali tool-specifiche
+.claude/settings.local.json

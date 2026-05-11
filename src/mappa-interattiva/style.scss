@@ -3,7 +3,7 @@
 @import url('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css');
 @import url('https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css');
 
-// ── Wrapper blocco ────────────────────────────────────────────────────────
+// Wrapper blocco
 .map-block-wrap {
     width: 100%;
     display: flex;
@@ -11,7 +11,7 @@
     gap: 0;
 }
 
-// ── Riga principale (sidebar + filtri attivi + mappa + info panel) ────────
+// Riga principale (sidebar + filtri attivi + mappa + info panel)
 .map-main {
     flex: 0 0 100%;
     display: flex;
@@ -26,7 +26,7 @@
     }
 }
 
-// ── Sidebar filtri (toggle laterale) ──────────────────────────────────────
+// Sidebar filtri (toggle laterale)
 .map-sidebar {
     flex-shrink: 0;
     display: flex;
@@ -57,7 +57,7 @@
     }
 }
 
-// ── Bottone toggle (sempre visibile, testo verticale) ─────────────────────
+// Bottone toggle (sempre visibile, testo verticale) ─
 .map-sidebar__toggle {
     flex-shrink: 0;
     width: 36px;
@@ -95,7 +95,7 @@
     }
 }
 
-// ── Pannello filtri (visibile solo quando is-open) ─────────────────────────
+// Pannello filtri (visibile solo quando is-open) ─
 .map-sidebar__panel {
     flex: 1;
     min-width: 220px;
@@ -115,7 +115,7 @@
     }
 }
 
-// ── Colonne filtro ─────────────────────────────────────────────────────────
+// Colonne filtro 
 .map-sidebar__panel .filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
     
@@ -190,7 +190,7 @@
     }
 }
 
-// ── Filtri attivi (barra full-width sopra sidebar + mappa) ─────────────────
+// Filtri attivi (barra full-width sopra sidebar + mappa)
 .tl-active-filters {
     flex: 0 0 100%;
     order: -1;
@@ -250,7 +250,7 @@
     &.tl-hidden { display: none; }
 }
 
-// ── Area mappa (wrapper canvas + info panel) ──────────────────────────────
+// Area mappa (wrapper canvas + info panel) 
 .map-area {
     flex: 1;
     min-width: 0;
@@ -265,7 +265,7 @@
     }
 }
 
-// ── Canvas Leaflet ─────────────────────────────────────────────────────────
+// Canvas Leaflet 
 .map-canvas {
     width: 100%;
     height: 100%;
@@ -273,7 +273,7 @@
     z-index: 0;
 }
 
-// ── Cluster icon ───────────────────────────────────────────────────────────
+// Cluster icon 
 .map-cluster-icon {
     background: none !important;
     border: none !important;
@@ -287,7 +287,7 @@
     &:hover svg { filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
 }
 
-// ── Pin SVG ────────────────────────────────────────────────────────────────
+// Pin SVG
 .map-pin-icon {
     background: none !important;
     border: none !important;
@@ -301,7 +301,7 @@
     &:hover svg { filter: drop-shadow(0 4px 8px rgba(0,0,0,.45)); }
 }
 
-// ── Info panel (overlay sulla mappa, 300 px da destra) ────────────────────
+// Info panel (overlay sulla mappa, 300 px da destra) 
 .mp-info-panel {
     position: absolute;
     top: 0;
@@ -340,7 +340,7 @@
 
 .mp-info-panel__content { flex: 1; }
 
-// ── Card nel panel ─────────────────────────────────────────────────────────
+// Card nel panel 
 
 .mp-thumb {
     width: 100%;

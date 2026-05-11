@@ -135,7 +135,7 @@ $context = [
 <div class="map-block-wrap"
      style="--map-height:<?php echo $map_height; ?>px"
      data-wp-interactive="mappa-interattiva"
-     data-wp-context='<?php echo wp_json_encode( $context ); ?>'>
+     data-wp-context="<?php echo esc_attr( wp_json_encode( $context ) ); ?>">
 
     <!-- Riga principale -->
     <div class="map-main">
@@ -159,7 +159,7 @@ $context = [
                             data-wp-on--click="actions.clearFilters">Tutte</button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
@@ -175,7 +175,7 @@ $context = [
                 <div class="pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
@@ -191,7 +191,7 @@ $context = [
                 <div class="pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"

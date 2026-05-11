@@ -129,7 +129,7 @@ $context = [
 
 <div
     data-wp-interactive="post-list"
-    data-wp-context='<?php echo wp_json_encode( $context ); ?>'
+    data-wp-context="<?php echo esc_attr( wp_json_encode( $context ) ); ?>"
     data-wp-init="callbacks.init"
     data-wp-watch--lazy="callbacks.lazyLoadImages"
     <?php echo get_block_wrapper_attributes( [ 'class' => 'pl-wrap' ] ); ?>
@@ -161,7 +161,7 @@ $context = [
                             data-wp-on--click="actions.clearFilters">Tutte</button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pl-pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
@@ -177,7 +177,7 @@ $context = [
                 <div class="pl-pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pl-pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
@@ -193,7 +193,7 @@ $context = [
                 <div class="pl-pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pl-pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
@@ -235,7 +235,7 @@ $context = [
         <?php foreach ( $posts_data as $index => $post ) : ?>
         <article
             class="pl-card"
-            data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $index ] ); ?>'
+            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $index ] ) ); ?>"
             data-wp-class--pl-hidden="!state.isVisible"
         >
             <a class="pl-card-link" href="<?php echo esc_url( $post['url'] ); ?>">

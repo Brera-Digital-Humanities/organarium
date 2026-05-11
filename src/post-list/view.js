@@ -213,10 +213,11 @@ store( 'post-list', {
         // Lazy-load thumbnail: data-src→src solo dopo load completato (spinner via CSS)
         lazyLoadImages() {
             const ctx = getContext();
+            if ( ! ctx ) return;
             void ctx.visibleCount;
-            void ctx.filters.categoria;
-            void ctx.filters.materiali;
-            void ctx.filters.tecniche;
+            void ctx.filters?.categoria;
+            void ctx.filters?.materiali;
+            void ctx.filters?.tecniche;
 
             requestAnimationFrame( () => {
                 document.querySelectorAll(

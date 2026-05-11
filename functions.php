@@ -25,7 +25,7 @@ function jerus_enqueue_styles() {
 			'jerus-global',
 			get_stylesheet_directory_uri() . '/build/style/style-style.css',
 			array( 'twentytwentyfive-style' ),
-			filemtime( $global_css )
+			filemtime( $global_css ) 
 		);
 	}
 }

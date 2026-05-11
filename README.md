@@ -136,7 +136,7 @@ I tre campi a scelta usano `return_format: "value"`, quindi PHP riceve la chiave
 
 **`tecniche`** (radio, single-choice, `allow_null: 1`):
 
-`affresco`, `stucco`, `mosaico`, `scultura`, `modellato`, `bassorilievo`, `incisione`, `disegno`, `vetrata`, `miniatura`, `arazzo` — label = capitalizzazione del value.
+`affresco`, `stucco`, `mosaico`, `scultura`, `modellato`, `bassorilievo`, `incisione`, `disegno`, `vetrata`, `miniatura`, `arazzo`, `pittura`, `intarsio` — label = capitalizzazione del value.
 
 ### Note di implementazione
 
@@ -184,9 +184,9 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 **Funzionalità:**
 
 *Century Bar*
-- Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti** di larghezza uguale (1/17 del container ciascuno)
+- Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti**: i segmenti che contengono almeno un post si dividono lo spazio rimanente in parti uguali (`flex: 1 1 0`), mentre i segmenti vuoti hanno larghezza fissa (60 px desktop / 30 px mobile), sono `disabled` e renderizzati con opacity ridotta
 - Ogni segmento corrisponde a un secolo; il primo copre 200 a.C. – 0 con etichetta `200 a.C.`, il secondo copre 0 – 100 d.C. con etichetta `0`, gli altri seguono fino al segmento 1500 – 1600
-- Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px) posizionati proporzionalmente al `sort_key` del post all'interno del range; i dot vengono impilati verticalmente in base alle decine degli anni es. 0-9, 10-19
+- Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px desktop / 4×4 px mobile) posizionati proporzionalmente al `sort_key` del post all'interno del range; i dot vengono impilati verticalmente in bucket da **5 anni** (es. 0-4, 5-9, 10-14)
 - Il segmento attivo è colorato con `accent-4`; il dot del post in evidenza nel carousel diventa `contrast` (nero)
 - Cliccando un segmento: carica i post del quel secolo, azzera tutti i filtri e chiude il pannello filtri
 - Su mobile (< 768 px) la barra si distribuisce su **3 righe** (6 + 6 + 5 segmenti)
@@ -194,6 +194,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 *Vista Timeline*
 - Carousel 3D con prospettiva CSS (`perspective: 500vw`) e fino a 5 card visibili simultaneamente (attiva, prev/next, prev2/next2)
 - Navigazione con pulsanti freccia, tastiera (←/→), **rotella del mouse** sulla viewport o sullo scrubber e **swipe touch** orizzontale sulla viewport (mobile): la viewport ha `touch-action: pan-y`, quindi lo scroll verticale della pagina resta nativo mentre l'asse orizzontale viene riconosciuto come navigazione del carousel (soglia 50 px, direzione prevalentemente orizzontale)
+- I pulsanti freccia si auto-nascondono quando i post visibili (dopo i filtri) sono ≤ 1 (niente da navigare)
 - **Click su una card non-attiva**: la porta in primo piano (hit-test via `getBoundingClientRect` sulle card non-attive, perché il contesto 3D `preserve-3d` non delega in modo affidabile i pointer event ai figli)
 - Scrubber timeline trascinabile (desktop) con marker per ogni post e label con l'anno; può essere nascosto dal Site Editor e si auto-nasconde quando i post visibili (dopo i filtri) sono meno di 3
 
@@ -205,7 +206,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 - Pannello filtri a scomparsa con pill selezionabili per:
   - **Categoria** (campo ACF `categorie_generali`)
   - **Materiale** (campo ACF `materiale`)
-  - **Tecnica** (campo ACF `tecnica`)
+  - **Tecnica** (campo ACF `tecniche`)
 - I filtri agiscono sui post del **secolo selezionato** nella century bar
 - Le pill hanno tre stati:
   - **attiva** — selezionata
@@ -226,7 +227,8 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 | Attributo | Valori | Descrizione |
 |---|---|---|
-| `postSource` | `all` / `current_category` | Sorgente post da mostrare |
+| `postSource` | `all` / `current_category` / `fixed_category` | Sorgente post da mostrare |
+| `selectedCategory` | ID categoria | Categoria fissa (se `fixed_category`) |
 | `allowedViews` | `both` / `timeline` / `grid` | Viste disponibili per l'utente |
 | `showScrubber` | `true` / `false` | Mostra o nasconde lo scrubber timeline (visibile solo se `allowedViews ≠ grid`) |
 

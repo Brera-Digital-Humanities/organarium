@@ -50,6 +50,10 @@ store( 'timeline-3d', {
             return store( 'timeline-3d' ).state.visiblePosts.length >= 3;
         },
 
+        get showNavBtn() {
+            return store( 'timeline-3d' ).state.visiblePosts.length > 1;
+        },
+
         get counterCurrent() {
             return getContext().activeIndex + 1;
         },

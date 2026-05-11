@@ -113,7 +113,7 @@ $all_tec = array_map(
 // Century segments — 17 segmenti larghezza uguale (200 a.C.→0, 0→100, poi 100→1500 a passi di 100)
 $_build_seg = static function ( int $seg_min, int $seg_max, string $label, int $units ) use ( $posts_data ): array {
     $dots_by_x   = [];
-    $bucket_size = 10;
+    $bucket_size = 5;
     foreach ( $posts_data as $pi => $post ) {
         $sk = (int) $post['sort_key'];
         if ( $sk >= $seg_min && $sk < $seg_max ) {
@@ -133,6 +133,20 @@ $century_segments[] = $_build_seg( 0, 100, '0', 1 );
 for ( $s = 100; $s <= 1500; $s += 100 ) {
     $century_segments[] = $_build_seg( $s, $s + 100, (string) $s, 1 );
 }
+
+// Max stack di dots per ogni segmento (altezza indipendente) + conteggio totale dot
+foreach ( $century_segments as &$_seg ) {
+    $_seg_max = 1;
+    $_seg_total = 0;
+    foreach ( $_seg['dots_by_x'] as $_indices ) {
+        $c = count( $_indices );
+        $_seg_total += $c;
+        if ( $c > $_seg_max ) $_seg_max = $c;
+    }
+    $_seg['max_stack']  = $_seg_max;
+    $_seg['total_dots'] = $_seg_total;
+}
+unset( $_seg );
 
 // Preferenze dal cookie di sessione
 $_tl_prefs = [];
@@ -182,7 +196,7 @@ $context = [
 
 <div
     data-wp-interactive="timeline-3d"
-    data-wp-context='<?php echo wp_json_encode( $context ); ?>'
+    data-wp-context="<?php echo esc_attr( wp_json_encode( $context ) ); ?>"
     data-wp-init="callbacks.init"
     data-wp-watch--save="callbacks.savePrefs"
     data-wp-watch--lazy="callbacks.lazyLoadImages"
@@ -244,7 +258,7 @@ $context = [
                             data-wp-on--click="actions.clearFilters">Tutte</button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-class--invisible="state.isPillInvisible"
@@ -261,7 +275,7 @@ $context = [
                 <div class="pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'materiali', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-class--invisible="state.isPillInvisible"
@@ -278,7 +292,7 @@ $context = [
                 <div class="pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pill"
-                            data-wp-context='<?php echo wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ); ?>'
+                            data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'tecniche', 'filterVal' => $opt['value'] ] ) ); ?>"
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-class--invisible="state.isPillInvisible"
@@ -323,10 +337,12 @@ $context = [
     <!-- ═══ CENTURY BAR ═══ -->
     <div class="tl-century-bar">
         <?php foreach ( $century_segments as $seg ) : ?>
-        <button class="century-seg"
+        <?php $_is_empty = $seg['total_dots'] === 0; ?>
+        <button class="century-seg<?php echo $_is_empty ? ' is-empty' : ''; ?>"
                 type="button"
-                style="flex: 0 0 calc(100% / 17)"
-                data-wp-context='<?php echo wp_json_encode( [ 'segMin' => $seg['seg_min'], 'segMax' => $seg['seg_max'] ] ); ?>'
+                <?php disabled( $_is_empty ); ?>
+                style="--tl-seg-stack:<?php echo (int) $seg['max_stack']; ?>"
+                data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'segMin' => $seg['seg_min'], 'segMax' => $seg['seg_max'] ] ) ); ?>"
                 data-wp-class--is-active="state.isCenturyActive"
                 data-wp-on--click="actions.setCentury">
             <div class="century-seg__head">
@@ -336,9 +352,9 @@ $context = [
                 <?php foreach ( $seg['dots_by_x'] as $x_pct => $indices ) : ?>
                     <?php foreach ( $indices as $stack_i => $pi ) : ?>
                     <div class="century-dot"
-                         data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $pi ] ); ?>'
+                         data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $pi ] ) ); ?>"
                          data-wp-class--is-active="state.isDotActive"
-                         style="left:<?php echo $x_pct; ?>%;top:<?php echo 4 + $stack_i * 8; ?>px"></div>
+                         style="left:<?php echo $x_pct; ?>%;--tl-stack-i:<?php echo (int) $stack_i; ?>"></div>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
             </div>
@@ -359,7 +375,7 @@ $context = [
                 <article
                     class="timeline-card"
                     data-post-id="<?php echo (int) $post['id']; ?>"
-                    data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $index ] ); ?>'
+                    data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $index ] ) ); ?>"
                     data-wp-class--is-hidden="!state.isVisible"
                     data-wp-class--is-active="state.isActive"
                     data-wp-class--is-prev="state.isPrev"
@@ -395,7 +411,8 @@ $context = [
             </div><!-- .cards-container -->
         </div><!-- .timeline-viewport -->
 
-        <nav class="nav-buttons" aria-label="Navigazione timeline">
+        <nav class="nav-buttons" aria-label="Navigazione timeline"
+                data-wp-class--tl-hidden="!state.showNavBtn">
             <button class="nav-btn nav-btn--prev"
                     data-wp-on--click="actions.prev"
                     data-wp-bind--disabled="state.isFirst">
@@ -428,7 +445,7 @@ $context = [
 
                 <?php foreach ( $posts_data as $index => $post ) : ?>
                 <button class="scrubber-marker"
-                        data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $index ] ); ?>'
+                        data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $index ] ) ); ?>"
                         data-wp-class--is-hidden="!state.isVisible"
                         data-wp-class--is-active="state.isActive"
                         data-wp-style--left="state.markerLeft"
@@ -454,7 +471,7 @@ $context = [
 
         <?php foreach ( $posts_data as $index => $post ) : ?>
         <div class="grid-card"
-             data-wp-context='<?php echo wp_json_encode( [ 'postIndex' => $index ] ); ?>'
+             data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $index ] ) ); ?>"
              data-wp-class--is-hidden="!state.isVisible"
              data-wp-style--order="state.gridOrder">
             <a class="gc-link" href="<?php echo esc_url( $post['url'] ); ?>">

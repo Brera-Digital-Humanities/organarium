@@ -1,6 +1,6 @@
 /* Timeline — palette TT5 (accent-1 #f5cc5b, accent-2 #b85f29, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #f2f2e5) */
 
-/* ── Utility ── */
+/* Utility */
 .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -237,7 +237,7 @@
     @media (min-width: 768px) {
         gap: 1rem;
     }
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .tl-current-century {
@@ -280,7 +280,12 @@
 ══════════════════════════════ */
 .timeline-view {
     display: none;
-    &.show { display: block; }
+    &.show { display: block; 
+    overflow: hidden;}
+    margin-top: 2rem;
+    @media (max-width: 768px) {
+        margin-top: 1.5rem;
+    }
 }
 
 .timeline-viewport {
@@ -288,9 +293,16 @@
     width: 100vw;
     margin-left: calc(-50vw + 50%);
 
-    /* Altezza full viewport */
-    height: 75vh;
-    height: 75svh; /* browser moderni: esclude la chrome bar del mobile */
+    /* Altezza calcolata sulla card attiva: thumb (16/9) + spazio per testo + margine shadow */
+    --tl-card-w: 87vw;
+    --tl-card-content: 20rem;
+    height: calc(var(--tl-card-w) * 9 / 16 + var(--tl-card-content));
+    max-height: 75vh;
+    max-height: 75svh;
+
+    @media (min-width: 768px) {
+        --tl-card-w: 33vw;
+    }
 
     perspective: 500vw;
     perspective-origin: 50% 38%;
@@ -310,8 +322,9 @@
 
 .timeline-card {
     position: absolute;
-    top: 50%;
+    top: 0;
     left: 50%;
+    transform-origin: 50% 50%;
     transform-style: preserve-3d;
     opacity: 0;
     pointer-events: none;
@@ -319,12 +332,13 @@
         transform 0.55s cubic-bezier(0.23, 1, 0.32, 1),
         opacity   0.55s cubic-bezier(0.23, 1, 0.32, 1);
 
-    /* ── Mobile: card larga quanto il device, solo carta attiva ── */
+    /*  Mobile: card larga quanto il device, solo carta attiva */
     width: 87vw;
-    transform: translate(-50%, -50%) translateZ(-600px) scale(0.35);
+    transform: translate(-50%, 0) translateZ(-600px) scale(0.35);
 
+    /* Card attiva: top edge ancorato al viewport (scale 1 → nessun gap dall'alto) */
     &.is-active {
-        transform: translate(-50%, -50%) translateZ(0) scale(1);
+        transform: translate(-50%, 0) translateZ(0) scale(1);
         opacity: 1;
         pointer-events: auto;
     }
@@ -335,34 +349,35 @@
         pointer-events: none;
     }
 
-    /* ── Desktop: 5 posizioni, effetto 3D ridotto e carte allargate ── */
+    /* Desktop: laterali con stesso top edge, ma scale<1 attorno al centro le porta
+       a una "distanza dall'alto proporzionale alla loro dimensione" naturalmente */
     @media (min-width: 768px) {
         width: 33vw;
-        transform: translate(-50%, -50%) translateZ(-400px) scale(0.35);
+        transform: translate(-50%, 0) translateZ(-400px) scale(0.35);
 
         &.is-prev {
-            transform: translate(calc(-50% - 25vw), -50%) translateZ(-90px) rotateY(7deg) scale(0.82);
+            transform: translate(calc(-50% - 25vw), 0) translateZ(-90px) rotateY(7deg) scale(0.82);
             opacity: 0.65;
             pointer-events: auto;
             cursor: pointer;
         }
 
         &.is-next {
-            transform: translate(calc(-50% + 25vw), -50%) translateZ(-90px) rotateY(-7deg) scale(0.82);
+            transform: translate(calc(-50% + 25vw), 0) translateZ(-90px) rotateY(-7deg) scale(0.82);
             opacity: 0.65;
             pointer-events: auto;
             cursor: pointer;
         }
 
         &.is-prev2 {
-            transform: translate(calc(-50% - 40vw), -50%) translateZ(-160px) rotateY(11deg) scale(0.65);
+            transform: translate(calc(-50% - 40vw), 0) translateZ(-160px) rotateY(11deg) scale(0.65);
             opacity: 0.3;
             pointer-events: auto;
             cursor: pointer;
         }
 
         &.is-next2 {
-            transform: translate(calc(-50% + 40vw), -50%) translateZ(-160px) rotateY(-11deg) scale(0.65);
+            transform: translate(calc(-50% + 40vw), 0) translateZ(-160px) rotateY(-11deg) scale(0.65);
             opacity: 0.3;
             pointer-events: auto;
             cursor: pointer;
@@ -370,14 +385,14 @@
     }
 }
 
-/* ── Link immagine + titolo ── */
+/*  Link immagine + titolo */
 .card-link {
     display: block;
     text-decoration: none;
     color: inherit;
 }
 
-/* ── Interno card ── */
+/* Interno card */
 .card-inner {
     background: var(--wp--preset--color--accent-5, #f2f2e5);
     overflow: hidden;
@@ -385,9 +400,7 @@
     transition: box-shadow 0.55s cubic-bezier(0.23, 1, 0.32, 1);
 
     .is-active & {
-        box-shadow:
-            0 5px 30px rgba(0,0,0,.14),
-            0 0 0 0 color-mix(in srgb, var(--wp--preset--color--contrast, #111) 22%, transparent);
+        box-shadow: 0 10px 24px rgba(0,0,0,.10);
     }
 }
 
@@ -424,6 +437,10 @@
     padding: 0 1rem;
     font-weight: 700;
     line-height: 1.3;
+    height: 4.5rem;
+    @media (min-width: 768px) {
+        height: 3.5rem;
+    }
 }
 
 .card-excerpt {
@@ -434,6 +451,11 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    height: 7rem;
+    @media (max-width: 768px) {
+        height: 5rem;
+        font-size: var(--wp--preset--font-size--medium);
+    }
 }
 
 .card-tag {
@@ -447,12 +469,12 @@
     text-transform: uppercase;
 }
 
-/* ── Bottoni navigazione ── */
+/* Bottoni navigazione */
 .nav-buttons {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-top: 1.25rem;
+    margin-top: 0.5rem;
 }
 
 .nav-btn {
@@ -493,7 +515,7 @@
     cursor: pointer;
     user-select: none;
     touch-action: pan-y;
-    margin-top: 2rem;
+    margin-top: 1rem;
 
     @media (min-width: 768px) {
         display: block;
@@ -691,13 +713,21 @@
    CENTURY BAR
 ══════════════════════════════ */
 .tl-century-bar {
+    --tl-dot-gap: 7px;
+    --tl-dot-offset: 4px;
+    --tl-dot-size: 5px;
+
     display: flex;
+    align-items: flex-start;
     width: 100%;
-    margin: 1.5rem 0 0;
+    margin: 0.5rem 0 0;
     position: relative;
     overflow: hidden;
 
     @media (max-width: 767px) {
+        --tl-dot-gap: 5px;
+        --tl-dot-offset: 3px;
+        --tl-dot-size: 4px;
         flex-wrap: wrap;
     }
 }
@@ -712,17 +742,33 @@
     padding: 0.4rem 0 0;
     text-align: left;
     color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 35%, transparent);
-    transition: color 0.2s;
+    transition: color 0.2s, flex-basis 0.3s ease;
 
+    /* Desktop: i segmenti con dot si dividono lo spazio rimanente in parti uguali,
+       quelli vuoti restano a 40px fissi */
+    flex: 1 1 0;
+
+    &.is-empty {
+        flex: 0 0 60px;
+        cursor: default;
+        opacity: 0.4;
+    }
+
+    /* Mobile: stessa logica ma con min-width sui non-vuoti per consentire il wrap
+       naturale su 3 righe; vuoti più stretti (30px) per non rubare spazio */
     @media (max-width: 767px) {
-        flex: 0 0 calc(100% / 6) !important;
+        flex: 1 1 50px;
+
+        &.is-empty {
+            flex: 0 0 30px;
+        }
     }
 
     &.is-active {
         color: var(--wp--preset--color--accent-4, #56814A);
     }
 
-    &:hover:not(.is-active) {
+    &:hover:not(.is-active):not(.is-empty) {
         color: var(--wp--preset--color--contrast, #111);
     }
 
@@ -765,14 +811,16 @@
 .century-seg__dots {
     position: relative;
     border-top: 1px solid currentColor;
-    height: 45px;
+    height: calc(var(--tl-dot-offset) + var(--tl-dot-gap) * var(--tl-seg-stack, 1) + var(--tl-dot-size));
+    min-height: 18px;
     overflow: visible;
 }
 
 .century-dot {
     position: absolute;
-    width: 5px;
-    height: 5px;
+    top: calc(var(--tl-dot-offset) + var(--tl-stack-i, 0) * var(--tl-dot-gap));
+    width: var(--tl-dot-size);
+    height: var(--tl-dot-size);
     border-radius: 2px;
     background: currentColor;
     opacity: 0.45;

@@ -358,8 +358,17 @@ store( 'timeline-3d', {
             ctx.filters.categoria     = 'all';
             ctx.filters.materiali     = '';
             ctx.filters.tecniche      = '';
-            ctx.activeIndex           = 0;
             ctx.filtersOpen           = false;
+
+            // In vista 3D, se i post del nuovo segmento sono più di 4,
+            // porta in primo piano la terza card (idx 2) anziché la prima.
+            // Non interferisce col ripristino da cookie: si attiva solo
+            // sul click utente al segmento, non all'init.
+            const count = ctx.posts.filter( ( p ) => {
+                const sk = p.sort_key ?? 0;
+                return sk >= ctx.segMin && sk < ctx.segMax;
+            } ).length;
+            ctx.activeIndex = ( ctx.viewMode === 'timeline' && count > 4 ) ? 2 : 0;
         },
 
         setViewTimeline() {

@@ -1,4 +1,4 @@
-/* Timeline — palette TT5 (accent-1 #f5cc5b, accent-2 #b85f29, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #f2f2e5) */
+/* Timeline — palette TT5 (accent-1 #BF8D50, accent-2 #BF8D50, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #FFFEEF) */
 
 /* Utility */
 .sr-only {
@@ -97,7 +97,7 @@
 
     &.active {
         background: var(--wp--preset--color--contrast, #111);
-        color: var(--wp--preset--color--accent-5, #f2f2e5);
+        color: var(--wp--preset--color--accent-5, #FFFEEF);
         border-color: var(--wp--preset--color--contrast, #111);
     }
 
@@ -135,8 +135,8 @@
     --_pill-bg: var(--wp--preset--color--contrast, #111);
 
     &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
-    &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #f5cc5b); }
-    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #b85f29); }
+    &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #BF8D50); }
+    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #BF8D50); }
 
     @media (min-width: 767px) {
         max-width: 31%;
@@ -394,7 +394,7 @@
 
 /* Interno card */
 .card-inner {
-    background: var(--wp--preset--color--accent-5, #f2f2e5);
+    background: var(--wp--preset--color--accent-5, #FFFEEF);
     overflow: hidden;
     box-shadow: 0 4px 28px rgba(0,0,0,.07);
     transition: box-shadow 0.55s cubic-bezier(0.23, 1, 0.32, 1);
@@ -607,7 +607,7 @@
 }
 
 .grid-card {
-    background: var(--wp--preset--color--accent-5, #f2f2e5);
+    background: var(--wp--preset--color--accent-5, #FFFEEF);
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.15s;

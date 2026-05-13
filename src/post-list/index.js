@@ -9,7 +9,7 @@ registerBlockType( metadata.name, {
 
     edit: ( { attributes, setAttributes } ) => {
         const blockProps = useBlockProps( {
-            style: { padding: '2rem', background: '#f2f2e5', textAlign: 'center' },
+            style: { padding: '2rem', background: '#FFFEEF', textAlign: 'center' },
         } );
 
         const categories = useSelect( ( select ) =>

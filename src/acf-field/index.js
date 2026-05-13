@@ -28,7 +28,7 @@ registerBlockType( metadata.name, {
         const blockProps = useBlockProps( {
             style: {
                 padding: '1rem',
-                background: '#f2f2e5',
+                background: '#FFFEEF',
                 border: '1px dashed rgba(0,0,0,0.2)',
             },
         } );

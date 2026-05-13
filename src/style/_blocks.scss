@@ -22,3 +22,17 @@
     color: $color-accent-3 !important;
   }
 }
+
+.cover{
+  position: relative;
+  .dida{
+    position: absolute;
+    bottom: 0;
+    &.right {
+      right: 0;
+      }
+    &.left {
+        left: 0;
+        }
+  }
+}

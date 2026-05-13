@@ -23,16 +23,19 @@
   }
 }
 
-.cover{
+.cover {
   position: relative;
-  .dida{
+
+  .dida {
     position: absolute;
     bottom: 0;
+
     &.right {
       right: 0;
-      }
+    }
+
     &.left {
-        left: 0;
-        }
+      left: 0;
+    }
   }
 }

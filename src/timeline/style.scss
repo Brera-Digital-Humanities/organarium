@@ -713,9 +713,9 @@
    CENTURY BAR
 ══════════════════════════════ */
 .tl-century-bar {
-    --tl-dot-gap: 7px;
+    --tl-dot-gap: 6px;
     --tl-dot-offset: 4px;
-    --tl-dot-size: 5px;
+    --tl-dot-size: 4px;
 
     display: flex;
     align-items: flex-start;
@@ -745,17 +745,16 @@
     transition: color 0.2s, flex-basis 0.3s ease;
 
     /* Desktop: i segmenti con dot si dividono lo spazio rimanente in parti uguali,
-       quelli vuoti restano a 40px fissi */
+       quelli vuoti restano a 50px fissi */
     flex: 1 1 0;
 
     &.is-empty {
-        flex: 0 0 60px;
+        flex: 0 0 50px;
         cursor: default;
         opacity: 0.4;
     }
 
-    /* Mobile: stessa logica ma con min-width sui non-vuoti per consentire il wrap
-       naturale su 3 righe; vuoti più stretti (30px) per non rubare spazio */
+    /* Mobile: wrap su 3 righe; vuoti più stretti */
     @media (max-width: 767px) {
         flex: 1 1 50px;
 
@@ -821,7 +820,7 @@
     top: calc(var(--tl-dot-offset) + var(--tl-stack-i, 0) * var(--tl-dot-gap));
     width: var(--tl-dot-size);
     height: var(--tl-dot-size);
-    border-radius: 2px;
+    //border-radius: 2px;
     background: currentColor;
     opacity: 0.45;
     transition: opacity 0.2s, background 0.2s;

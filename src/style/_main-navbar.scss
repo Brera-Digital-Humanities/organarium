@@ -2,18 +2,10 @@
 
 .logo {
     a{
-    @media (max-width: 767px) {
-        font-size: 20px; 
-        line-height: 1;
-        }
     &:hover { text-decoration: none; }
     }
 }
 @media (max-width: 767px) {
-.custom-logo{
-        width: 26px;
-        margin-top: 5px;
-}
 
 
 .logo-title{

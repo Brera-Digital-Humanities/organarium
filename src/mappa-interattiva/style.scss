@@ -1,4 +1,4 @@
-/* Mappa Interattiva — palette TT5 (accent-1 #D9B813, accent-2 #BF8D50, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #FFFEEF) */
+/* Mappa Interattiva — palette TT5 (accent-1 #D9B813, accent-2 #DAC898, accent-3 #6b2a0b, accent-4 #819671, accent-5 #FFFEEF) */
 
 @import url('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css');
 @import url('https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css');
@@ -119,9 +119,9 @@
 .map-sidebar__panel .filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
     
-    &.filter-col--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
+    &.filter-col--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #819671); }
     &.filter-col--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #D9B813); }
-    &.filter-col--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #BF8D50); }
+    &.filter-col--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #DAC898); }
     &.filter-col--accent-3 { --_pill-bg: color-mix(in srgb, var(--wp--preset--color--accent-3, #6b2a0b) 30%, var(--wp--preset--color--accent-5, #FFFEEF)); }
 }
 
@@ -241,9 +241,9 @@
     font-size: 1rem;
     cursor: pointer;
 
-    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #56814A); }
+    &.filter-col--accent-4 { color: var(--wp--preset--color--accent-4, #819671); }
     &.filter-col--accent-1 { color: var(--wp--preset--color--accent-1, #D9B813); }
-    &.filter-col--accent-2 { color: var(--wp--preset--color--accent-2, #BF8D50); }
+    &.filter-col--accent-2 { color: var(--wp--preset--color--accent-2, #DAC898); }
     &.filter-col--accent-3 { color: var(--wp--preset--color--accent-3, #6b2a0b); }
     &:focus { outline: none; }
 
@@ -271,6 +271,7 @@
     height: 100%;
     background: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 6%, transparent);
     z-index: 0;
+    font-family: var(--wp--preset--font-family--baloo-2) !important;
 }
 
 // Cluster icon 

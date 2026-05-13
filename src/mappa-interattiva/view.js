@@ -26,19 +26,19 @@ const STYLES = {
 };
 
 function makeIcon() {
-    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#b85f29" stroke="#6b2a0b" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#f5cc5b"/></svg>`;
+    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#BF8D50" stroke="#6b2a0b" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#D9B813"/></svg>`;
     return L.divIcon({ html: svg, className: 'map-pin-icon', iconSize: [28,28], iconAnchor: [14,14] });
 }
 
 function makeIconSelected() {
-    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#f5cc5b" stroke="#b85f29" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#6b2a0b"/></svg>`;
+    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#D9B813" stroke="#BF8D50" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#6b2a0b"/></svg>`;
     return L.divIcon({ html: svg, className: 'map-pin-icon map-pin-icon--selected', iconSize: [28,28], iconAnchor: [14,14] });
 }
 
 function makeClusterIcon( count ) {
     const s    = count < 10 ? 38 : count < 100 ? 46 : 54;
     const half = s / 2;
-    const svg  = `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg"><circle cx="${half}" cy="${half}" r="${half - 2}" fill="#b85f29" stroke="#6b2a0b" stroke-width="2"/><text x="${half}" y="${half}" text-anchor="middle" dominant-baseline="central" fill="#f5cc5b" font-size="${s < 42 ? 14 : 16}" font-weight="700" font-family="sans-serif">${count}</text></svg>`;
+    const svg  = `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg"><circle cx="${half}" cy="${half}" r="${half - 2}" fill="#BF8D50" stroke="#6b2a0b" stroke-width="2"/><text x="${half}" y="${half}" text-anchor="middle" dominant-baseline="central" fill="#D9B813" font-size="${s < 42 ? 14 : 16}" font-weight="700" font-family="sans-serif">${count}</text></svg>`;
     return L.divIcon( { html: svg, className: 'map-cluster-icon', iconSize: [ s, s ], iconAnchor: [ half, half ] } );
 }
 

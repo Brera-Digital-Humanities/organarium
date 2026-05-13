@@ -1,4 +1,4 @@
-/* Post List — palette TT5 (accent-1 #D9B813, accent-2 #BF8D50, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #FFFEEF) */
+/* Post List — palette TT5 (accent-1 #D9B813, accent-2 #DAC898, accent-3 #6b2a0b, accent-4 #819671, accent-5 #FFFEEF) */
 
 .pl-hidden { display: none !important; }
 
@@ -79,9 +79,9 @@
 .pl-filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
 
-    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
+    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #819671); }
     &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #D9B813); }
-    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #BF8D50); }
+    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #DAC898); }
 
     @media (min-width: 767px) {
     max-width: 31%;

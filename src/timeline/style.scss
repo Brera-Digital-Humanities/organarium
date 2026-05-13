@@ -1,4 +1,4 @@
-/* Timeline — palette TT5 (accent-1 #BF8D50, accent-2 #BF8D50, accent-3 #6b2a0b, accent-4 #56814A, accent-5 #FFFEEF) */
+/* Timeline — palette TT5 (accent-1 #DAC898, accent-2 #DAC898, accent-3 #6b2a0b, accent-4 #819671, accent-5 #FFFEEF) */
 
 /* Utility */
 .sr-only {
@@ -134,9 +134,9 @@
 .filter-col {
     --_pill-bg: var(--wp--preset--color--contrast, #111);
 
-    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #56814A); }
-    &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #BF8D50); }
-    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #BF8D50); }
+    &--accent-4 { --_pill-bg: var(--wp--preset--color--accent-4, #819671); }
+    &--accent-1 { --_pill-bg: var(--wp--preset--color--accent-1, #DAC898); }
+    &--accent-2 { --_pill-bg: var(--wp--preset--color--accent-2, #DAC898); }
 
     @media (min-width: 767px) {
         max-width: 31%;
@@ -652,7 +652,7 @@
     height: 32px;
     margin: -16px 0 0 -16px;
     border: 3px solid color-mix(in srgb, var(--wp--preset--color--contrast, #111) 25%, transparent);
-    border-top-color: var(--wp--preset--color--accent-4, #56814A);
+    border-top-color: var(--wp--preset--color--accent-4, #819671);
     border-radius: 50%;
     animation: tl-spin 0.8s linear infinite;
 }
@@ -764,7 +764,7 @@
     }
 
     &.is-active {
-        color: var(--wp--preset--color--accent-4, #56814A);
+        color: var(--wp--preset--color--accent-4, #819671);
     }
 
     &:hover:not(.is-active):not(.is-empty) {

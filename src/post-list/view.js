@@ -4,15 +4,20 @@ store( 'post-list', {
 
     state: {
 
-        // ── Post filtrati per i tre gruppi ACF ────────────────────────────────
+        // ── Post filtrati + ordinati per sort_key numerico ────────────────────
         get filteredPosts() {
-            const { posts, filters } = getContext();
-            return posts.filter( ( post ) => {
-                const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
-                const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
-                const matchTec = filters.tecniche  === '' || post.tecnica.includes( filters.tecniche );
-                return matchCat && matchMat && matchTec;
-            } );
+            const { posts, filters, sortAsc } = getContext();
+            return posts
+                .filter( ( post ) => {
+                    const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
+                    const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
+                    const matchTec = filters.tecniche  === '' || post.tecnica.includes( filters.tecniche );
+                    return matchCat && matchMat && matchTec;
+                } )
+                .sort( ( a, b ) => sortAsc
+                    ? ( a.sort_key ?? 0 ) - ( b.sort_key ?? 0 )
+                    : ( b.sort_key ?? 0 ) - ( a.sort_key ?? 0 )
+                );
         },
 
         get filteredCount() {
@@ -42,6 +47,21 @@ store( 'post-list', {
             const filtered = state.filteredPosts;
             const idx = filtered.indexOf( post );
             return idx !== -1 && idx < ctx.visibleCount;
+        },
+
+        // ── Ordine CSS della card nel flex column (contesto locale: postIndex) ─
+        get cardOrder() {
+            const ctx     = getContext();
+            const { state } = store( 'post-list' );
+            const post    = ctx.posts?.[ ctx.postIndex ];
+            if ( ! post ) return 9999;
+            const idx = state.filteredPosts.indexOf( post );
+            return idx === -1 ? 9999 : idx + 1;
+        },
+
+        // ── Ordinamento ───────────────────────────────────────────────────────
+        get sortLabel() {
+            return getContext().sortAsc ? 'Ordina ↑↓' : 'Ordina ↓↑';
         },
 
         // ── Filtri ────────────────────────────────────────────────────────────
@@ -171,6 +191,12 @@ store( 'post-list', {
             ctx.filters.tecniche = '';
             ctx.visibleCount = 10;
         },
+
+        toggleSort() {
+            const ctx = getContext();
+            ctx.sortAsc = ! ctx.sortAsc;
+            ctx.visibleCount = 10;
+        },
     },
 
     callbacks: {
@@ -215,6 +241,7 @@ store( 'post-list', {
             const ctx = getContext();
             if ( ! ctx ) return;
             void ctx.visibleCount;
+            void ctx.sortAsc;
             void ctx.filters?.categoria;
             void ctx.filters?.materiali;
             void ctx.filters?.tecniche;

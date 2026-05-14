@@ -263,13 +263,14 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 ### 3. Post List (`ttf-child/post-list`)
 
-Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`. I post sono ordinati cronologicamente per il campo ACF `data_per_la_timeline` (`usort` lato PHP dopo la query, perché `WP_Query` non può ordinare nativamente su un meta numerico senza la chiave registrata).
+Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sinistra 33%, testo a destra) con filtri ACF identici a quelli della timeline, **toggle di ordinamento** (ascendente/discendente) e **caricamento infinito** (infinite scroll): i post vengono rivelati 10 alla volta al rilevamento del sentinel tramite `IntersectionObserver`. I post sono ordinati per il campo ACF `data_per_la_timeline` (`usort` lato PHP per l'ordine iniziale; lato client il sort è ricalcolato reattivamente in `state.filteredPosts` insieme ai filtri attivi, quindi l'ordinamento rispetta sempre la selezione corrente).
 
 **Funzionalità:**
 
 - Card orizzontali: immagine 33% / aspect-ratio 4:3 + corpo testo (data, ubicazione, titolo, estratto, tag categoria)
 - Campi **Data** e **Ubicazione** raggruppati in un unico blocco meta con etichetta in grassetto, disposti uno sotto l'altro
 - Contatore risultati filtrati visibile nella barra superiore
+- **Ordinamento** ascendente/discendente per `data_per_la_timeline`: il toggle agisce sui post filtrati (il sort è applicato dopo i filtri in `state.filteredPosts`); l'ordine visivo è realizzato via CSS `order` sulle card (il DOM resta nell'ordine iniziale PHP), così il riordino è puramente reattivo senza re-render. Cambiare ordinamento azzera `visibleCount` a 10
 - **Filtri a scomparsa** con pill selezionabili per **Categoria**, **Materiale** e **Tecnica** — stessa logica della timeline: toggle singolo per gruppo, pill disabilitate per combinazioni non disponibili, badge filtri attivi con rimozione singola o globale; ogni cambio filtro azzera `visibleCount` a 10
 - **Infinite scroll**: un sentinel invisibile (1 px) posizionato dopo la lista è osservato da `IntersectionObserver` con `rootMargin: 300px`; al rilevamento incrementa `visibleCount` di 10 finché non ci sono altri post da mostrare. Se il sentinel resta intersecato dopo l'incremento (es. pochi post o viewport alto, casi in cui l'observer non rifirerebbe perché notifica solo i cambi di stato), `loadMore()` si rilancia in `requestAnimationFrame` finché esce dal viewport o non ci sono più post
 - **Lazy-load thumbnail con fade-in**: le `<img>` sono renderizzate con `data-src` invece di `src`, quindi nessuna richiesta al browser al render iniziale. Quando `visibleCount` o i filtri cambiano, il callback `lazyLoadImages` seleziona le card non più nascoste, applica `is-loading` al wrapper (spinner CSS) e setta `src` solo allora; `data-src` viene rimosso al `load`/`error` e il CSS (`img[data-src] { opacity: 0 }` + `transition`) produce il fade-in
@@ -299,9 +300,11 @@ Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sin
 
 | Elemento | Descrizione |
 |---|---|
-| state `filteredPosts` | Post filtrati per i tre gruppi ACF |
+| state `filteredPosts` | Post filtrati per i tre gruppi ACF e ordinati per `sort_key` secondo `sortAsc` |
 | state `filteredCount` | Numero di post filtrati (mostrato nel contatore) |
-| state `isVisible` | Visibilità card: passa i filtri E il suo indice è < `visibleCount` (contesto locale: `postIndex`) |
+| state `isVisible` | Visibilità card: passa i filtri E il suo indice in `filteredPosts` è < `visibleCount` (contesto locale: `postIndex`) |
+| state `cardOrder` | CSS `order` della card nel flex column basato sulla posizione in `filteredPosts` (contesto locale: `postIndex`) |
+| state `sortLabel` | Etichetta del bottone Ordina (`Ordina ↑↓` / `Ordina ↓↑`) |
 | state `hasMore` | Ci sono post filtrati oltre `visibleCount` |
 | state `showEndMessage/showEmptyMessage` | Messaggi di stato a fine lista o senza risultati |
 | state `filtersOpen/filterToggleLabel` | Apertura pannello filtri e label del pulsante |
@@ -311,8 +314,9 @@ Presenta i post in una **lista verticale a layout orizzontale** (thumbnail a sin
 | state `activeCategoriaLabel/Materiali/Tecniche` | Etichetta ACF del filtro attivo |
 | action `toggleFilters/clearFilters/togglePill` | Gestione pannello e filtri (ogni cambio resetta `visibleCount = 10`) |
 | action `clearCategoria/clearMateriali/clearTecniche` | Rimozione filtro singolo |
+| action `toggleSort` | Inversione `sortAsc` — i `state.filteredPosts` vengono riordinati reattivamente e ogni card aggiorna `data-wp-style--order`; resetta `visibleCount = 10` |
 | callback `init` | Setup `IntersectionObserver` sul sentinel — cattura `ctx` durante la direttiva per accedere ai segnali Preact dall'interno del callback asincrono. `loadMore()` ricorsivo (in `requestAnimationFrame`) per gestire il caso "sentinel ancora intersecato dopo l'incremento" |
-| callback `lazyLoadImages` | Lazy-load delle thumbnail (reattivo via `data-wp-watch--lazy`): all'incremento di `visibleCount` o al cambio filtri, seleziona `.pl-card:not(.pl-hidden) .pl-card-img img[data-src]`, applica `is-loading` al wrapper e setta `src = dataset.src`; `data-src` rimosso al `load`/`error` per innescare il fade-in via CSS |
+| callback `lazyLoadImages` | Lazy-load delle thumbnail (reattivo via `data-wp-watch--lazy`): all'incremento di `visibleCount`, al cambio filtri o al toggle di `sortAsc` (necessario perché il riordino può portare in primo piano post mai caricati anche se `visibleCount` non cambia), seleziona `.pl-card:not(.pl-hidden) .pl-card-img img[data-src]`, applica `is-loading` al wrapper e setta `src = dataset.src`; `data-src` rimosso al `load`/`error` per innescare il fade-in via CSS |
 
 **Architettura:**
 - Tutti i post sono renderizzati server-side in PHP e passati nel context; JS controlla quanti sono visibili tramite `visibleCount`

@@ -116,6 +116,7 @@ $context = [
     'posts'        => $posts_data,
     'visibleCount' => 10,
     'filtersOpen'  => false,
+    'sortAsc'      => true,
     'filters'      => [
         'categoria' => 'all',
         'materiali' => '',
@@ -137,14 +138,21 @@ $context = [
 
     <!-- ═══ BARRA SUPERIORE ═══ -->
     <div class="pl-bar<?php echo $show_filters ? '' : ' pl-bar--no-filters'; ?>">
-        <?php if ( $show_filters ) : ?>
-        <button class="pl-btn"
-                data-wp-on--click="actions.toggleFilters"
-                data-wp-text="state.filterToggleLabel">Filtra ↓</button>
-        <?php endif; ?>
-        <span class="pl-counter">
-            <span data-wp-text="state.filteredCount"><?php echo count( $posts_data ); ?></span>&nbsp;risultati
-        </span>
+        <div class="pl-bar-left">
+            <?php if ( $show_filters ) : ?>
+            <button class="pl-btn"
+                    data-wp-on--click="actions.toggleFilters"
+                    data-wp-text="state.filterToggleLabel">Filtra ↓</button>
+            <?php endif; ?>
+        </div>
+        <div class="pl-bar-right">
+            <span class="pl-counter">
+                <span data-wp-text="state.filteredCount"><?php echo count( $posts_data ); ?></span>&nbsp;risultati
+            </span>
+            <button class="pl-btn"
+                    data-wp-on--click="actions.toggleSort"
+                    data-wp-text="state.sortLabel">Ordina ↑↓</button>
+        </div>
     </div>
 
     <!-- ═══ PANNELLO FILTRI (a scomparsa) ═══ -->
@@ -237,6 +245,7 @@ $context = [
             class="pl-card"
             data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'postIndex' => $index ] ) ); ?>"
             data-wp-class--pl-hidden="!state.isVisible"
+            data-wp-style--order="state.cardOrder"
         >
             <a class="pl-card-link" href="<?php echo esc_url( $post['url'] ); ?>">
                 <div class="pl-card-img<?php echo $img_ratio_class; echo empty( $post['thumb'] ) ? ' pl-card-img--ph' : ''; ?>">

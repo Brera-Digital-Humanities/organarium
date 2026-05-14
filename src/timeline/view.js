@@ -494,8 +494,9 @@ store( 'timeline-3d', {
                 if ( e.key === 'ArrowLeft' )  goPrev();
             } );
 
-            // Rotella del mouse → next / prev
+            // Rotella del mouse → next / prev (solo se ci sono ≥ 4 post visibili)
             document.querySelector( '.timeline-view' )?.addEventListener( 'wheel', ( e ) => {
+                if ( visiblePosts().length < 4 ) return;
                 e.preventDefault();
                 if ( e.deltaY > 0 ) goNext();
                 else goPrev();

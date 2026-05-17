@@ -1,4 +1,11 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import {
+    filterAndSortPosts,
+    isValueAvailable as pureIsValueAvailable,
+    cardOrder,
+    isCardVisible,
+    countFilteredPosts,
+} from './logic';
 
 store( 'post-list', {
 
@@ -7,17 +14,7 @@ store( 'post-list', {
         // ── Post filtrati + ordinati per sort_key numerico ────────────────────
         get filteredPosts() {
             const { posts, filters, sortAsc } = getContext();
-            return posts
-                .filter( ( post ) => {
-                    const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
-                    const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
-                    const matchTec = filters.tecniche  === '' || post.tecnica.includes( filters.tecniche );
-                    return matchCat && matchMat && matchTec;
-                } )
-                .sort( ( a, b ) => sortAsc
-                    ? ( a.sort_key ?? 0 ) - ( b.sort_key ?? 0 )
-                    : ( b.sort_key ?? 0 ) - ( a.sort_key ?? 0 )
-                );
+            return filterAndSortPosts( posts, { filters, sortAsc } );
         },
 
         get filteredCount() {
@@ -40,23 +37,16 @@ store( 'post-list', {
 
         // ── Visibilità singola card (contesto locale: postIndex) ───────────────
         get isVisible() {
-            const ctx     = getContext();
-            const { state } = store( 'post-list' );
-            const post    = ctx.posts?.[ ctx.postIndex ];
-            if ( ! post ) return false;
-            const filtered = state.filteredPosts;
-            const idx = filtered.indexOf( post );
-            return idx !== -1 && idx < ctx.visibleCount;
+            const ctx = getContext();
+            const post = ctx.posts?.[ ctx.postIndex ];
+            return isCardVisible( store( 'post-list' ).state.filteredPosts, post, ctx.visibleCount );
         },
 
         // ── Ordine CSS della card nel flex column (contesto locale: postIndex) ─
         get cardOrder() {
-            const ctx     = getContext();
-            const { state } = store( 'post-list' );
-            const post    = ctx.posts?.[ ctx.postIndex ];
-            if ( ! post ) return 9999;
-            const idx = state.filteredPosts.indexOf( post );
-            return idx === -1 ? 9999 : idx + 1;
+            const ctx  = getContext();
+            const post = ctx.posts?.[ ctx.postIndex ];
+            return cardOrder( store( 'post-list' ).state.filteredPosts, post );
         },
 
         // ── Ordinamento ───────────────────────────────────────────────────────
@@ -91,27 +81,8 @@ store( 'post-list', {
 
         // Pill disponibile se filterVal esiste in almeno un post degli altri gruppi
         get isValueAvailable() {
-            const ctx = getContext();
-            const { filterGroup, filterVal, posts, filters } = ctx;
-            if ( ! filterGroup ) return true;
-
-            const filtered = posts.filter( ( post ) => {
-                const matchCat = filterGroup === 'categoria'
-                    ? true
-                    : ( filters.categoria === 'all' || post.categoria === filters.categoria );
-                const matchMat = filterGroup === 'materiali'
-                    ? true
-                    : ( filters.materiali === '' || post.materiale.includes( filters.materiali ) );
-                const matchTec = filterGroup === 'tecniche'
-                    ? true
-                    : ( filters.tecniche === '' || post.tecnica.includes( filters.tecniche ) );
-                return matchCat && matchMat && matchTec;
-            } );
-
-            if ( filterGroup === 'categoria' ) return filtered.some( ( p ) => p.categoria === filterVal );
-            if ( filterGroup === 'materiali' ) return filtered.some( ( p ) => p.materiale.includes( filterVal ) );
-            if ( filterGroup === 'tecniche' )  return filtered.some( ( p ) => p.tecnica.includes( filterVal ) );
-            return true;
+            const { posts, filters, filterGroup, filterVal } = getContext();
+            return pureIsValueAvailable( posts, { filterGroup, filterVal, filters } );
         },
 
         get isPillDisabled() {
@@ -209,13 +180,7 @@ store( 'post-list', {
             if ( ! sentinel ) return;
 
             // Conteggio filtrato (getContext() non è disponibile in callback async)
-            const filteredCount = () => ctx.posts.filter( ( post ) => {
-                const { filters } = ctx;
-                const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
-                const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
-                const matchTec = filters.tecniche  === '' || post.tecnica.includes( filters.tecniche );
-                return matchCat && matchMat && matchTec;
-            } ).length;
+            const filteredCount = () => countFilteredPosts( ctx.posts, ctx.filters );
 
             // Loop manuale: IntersectionObserver notifica solo i cambi di stato
             const loadMore = () => {

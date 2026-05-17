@@ -1,6 +1,15 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import {
+    isValueAvailable as pureIsValueAvailable,
+    clusterIconSize,
+    groupPostsByCoord,
+    buildMarkerFilters,
+    markerMatchesFilters,
+    filterPostsForPanel,
+    makeCard,
+} from './logic';
 
 delete L.Icon.Default.prototype._getIconUrl;
 
@@ -25,43 +34,48 @@ const STYLES = {
     },
 };
 
-function makeIcon() {
-    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#6B2A0B" stroke="#DAC898" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#DAC898"/></svg>`;
-    return L.divIcon({ html: svg, className: 'map-pin-icon', iconSize: [28, 28], iconAnchor: [14, 14] });
+function pinInner(count, fill) {
+    return count > 1
+        ? `<text x="14" y="14" text-anchor="middle" dominant-baseline="central" fill="${fill}" font-size="12" font-weight="700" font-family="sans-serif">${count}</text>`
+        : `<circle cx="14" cy="14" r="6" fill="${fill}"/>`;
 }
 
-function makeIconSelected() {
-    const svg = `<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#DAC898" stroke="#6B2A0B" stroke-width="2"/><circle cx="14" cy="14" r="6" fill="#6b2a0b"/></svg>`;
-    return L.divIcon({ html: svg, className: 'map-pin-icon map-pin-icon--selected', iconSize: [28, 28], iconAnchor: [14, 14] });
+function pinSize(count) {
+    return count > 1 ? 28 : 26;
+}
+
+function makeIcon(count = 1) {
+    const s = pinSize(count);
+    const half = s / 2;
+    const svg = `<svg width="${s}" height="${s}" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#6B2A0B" stroke="#DAC898" stroke-width="2"/>${pinInner(count, '#DAC898')}</svg>`;
+    return L.divIcon({ html: svg, className: 'map-pin-icon', iconSize: [s, s], iconAnchor: [half, half] });
+}
+
+function makeIconSelected(count = 1) {
+    const s = pinSize(count);
+    const half = s / 2;
+    const svg = `<svg width="${s}" height="${s}" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="13" fill="#DAC898" stroke="#6B2A0B" stroke-width="2"/>${pinInner(count, '#6b2a0b')}</svg>`;
+    return L.divIcon({ html: svg, className: 'map-pin-icon map-pin-icon--selected', iconSize: [s, s], iconAnchor: [half, half] });
 }
 
 function makeClusterIcon(count) {
-    const s = count < 10 ? 38 : count < 100 ? 46 : 54;
+    const s = clusterIconSize(count);
     const half = s / 2;
-    const svg = `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg"><circle cx="${half}" cy="${half}" r="${half - 2}" fill="#6B2A0B" stroke="#DAC898" stroke-width="2"/><text x="${half}" y="${half}" text-anchor="middle" dominant-baseline="central" fill="#DAC898" font-size="${s < 42 ? 14 : 16}" font-weight="700" font-family="sans-serif">${count}</text></svg>`;
+    const svg = `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg"><circle cx="${half}" cy="${half}" r="${half - 2}" fill="#6B2A0B" stroke="#DAC898" stroke-width="2"/><text x="${half}" y="${half}" text-anchor="middle" dominant-baseline="central" fill="#DAC898" font-size="${s < 36 ? 12 : 14}" font-weight="700" font-family="sans-serif">${count}</text></svg>`;
     return L.divIcon({ html: svg, className: 'map-cluster-icon', iconSize: [s, s], iconAnchor: [half, half] });
-}
-
-function esc(s) {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // Refs non-reattivi: evita che la selezione marker ritrigghi updateMarkers (zoom-out indesiderato)
 const ctxRefs = new WeakMap();
 function getRefs(ctx) {
     let r = ctxRefs.get(ctx);
-    if (!r) { r = {}; ctxRefs.set(ctx, r); }
+    if (!r) { r = { firstRender: true }; ctxRefs.set(ctx, r); }
     return r;
 }
 
-function makeCard(post) {
-    const thumb = post.thumb ? `<div class="mp-thumb"><a class="mp-title" href="${esc(post.url)}"><img src="${esc(post.thumb)}" alt="${esc(post.title)}" loading="lazy"></a></div>` : '';
-    const ubicazione = post.ubicazione ? `<span class="mp-ubicazione">UBICAZIONE: ${esc(post.ubicazione)}</span>` : '';
-    const excerpt = post.excerpt ? `<p class="mp-excerpt">${esc(post.excerpt)}</p>` : '';
-    return `<div class="mp-card">${thumb}<div class="mp-body">${ubicazione}<a class="mp-title" href="${esc(post.url)}">${esc(post.title)}</a>${excerpt}</div></div>`;
-}
+// Riquadro Europa usato come viewport iniziale su mobile (evita zoom-out estremi su set di pin intercontinentali)
+const EUROPE_BOUNDS = [[35, -10], [70, 40]];
+const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 
 store('mappa-interattiva', {
     state: {
@@ -94,36 +108,8 @@ store('mappa-interattiva', {
 
         // Disponibilità condizionale pill
         get isValueAvailable() {
-            const ctx = getContext();
-            const { filterGroup, filterVal, posts, filters } = ctx;
-            if (!filterGroup) return true;
-
-            const filtered = posts.filter((post) => {
-                const matchCat = filterGroup === 'categoria'
-                    ? true
-                    : (filters.categoria === 'all' || post.categoria === filters.categoria);
-                const matchMat = filterGroup === 'materiali'
-                    ? true
-                    : (filters.materiali === '' || post.materiale.includes(filters.materiali));
-                const matchTec = filterGroup === 'tecniche'
-                    ? true
-                    : (filters.tecniche === '' || post.tecnica.includes(filters.tecniche));
-                const matchPer = filterGroup === 'periodo'
-                    ? true
-                    : (filters.periodo === ''
-                        || (filters.periodo === 'tardo-antico' && post.data_per_timeline < 800)
-                        || (filters.periodo === 'medioevo-moderno' && post.data_per_timeline >= 800));
-                return matchCat && matchMat && matchTec && matchPer;
-            });
-
-            if (filterGroup === 'categoria') return filtered.some((p) => p.categoria === filterVal);
-            if (filterGroup === 'materiali') return filtered.some((p) => p.materiale.includes(filterVal));
-            if (filterGroup === 'tecniche') return filtered.some((p) => p.tecnica.includes(filterVal));
-            if (filterGroup === 'periodo') {
-                if (filterVal === 'tardo-antico') return filtered.some((p) => p.data_per_timeline < 800);
-                if (filterVal === 'medioevo-moderno') return filtered.some((p) => p.data_per_timeline >= 800);
-            }
-            return true;
+            const { posts, filters, filterGroup, filterVal } = getContext();
+            return pureIsValueAvailable( posts, { filterGroup, filterVal, filters } );
         },
 
         get isPillDisabled() {
@@ -227,57 +213,39 @@ store('mappa-interattiva', {
 
             const panel = ref.closest('[data-wp-interactive]').querySelector('.mp-info-panel');
             const panelContent = panel.querySelector('.mp-info-panel__content');
-            const defaultIcon = makeIcon();
-            const selectedIcon = makeIconSelected();
 
             const refs = getRefs(ctx);
             refs.panel = panel;
-            refs.defaultIcon = defaultIcon;
 
             panel.querySelector('.mp-info-panel__close').addEventListener('click', () => {
                 panel.classList.remove('is-open');
                 if (refs.selectedMarker) {
-                    refs.selectedMarker.setIcon(defaultIcon);
+                    refs.selectedMarker.setIcon(refs.selectedMarker._defaultIcon);
                     refs.selectedMarker = null;
                 }
             });
 
-            const coordGroups = {};
-            ctx.posts.forEach((post) => {
-                const key = post.lat.toFixed(6) + ',' + post.lng.toFixed(6);
-                if (!coordGroups[key]) coordGroups[key] = [];
-                coordGroups[key].push(post);
-            });
+            const coordGroups = groupPostsByCoord(ctx.posts);
 
             ctx.allMarkers = Object.values(coordGroups).map((group) => {
                 const first = group[0];
+                const count = group.length;
+                const defaultIcon = makeIcon(count);
+                const selectedIcon = makeIconSelected(count);
                 const marker = L.marker([first.lat, first.lng], { icon: defaultIcon });
-                marker._filters = {
-                    categoria: group.map((p) => p.categoria || ''),
-                    materiale: [].concat(...group.map((p) => p.materiale || [])),
-                    tecnica: [].concat(...group.map((p) => p.tecnica || [])),
-                    hasTardoAntico: group.some((p) => p.data_per_timeline < 800),
-                    hasMedioevo: group.some((p) => p.data_per_timeline >= 800),
-                };
+                marker._filters = buildMarkerFilters(group);
+                marker._postCount = count;
+                marker._defaultIcon = defaultIcon;
 
                 marker.on('click', () => {
                     if (refs.selectedMarker && refs.selectedMarker !== marker) {
-                        refs.selectedMarker.setIcon(defaultIcon);
+                        refs.selectedMarker.setIcon(refs.selectedMarker._defaultIcon);
                     }
                     marker.setIcon(selectedIcon);
                     refs.selectedMarker = marker;
 
-                    const { filters } = ctx;
-                    const periodoActive = filters.periodo;
-                    const postsInPanel = !periodoActive
-                        ? group
-                        : group.filter((p) =>
-                            periodoActive === 'tardo-antico'
-                                ? p.data_per_timeline < 800
-                                : p.data_per_timeline >= 800
-                        );
-
-                    panelContent.innerHTML = (postsInPanel.length ? postsInPanel : group)
+                    const postsInPanel = filterPostsForPanel(group, ctx.filters.periodo);
+                    panelContent.innerHTML = postsInPanel
                         .map(makeCard).join('<div class="mp-divider"></div>');
                     panel.classList.add('is-open');
                     panel.scrollTop = 0;
@@ -287,12 +255,16 @@ store('mappa-interattiva', {
             });
 
             ctx.markerGroup = L.markerClusterGroup({
-                iconCreateFunction: (cluster) => makeClusterIcon(cluster.getChildCount()),
+                iconCreateFunction: (cluster) => {
+                    const total = cluster.getAllChildMarkers()
+                        .reduce((s, m) => s + (m._postCount || 1), 0);
+                    return makeClusterIcon(total);
+                },
                 showCoverageOnHover: false,
                 zoomToBoundsOnClick: true,
                 spiderfyOnMaxZoom: true,
-                disableClusteringAtZoom: 17,
-                maxClusterRadius: 60,
+                disableClusteringAtZoom: 14,
+                maxClusterRadius: 30,
                 animate: true,
             }).addTo(map);
 
@@ -312,32 +284,30 @@ store('mappa-interattiva', {
 
             markerGroup.clearLayers();
 
-            const visible = allMarkers.filter((m) => {
-                const okCat = filters.categoria === 'all' || m._filters.categoria.includes(filters.categoria);
-                const okMat = filters.materiali === '' || m._filters.materiale.includes(filters.materiali);
-                const okTec = filters.tecniche === '' || m._filters.tecnica.includes(filters.tecniche);
-                const okPer = filters.periodo === ''
-                    || (filters.periodo === 'tardo-antico' && m._filters.hasTardoAntico)
-                    || (filters.periodo === 'medioevo-moderno' && m._filters.hasMedioevo);
-                return okCat && okMat && okTec && okPer;
-            });
+            const visible = allMarkers.filter((m) => markerMatchesFilters(m._filters, filters));
 
             visible.forEach((m) => markerGroup.addLayer(m));
 
             if (refs.selectedMarker && !visible.includes(refs.selectedMarker)) {
                 if (refs.panel) refs.panel.classList.remove('is-open');
-                refs.selectedMarker.setIcon(refs.defaultIcon);
+                refs.selectedMarker.setIcon(refs.selectedMarker._defaultIcon);
                 refs.selectedMarker = null;
             }
 
             if (visible.length === 1) {
                 mapInstance.setView(visible[0].getLatLng(), 13);
             } else if (visible.length > 1) {
-                mapInstance.fitBounds(
-                    L.latLngBounds(visible.map((m) => m.getLatLng())),
-                    { padding: [48, 48] }
-                );
+                if (refs.firstRender && isMobile()) {
+                    mapInstance.fitBounds(EUROPE_BOUNDS, { padding: [16, 16] });
+                } else {
+                    mapInstance.fitBounds(
+                        L.latLngBounds(visible.map((m) => m.getLatLng())),
+                        { padding: [48, 48] }
+                    );
+                }
             }
+
+            refs.firstRender = false;
         },
     },
 });

@@ -451,9 +451,9 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 7rem;
+    height: 6rem;
     @media (max-width: 768px) {
-        height: 5rem;
+        height: 4.7rem;
         font-size: var(--wp--preset--font-size--medium);
     }
 }
@@ -490,7 +490,7 @@
     font-size: 1.1em;
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
-
+    margin: 2px 0;
     &:hover:not(:disabled) {
         background: var(--wp--preset--color--contrast, #111);
         svg path {

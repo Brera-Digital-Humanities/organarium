@@ -184,12 +184,13 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 **Funzionalità:**
 
 *Century Bar*
-- Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti**: i segmenti che contengono almeno un post si dividono lo spazio rimanente in parti uguali (`flex: 1 1 0`), mentre i segmenti vuoti hanno larghezza fissa (60 px desktop / 30 px mobile), sono `disabled` e renderizzati con opacity ridotta
-- Ogni segmento corrisponde a un secolo; il primo copre 200 a.C. – 0 con etichetta `200 a.C.`, il secondo copre 0 – 100 d.C. con etichetta `0`, gli altri seguono fino al segmento 1500 – 1600
+- Barra di navigazione cronologica che copre il range 200 a.C. – 1600 d.C. in **17 segmenti**: ogni segmento ha larghezza minima **110 px desktop / 90 px mobile** (`flex: 1 0 110/90px`) e cresce equamente se c'è spazio residuo, mai sotto il minimo. I segmenti vuoti sono `disabled` e renderizzati con opacity ridotta, ma mantengono la stessa larghezza degli altri
+- I segmenti non vanno a capo (`flex-wrap: nowrap`): la barra esce dal container con `width: calc(100vw - 40px)` + `margin-left: calc(20px - 50vw + 50%)` — 20 px di gutter dai bordi del viewport, scelti anche per evitare la scrollbar orizzontale di pagina che Chrome genera con `100vw` quando la scrollbar verticale è presente. Quando i segmenti eccedono il viewport, la barra è **draggable orizzontalmente**: mouse via pointer events con `cursor: grab` → `grabbing`; il click sintetico sul segmento viene soppresso se l'utente ha trascinato (capture + `stopPropagation`). Touch: `touch-action: pan-x pan-y` lascia gestire il pan al browser. Scrollbar visivamente nascosta
+- La posizione di scroll (`scrollLeft`) è persistita nel cookie `tl_prefs` come `centuryScrollLeft` (debounce 250 ms su `scroll`) e ripristinata al reload in `requestAnimationFrame` dopo il layout. **La barra non si sposta mai automaticamente**: solo l'azione dell'utente cambia la posizione
+- Ogni segmento corrisponde a un secolo; il primo copre 200 a.C. – 0 con etichetta `200 a.C.`, il secondo copre 0 – 100 d.C. con etichetta `0`, gli altri seguono fino al segmento 1500 – 1600. Il primo segmento non ha tick verticale di apertura
 - Ogni segmento mostra: etichetta del secolo, tick verticale, linea orizzontale continua e **dot quadrati** (5×5 px desktop / 4×4 px mobile) posizionati proporzionalmente al `sort_key` del post all'interno del range; i dot vengono impilati verticalmente in bucket da **5 anni** (es. 0-4, 5-9, 10-14)
 - Il segmento attivo è colorato con `accent-4`; il dot del post in evidenza nel carousel diventa `contrast` (nero)
 - Cliccando un segmento: carica i post del quel secolo, azzera tutti i filtri e chiude il pannello filtri
-- Su mobile (< 768 px) la barra si distribuisce su **3 righe** (6 + 6 + 5 segmenti)
 
 *Vista Timeline*
 - Carousel 3D con prospettiva CSS (`perspective: 500vw`) e fino a 5 card visibili simultaneamente (attiva, prev/next, prev2/next2)
@@ -220,7 +221,7 @@ Presenta i post in **due modalità di visualizzazione** selezionabili dall'utent
 
 *Persistenza preferenze (cookie di sessione)*
 - Cookie `tl_prefs` (sessione, nessun `max-age`) scritto in JS tramite `callbacks.savePrefs` (`data-wp-watch`, reattivo)
-- Campi salvati: `centuryMin`, `centuryMax`, `viewMode`, `sortAsc`, `activeIndex`, `categoria`, `materiali`, `tecniche`
+- Campi salvati: `centuryMin`, `centuryMax`, `viewMode`, `sortAsc`, `activeIndex`, `categoria`, `materiali`, `tecniche`, `centuryScrollLeft`
 - PHP legge il cookie al render e inizializza il context con le preferenze salvate; `viewMode` viene validato contro `allowedViews` del blocco
 
 **Attributi del blocco (configurabili dal Site Editor):**

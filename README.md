@@ -9,7 +9,7 @@ Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentaz
 - WordPress 6.5+
 - Parent theme: **Twenty Twenty-Five**
 - Plugin: **Advanced Custom Fields (ACF)** + **ACF Extended** (per il campo Open Street Map)
-- Node.js 18+ e npm (per la compilazione)
+- Node.js 20 e npm (per la compilazione — versione fissata in `.nvmrc`)
 
 ---
 
@@ -23,6 +23,7 @@ jerus-organo/
 │   ├── mappa-interattiva/    # Blocco mappa Leaflet con pin geolocalizzati
 │   ├── post-list/            # Blocco lista post con infinite scroll e filtri ACF
 │   ├── acf-field/            # Blocco generico per visualizzare un campo ACF
+│   ├── shared/               # Logica di filtraggio condivisa tra timeline, post-list e mappa-interattiva
 │   └── style/                # Stile globale del child theme (SCSS)
 ├── build/                    # File compilati (generati da wp-scripts, non versionati)
 ├── functions.php             # Registrazione blocchi, enqueue stili, custom excerpt length
@@ -57,6 +58,52 @@ Il file `webpack.config.js` estende la configurazione di default di `@wordpress/
 
 ---
 
+## Test
+
+Suite di unit test basata su `wp-scripts test-unit-js` (Jest + jsdom, già incluso nelle devDependencies, nessuna configurazione aggiuntiva).
+
+**Esecuzione:**
+
+```bash
+nvm use 20
+npm run test:unit
+```
+
+**Architettura**
+
+Ogni blocco interattivo isola la logica di filtraggio, ordinamento e calcolo in un file `logic.js` accanto al `view.js`. Il file `logic.js` esporta funzioni pure: non importa `@wordpress/interactivity`, Leaflet né tocca il DOM. La view importa e usa queste funzioni; i test le esercitano in isolamento. Le funzioni effettivamente condivise tra più blocchi vivono in `src/shared/filters-logic.js` e vengono ri-esportate dai singoli `logic.js`, così le view continuano a importare un unico modulo locale.
+
+**Suite presenti**
+
+| Suite | File testato | Cosa copre |
+|---|---|---|
+| `src/shared/__tests__/filters-logic.test.js`            | `src/shared/filters-logic.js`         | Logica condivisa: `matchesPeriodo`, `postMatchesFilters` (con `periodo` opzionale), `isValueAvailable` (con `extraMatch` opzionale per vincoli aggiuntivi come l'intervallo di secolo), `filterAndSortPosts` (con `extraFilter` opzionale) |
+| `src/mappa-interattiva/__tests__/logic.test.js`         | `src/mappa-interattiva/logic.js`      | `escapeHtml`, `clusterIconSize`, `groupPostsByCoord`, `buildMarkerFilters`, `markerMatchesFilters`, `filterPostsForPanel`, `makeCard` |
+| `src/timeline/__tests__/logic.test.js`                  | `src/timeline/logic.js`               | Wrapper sull'intervallo di secolo (`filterAndSortPosts`, `isValueAvailable`), `isPillInvisible`, `markerPercent`, `formatCenturyLabel`, `scrubberJumpIndex` |
+| `src/post-list/__tests__/logic.test.js`                 | `src/post-list/logic.js`              | `postMatchesFilters`, `filterAndSortPosts`, `isValueAvailable`, `cardOrder`, `isCardVisible`, `countFilteredPosts` |
+
+**Aggiungere test a un blocco esistente**
+
+I dataset usati nei test esistenti seguono uno schema comune (array di post con `id`, `categoria`, `materiale[]`, `tecnica[]`, `sort_key`, `data_per_timeline`); riutilizzarlo riduce l'attrito. Per testare un comportamento nuovo:
+
+1. Aggiungere la funzione pura al `logic.js` del blocco (o a `src/shared/filters-logic.js` se la logica è condivisa con altri blocchi).
+2. Importarla nel `view.js` al posto della versione inline.
+3. Aggiungere il caso al file `__tests__/logic.test.js` corrispondente.
+
+**Aggiungere test a un blocco nuovo**
+
+```
+src/<nuovo-blocco>/
+├── view.js                      # importa da ./logic
+├── logic.js                     # funzioni pure
+└── __tests__/
+    └── logic.test.js
+```
+
+`wp-scripts test-unit-js` rileva automaticamente i file `*.test.js` sotto `src/`, nessuna configurazione di paths richiesta. Le funzioni condivise con altri blocchi vanno collocate in `src/shared/` con il proprio `__tests__/`.
+
+---
+
 ## Stile globale
 
 Lo stile generale del child theme è scritto in **SCSS** e compilato da `wp-scripts` insieme ai blocchi.
@@ -69,6 +116,7 @@ src/style/
 ├── _variables.scss     # Alias delle CSS custom properties di TT5
 ├── _typography.scss
 ├── _layout.scss
+├── _main-navbar.scss   # Override della navbar principale del parent theme
 └── _blocks.scss        # Override blocchi core e selettori globali
 ```
 
@@ -332,12 +380,12 @@ Visualizza una **mappa Leaflet.js** con pin geolocalizzati per ogni articolo che
 
 **Funzionalità:**
 
-- Pin SVG circolari (28×28 px: cerchio con punto centrale) con colori fissi indipendenti dalla categoria
-- **Clustering automatico** (Leaflet.markercluster): pin vicini vengono raggruppati in un cluster SVG che mostra il conteggio; si apre in spiderfication a zoom elevato o si scioglie in pin individuali a `disableClusteringAtZoom: 17`
-- **Raggruppamento coordinate**: più articoli con le stesse coordinate condividono un unico marker; cliccando si apre una sidebar laterale con le card degli articoli corrispondenti al periodo attivo (o tutti se nessun filtro periodo è attivo), separate da un divisore orizzontale
+- Pin SVG circolari con colori fissi indipendenti dalla categoria. Dimensioni: **26×26 px** per il post singolo, **28×28 px** quando il pin rappresenta più post co-localizzati (in quel caso il punto centrale è sostituito dal **conteggio dei post**). Il viewBox SVG resta a 28: il pin singolo è semplicemente scalato al 93% per dare risalto visivo ai pin con conteggio
+- **Clustering automatico** (Leaflet.markercluster): pin vicini vengono raggruppati in un cluster SVG che mostra il **numero totale di post** contenuti (somma dei `_postCount` dei marker figli, non il numero di marker); si apre in spiderfication a zoom elevato o si scioglie in pin individuali a `disableClusteringAtZoom: 14`. `maxClusterRadius: 30` (raggio contenuto per evitare aggregazioni troppo larghe)
+- **Raggruppamento coordinate**: più articoli con le stesse coordinate condividono un unico marker (con conteggio sul pin); cliccando si apre una sidebar laterale con le card degli articoli corrispondenti al periodo attivo (o tutti se nessun filtro periodo è attivo), separate da un divisore orizzontale
 - Card con thumbnail, campo `ubicazione` e titolo linkato (colore `accent-3 #6b2a0b`)
 - **Sidebar filtri laterale a scomparsa** (36 px → 450 px, toggle con testo verticale) con pill per **Categoria**, **Materiale**, **Tecnica** e **Periodo** — stessa logica della timeline: pill disabilitate per combinazioni non disponibili, etichette ACF risolte tramite `get_field_object()`, badge filtri attivi con rimozione singola o globale
-- Viewport automatico: `fitBounds` sui marker filtrati oppure zoom sul singolo marker visibile
+- Viewport automatico: `fitBounds` sui marker filtrati oppure zoom sul singolo marker visibile. **Su mobile (≤767px), al primo render** la mappa fa `fitBounds` su un riquadro Europa fisso (`[[35, -10], [70, 40]]`, padding 16px) anziché sui marker effettivi: previene lo zoom-out estremo quando il dataset include pin intercontinentali (es. Europa + Americhe), che renderebbe i pin europei indistinguibili sullo schermo piccolo. Dal secondo `updateMarkers` in poi (cambio filtri, ecc.) si torna al comportamento normale. Flag `firstRender` tenuto nei `refs` non reattivi (`WeakMap`) per non triggerare `data-wp-watch`
 - 4 stili CartoDB con CSS filter applicato al tile pane: `natural`, `warm`, `teal`, `dark`
 
 **Stili mappa disponibili:**
@@ -429,3 +477,19 @@ Blocco generico che visualizza un singolo campo ACF con label e wrapper grafico.
 - **wp-scripts 32** — build toolchain (Webpack, SCSS, ESM modules, `--experimental-modules`)
 - **CSS 3D transforms** — effetto prospettico del carousel timeline
 - **Advanced Custom Fields + ACF Extended** — metadati estesi dei post (incluso campo Open Street Map)
+
+---
+
+## CI/CD
+
+Pipeline GitHub Actions in `.github/workflows/`:
+
+- **CI** (`ci.yml`) — test e build automatici su ogni push a `master` e su ogni pull request
+- **Release** (`release.yml`) — per pubblicare una nuova versione, creare e pushare un tag `v*`:
+
+  ```bash
+  git tag v1.0.1
+  git push origin v1.0.1
+  ```
+
+  Il workflow compila, crea lo zip del plugin con `npm run plugin-zip` e lo allega a una Release su GitHub.

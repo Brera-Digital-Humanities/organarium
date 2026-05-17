@@ -1,23 +1,19 @@
 import { store, getContext } from '@wordpress/interactivity';
+import {
+    filterAndSortPosts,
+    isValueAvailable as pureIsValueAvailable,
+    isPillInvisible as pureIsPillInvisible,
+    markerPercent,
+    formatCenturyLabel,
+    scrubberJumpIndex,
+} from './logic';
 
 function _scrubberJump( event, ctx, visiblePosts ) {
     const trackEl = event.currentTarget.querySelector( '.scrubber-track' );
     if ( ! trackEl ) return;
     const rect = trackEl.getBoundingClientRect();
-    const pct  = Math.max( 0, Math.min( 1, ( event.clientX - rect.left ) / rect.width ) );
-    const keys = visiblePosts.map( ( p ) => p.sort_key ?? 0 );
-    if ( keys.length === 0 ) return;
-    const min = Math.min( ...keys );
-    const max = Math.max( ...keys );
-    let idx = 0;
-    if ( min !== max ) {
-        const target = min + pct * ( max - min );
-        idx = keys.reduce(
-            ( best, key, i ) => Math.abs( key - target ) < Math.abs( keys[ best ] - target ) ? i : best,
-            0
-        );
-    }
-    ctx.activeIndex = idx;
+    const idx  = scrubberJumpIndex( event.clientX, rect.left, rect.width, visiblePosts );
+    if ( idx !== null ) ctx.activeIndex = idx;
 }
 
 store( 'timeline-3d', {
@@ -27,19 +23,7 @@ store( 'timeline-3d', {
         // ── Posts filtrati + ordinati per sort_key numerico ───────────────────
         get visiblePosts() {
             const { posts, filters, sortAsc, activeCenturyMin, activeCenturyMax } = getContext();
-            return posts
-                .filter( ( post ) => {
-                    const sk = post.sort_key ?? 0;
-                    const inCentury = sk >= activeCenturyMin && sk < activeCenturyMax;
-                    const matchCat = filters.categoria === 'all' || post.categoria === filters.categoria;
-                    const matchMat = filters.materiali === '' || post.materiale.includes( filters.materiali );
-                    const matchTec = filters.tecniche === '' || post.tecnica.includes( filters.tecniche );
-                    return inCentury && matchCat && matchMat && matchTec;
-                } )
-                .sort( ( a, b ) => sortAsc
-                    ? ( a.sort_key ?? 0 ) - ( b.sort_key ?? 0 )
-                    : ( b.sort_key ?? 0 ) - ( a.sort_key ?? 0 )
-                );
+            return filterAndSortPosts( posts, { activeCenturyMin, activeCenturyMax, filters, sortAsc } );
         },
 
         get visibleCount() {
@@ -86,29 +70,8 @@ store( 'timeline-3d', {
         // ── Disponibilità condizionale di una pill ────────────────────────────
         // Calcola se filterVal esiste in almeno un post filtrato dagli ALTRI gruppi
         get isValueAvailable() {
-            const ctx = getContext();
-            const { filterGroup, filterVal, posts, filters, activeCenturyMin, activeCenturyMax } = ctx;
-            if ( ! filterGroup ) return true;
-
-            const filtered = posts.filter( ( post ) => {
-                const sk = post.sort_key ?? 0;
-                if ( sk < activeCenturyMin || sk >= activeCenturyMax ) return false;
-                const matchCat = filterGroup === 'categoria'
-                    ? true
-                    : ( filters.categoria === 'all' || post.categoria === filters.categoria );
-                const matchMat = filterGroup === 'materiali'
-                    ? true
-                    : ( filters.materiali === '' || post.materiale.includes( filters.materiali ) );
-                const matchTec = filterGroup === 'tecniche'
-                    ? true
-                    : ( filters.tecniche === '' || post.tecnica.includes( filters.tecniche ) );
-                return matchCat && matchMat && matchTec;
-            } );
-
-            if ( filterGroup === 'categoria' ) return filtered.some( ( p ) => p.categoria === filterVal );
-            if ( filterGroup === 'materiali' ) return filtered.some( ( p ) => p.materiale.includes( filterVal ) );
-            if ( filterGroup === 'tecniche' )  return filtered.some( ( p ) => p.tecnica.includes( filterVal ) );
-            return true;
+            const { posts, filters, activeCenturyMin, activeCenturyMax, filterGroup, filterVal } = getContext();
+            return pureIsValueAvailable( posts, { filterGroup, filterVal, filters, activeCenturyMin, activeCenturyMax } );
         },
 
         get isPillDisabled() {
@@ -119,19 +82,8 @@ store( 'timeline-3d', {
 
         // ── Pill invisibile: il valore non compare in alcun post del secolo attivo ─
         get isPillInvisible() {
-            const ctx = getContext();
-            const { filterGroup, filterVal, posts, activeCenturyMin, activeCenturyMax } = ctx;
-            if ( ! filterGroup ) return false;
-
-            const inCentury = posts.filter( ( post ) => {
-                const sk = post.sort_key ?? 0;
-                return sk >= activeCenturyMin && sk < activeCenturyMax;
-            } );
-
-            if ( filterGroup === 'categoria' ) return ! inCentury.some( ( p ) => p.categoria === filterVal );
-            if ( filterGroup === 'materiali' ) return ! inCentury.some( ( p ) => p.materiale.includes( filterVal ) );
-            if ( filterGroup === 'tecniche' )  return ! inCentury.some( ( p ) => p.tecnica.includes( filterVal ) );
-            return false;
+            const { posts, activeCenturyMin, activeCenturyMax, filterGroup, filterVal } = getContext();
+            return pureIsPillInvisible( posts, { filterGroup, filterVal, activeCenturyMin, activeCenturyMax } );
         },
 
         // Per il binding HTML `disabled`: bottone non cliccabile in entrambi gli stati
@@ -185,8 +137,7 @@ store( 'timeline-3d', {
 
         get activeCenturyLabel() {
             const { activeCenturyMin, activeCenturyMax } = getContext();
-            const from = activeCenturyMin < 0 ? `${ -activeCenturyMin } a.C.` : `${ activeCenturyMin }`;
-            return `${ from }–${ activeCenturyMax }`;
+            return formatCenturyLabel( activeCenturyMin, activeCenturyMax );
         },
 
         // ── Vista ─────────────────────────────────────────────────────────────
@@ -273,12 +224,7 @@ store( 'timeline-3d', {
             const ctx  = getContext();
             const post = ctx.posts?.[ ctx.postIndex ];
             if ( ! post ) return '0%';
-            const min = ctx.activeCenturyMin;
-            const max = ctx.activeCenturyMax;
-            if ( max === min ) return '50%';
-            const sk  = post.sort_key ?? 0;
-            const pct = ( ( sk - min ) / ( max - min ) ) * 100;
-            return Math.max( 0, Math.min( 100, pct ) ).toFixed( 2 ) + '%';
+            return markerPercent( post.sort_key, ctx.activeCenturyMin, ctx.activeCenturyMax );
         },
 
         // Etichetta sopra il marker — solo la data (contesto locale: postIndex)
@@ -295,12 +241,7 @@ store( 'timeline-3d', {
             if ( ! visible.length ) return '0%';
             const active = visible[ ctx.activeIndex ];
             if ( ! active ) return '0%';
-            const min = ctx.activeCenturyMin;
-            const max = ctx.activeCenturyMax;
-            if ( max === min ) return '50%';
-            const sk  = active.sort_key ?? 0;
-            const pct = ( ( sk - min ) / ( max - min ) ) * 100;
-            return Math.max( 0, Math.min( 100, pct ) ).toFixed( 2 ) + '%';
+            return markerPercent( active.sort_key, ctx.activeCenturyMin, ctx.activeCenturyMax );
         },
     },
 
@@ -543,27 +484,38 @@ store( 'timeline-3d', {
                 } );
 
                 // Drag con il mouse (touch usa pan-x nativo via touch-action)
-                let dragging = false, startX = 0, startScroll = 0, moved = false;
+                // NB: setPointerCapture viene chiamato solo quando il drag inizia davvero
+                // (oltre la soglia di 3px). Catturarlo al pointerdown su Chrome causa il
+                // re-target del click sulla bar, sopprimendo il click sui segmenti.
+                let dragging = false, captured = false, startX = 0, startScroll = 0, moved = false;
                 bar.addEventListener( 'pointerdown', ( e ) => {
                     if ( e.pointerType !== 'mouse' ) return;
                     dragging = true;
+                    captured = false;
                     moved    = false;
                     startX   = e.clientX;
                     startScroll = bar.scrollLeft;
-                    bar.classList.add( 'is-dragging' );
-                    bar.setPointerCapture( e.pointerId );
                 } );
                 bar.addEventListener( 'pointermove', ( e ) => {
                     if ( ! dragging ) return;
                     const dx = e.clientX - startX;
-                    if ( Math.abs( dx ) > 3 ) moved = true;
-                    bar.scrollLeft = startScroll - dx;
+                    if ( Math.abs( dx ) > 3 ) {
+                        if ( ! moved ) {
+                            moved = true;
+                            bar.classList.add( 'is-dragging' );
+                            try { bar.setPointerCapture( e.pointerId ); captured = true; } catch ( _ ) {}
+                        }
+                        bar.scrollLeft = startScroll - dx;
+                    }
                 } );
                 const endDrag = ( e ) => {
                     if ( ! dragging ) return;
                     dragging = false;
                     bar.classList.remove( 'is-dragging' );
-                    try { bar.releasePointerCapture( e.pointerId ); } catch ( _ ) {}
+                    if ( captured ) {
+                        try { bar.releasePointerCapture( e.pointerId ); } catch ( _ ) {}
+                        captured = false;
+                    }
                     // Sopprime il click sintetico sul segmento se l'utente ha trascinato
                     if ( moved ) {
                         const stop = ( ev ) => { ev.stopPropagation(); ev.preventDefault(); };

@@ -207,7 +207,8 @@ store('mappa-interattiva', {
             if (ctx.allMarkers) return;
 
             const style = STYLES[ctx.mapStyle] || STYLES.natural;
-            const map = L.map(ref);
+            const map = L.map(ref, { zoomControl: false });
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
             L.tileLayer(style.tileUrl, { attribution: CARTO_ATTR }).addTo(map);
             map.getPanes().tilePane.style.filter = style.filter;
 

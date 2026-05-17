@@ -364,11 +364,12 @@ store( 'timeline-3d', {
             // porta in primo piano la terza card (idx 2) anziché la prima.
             // Non interferisce col ripristino da cookie: si attiva solo
             // sul click utente al segmento, non all'init.
-            const count = ctx.posts.filter( ( p ) => {
+            /*const count = ctx.posts.filter( ( p ) => {
                 const sk = p.sort_key ?? 0;
                 return sk >= ctx.segMin && sk < ctx.segMax;
             } ).length;
-            ctx.activeIndex = ( ctx.viewMode === 'timeline' && count > 4 ) ? 2 : 0;
+            ctx.activeIndex = ( ctx.viewMode === 'timeline' && count > 4 ) ? 2 : 0;*/
+            ctx.activeIndex = 0;
         },
 
         setViewTimeline() {
@@ -532,6 +533,56 @@ store( 'timeline-3d', {
                 }, true );
             }
 
+            // Century bar — drag-to-pan + ripristino posizione scroll da cookie
+            const bar = document.querySelector( '.tl-century-bar' );
+            if ( bar ) {
+                // Ripristino scroll salvato (dopo layout per scrollWidth corretto)
+                requestAnimationFrame( () => {
+                    const saved = ctx.centuryScrollLeft;
+                    if ( typeof saved === 'number' && saved > 0 ) bar.scrollLeft = saved;
+                } );
+
+                // Drag con il mouse (touch usa pan-x nativo via touch-action)
+                let dragging = false, startX = 0, startScroll = 0, moved = false;
+                bar.addEventListener( 'pointerdown', ( e ) => {
+                    if ( e.pointerType !== 'mouse' ) return;
+                    dragging = true;
+                    moved    = false;
+                    startX   = e.clientX;
+                    startScroll = bar.scrollLeft;
+                    bar.classList.add( 'is-dragging' );
+                    bar.setPointerCapture( e.pointerId );
+                } );
+                bar.addEventListener( 'pointermove', ( e ) => {
+                    if ( ! dragging ) return;
+                    const dx = e.clientX - startX;
+                    if ( Math.abs( dx ) > 3 ) moved = true;
+                    bar.scrollLeft = startScroll - dx;
+                } );
+                const endDrag = ( e ) => {
+                    if ( ! dragging ) return;
+                    dragging = false;
+                    bar.classList.remove( 'is-dragging' );
+                    try { bar.releasePointerCapture( e.pointerId ); } catch ( _ ) {}
+                    // Sopprime il click sintetico sul segmento se l'utente ha trascinato
+                    if ( moved ) {
+                        const stop = ( ev ) => { ev.stopPropagation(); ev.preventDefault(); };
+                        bar.addEventListener( 'click', stop, { capture: true, once: true } );
+                    }
+                };
+                bar.addEventListener( 'pointerup', endDrag );
+                bar.addEventListener( 'pointercancel', endDrag );
+
+                // Salva scrollLeft nel ctx (debounced) → triggera savePrefs reattivo
+                let saveT;
+                bar.addEventListener( 'scroll', () => {
+                    clearTimeout( saveT );
+                    saveT = setTimeout( () => {
+                        ctx.centuryScrollLeft = bar.scrollLeft;
+                    }, 250 );
+                }, { passive: true } );
+            }
+
             // Click su card non-attiva → in primo piano (hit-test via bounding rect, le card non catturano per il 3D)
             document.querySelector( '.timeline-viewport' )?.addEventListener( 'click', ( e ) => {
                 let card = e.target.closest( '.timeline-card' );
@@ -575,7 +626,7 @@ store( 'timeline-3d', {
                     if ( ! src ) return;
                     const wrapper = img.parentElement;
                     wrapper?.classList.add( 'is-loading' );
-                    // data-src rimosso solo a load completato → fade-in CSS
+                    // data-src rimosso solo a load completato, fade-in CSS
                     const done = () => {
                         wrapper?.classList.remove( 'is-loading' );
                         img.removeAttribute( 'data-src' );
@@ -598,6 +649,7 @@ store( 'timeline-3d', {
                 categoria:   ctx.filters.categoria,
                 materiali:   ctx.filters.materiali,
                 tecniche:    ctx.filters.tecniche,
+                centuryScrollLeft: ctx.centuryScrollLeft,
             } );
             document.cookie = 'tl_prefs=' + encodeURIComponent( prefs ) + '; path=/; SameSite=Lax';
         },

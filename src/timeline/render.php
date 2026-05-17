@@ -162,6 +162,7 @@ $_pref_active_index = isset( $_tl_prefs['activeIndex'] ) ? (int)  $_tl_prefs['ac
 $_pref_categoria   = sanitize_text_field( $_tl_prefs['categoria'] ?? 'all' );
 $_pref_materiali   = sanitize_text_field( $_tl_prefs['materiali'] ?? '' );
 $_pref_tecniche    = sanitize_text_field( $_tl_prefs['tecniche']  ?? '' );
+$_pref_century_scroll = isset( $_tl_prefs['centuryScrollLeft'] ) ? (int) $_tl_prefs['centuryScrollLeft'] : 0;
 
 // viewMode dal cookie rispettato solo se permesso dal blocco
 if ( $allowed_views === 'timeline' ) {
@@ -191,6 +192,7 @@ $context = [
     'catOptions'  => array_values( $all_cat ),
     'matOptions'  => array_values( $all_mat ),
     'tecOptions'  => array_values( $all_tec ),
+    'centuryScrollLeft' => $_pref_century_scroll,
 ];
 ?>
 

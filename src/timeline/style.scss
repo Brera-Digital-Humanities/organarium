@@ -603,7 +603,7 @@
         grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
         gap: 30px;
     }
-    margin-top: 3rem;
+    margin-top: 2rem;
 }
 
 .grid-card {
@@ -719,16 +719,44 @@
 
     display: flex;
     align-items: flex-start;
-    width: 100%;
-    margin: 0.5rem 0 0;
+    flex-wrap: nowrap;
+    margin: 1.5rem 0 0;
     position: relative;
-    overflow: hidden;
+
+    /* Esce dal container ma lascia 20px di margine dai bordi del viewport.
+       calc(100vw - 40px) evita anche l'overflow orizzontale di pagina che
+       capita su Chrome con `100vw` + scrollbar verticale presente. */
+    width: calc(100vw - 40px);
+    margin-left: calc(20px - 50vw + 50%);
+
+    /* Scroll orizzontale quando i segmenti eccedono il viewport */
+    overflow-x: auto;
+    overflow-y: visible;
+    overscroll-behavior-x: contain;
+
+    /* Scrollbar nascosta (drag-to-pan come unico controllo visivo) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
+    /* Drag-to-pan: mouse → grab/grabbing; touch → pan nativo (touch-action) */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-x pan-y;
+
+    &.is-dragging {
+        cursor: grabbing;
+    }
 
     @media (max-width: 767px) {
-        --tl-dot-gap: 5px;
+        --tl-dot-gap: 4px;
         --tl-dot-offset: 3px;
-        --tl-dot-size: 4px;
-        flex-wrap: wrap;
+        --tl-dot-size: 3px;
     }
 }
 
@@ -742,25 +770,19 @@
     padding: 0.4rem 0 0;
     text-align: left;
     color: color-mix(in srgb, var(--wp--preset--color--contrast, #111) 35%, transparent);
-    transition: color 0.2s, flex-basis 0.3s ease;
+    transition: color 0.2s;
 
-    /* Desktop: i segmenti con dot si dividono lo spazio rimanente in parti uguali,
-       quelli vuoti restano a 50px fissi */
-    flex: 1 1 0;
+    /* Min 110px desktop: cresce equamente se c'è spazio, mai sotto 110 (no shrink) */
+    flex: 1 0 110px;
 
     &.is-empty {
-        flex: 0 0 50px;
         cursor: default;
         opacity: 0.4;
     }
 
-    /* Mobile: wrap su 3 righe; vuoti più stretti */
+    /* Mobile: min 90px */
     @media (max-width: 767px) {
-        flex: 1 1 50px;
-
-        &.is-empty {
-            flex: 0 0 30px;
-        }
+        flex: 1 0 90px;
     }
 
     &.is-active {
@@ -788,6 +810,11 @@
         width: 1px;
         height: 6px;
         background: currentColor;
+    }
+
+    /* Primo segmento: niente tick verticale di apertura */
+    .century-seg:first-child &::after {
+        background: transparent;
     }
 }
 

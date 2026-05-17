@@ -19,6 +19,7 @@
     align-items: stretch;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid var(--wp--preset--color--contrast);
 
     @media (max-width: 767px) {
         flex-direction: column;

@@ -30,15 +30,22 @@ if ( $post_source === 'current_category' ) {
         ] ];
     }
 } elseif ( $post_source === 'fixed_categories' && ! empty( $selected_categories ) ) {
+    // Polylang: mappa gli ID al termine equivalente nella lingua corrente
+    $localized_categories = function_exists( 'jerus_localize_term_ids' )
+        ? (array) jerus_localize_term_ids( array_values( $selected_categories ) )
+        : array_values( $selected_categories );
+
     $query_args['tax_query'] = [ [
         'taxonomy' => 'category',
         'field'    => 'term_id',
-        'terms'    => array_values( $selected_categories ),
+        'terms'    => $localized_categories,
         'operator' => 'IN',
     ] ];
 }
 
-$query = new WP_Query( $query_args );
+$query = function_exists( 'jerus_query_with_lang_fallback' )
+    ? jerus_query_with_lang_fallback( $query_args )
+    : new WP_Query( $query_args );
 
 $posts_data    = [];
 $first_post_id = false;
@@ -125,6 +132,13 @@ $context = [
     'catOptions'   => array_values( $all_cat ),
     'matOptions'   => array_values( $all_mat ),
     'tecOptions'   => array_values( $all_tec ),
+    // Etichette dinamiche per il JS (vedi view.js: state.sortLabel, state.filterToggleLabel)
+    'i18n'         => [
+        'sortAsc'      => __( 'Ordina ↑↓', 'jerus-organo' ),
+        'sortDesc'     => __( 'Ordina ↓↑', 'jerus-organo' ),
+        'filtersOpen'  => __( 'Filtra ↑', 'jerus-organo' ),
+        'filtersClose' => __( 'Filtra ↓', 'jerus-organo' ),
+    ],
 ];
 ?>
 
@@ -142,16 +156,16 @@ $context = [
             <?php if ( $show_filters ) : ?>
             <button class="pl-btn"
                     data-wp-on--click="actions.toggleFilters"
-                    data-wp-text="state.filterToggleLabel">Filtra ↓</button>
+                    data-wp-text="state.filterToggleLabel"><?php esc_html_e( 'Filtra ↓', 'jerus-organo' ); ?></button>
             <?php endif; ?>
         </div>
         <div class="pl-bar-right">
             <span class="pl-counter">
-                <span data-wp-text="state.filteredCount"><?php echo count( $posts_data ); ?></span>&nbsp;risultati
+                <span data-wp-text="state.filteredCount"><?php echo count( $posts_data ); ?></span>&nbsp;<?php esc_html_e( 'risultati', 'jerus-organo' ); ?>
             </span>
             <button class="pl-btn"
                     data-wp-on--click="actions.toggleSort"
-                    data-wp-text="state.sortLabel">Ordina ↑↓</button>
+                    data-wp-text="state.sortLabel"><?php esc_html_e( 'Ordina ↑↓', 'jerus-organo' ); ?></button>
         </div>
     </div>
 
@@ -162,11 +176,11 @@ $context = [
 
             <?php if ( ! empty( $all_cat ) ) : ?>
             <div class="pl-filter-col pl-filter-col--accent-4">
-                <h5 class="pl-filter-label">Categoria</h5>
+                <h5 class="pl-filter-label"><?php esc_html_e( 'Categoria', 'jerus-organo' ); ?></h5>
                 <div class="pl-pills">
                     <button class="pl-pill"
                             data-wp-class--active="!state.hasActiveFilters"
-                            data-wp-on--click="actions.clearFilters">Tutte</button>
+                            data-wp-on--click="actions.clearFilters"><?php esc_html_e( 'Tutte', 'jerus-organo' ); ?></button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pl-pill"
                             data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
@@ -181,7 +195,7 @@ $context = [
 
             <?php if ( ! empty( $all_mat ) ) : ?>
             <div class="pl-filter-col pl-filter-col--accent-1">
-                <h5 class="pl-filter-label">Materiale</h5>
+                <h5 class="pl-filter-label"><?php esc_html_e( 'Materiale', 'jerus-organo' ); ?></h5>
                 <div class="pl-pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pl-pill"
@@ -197,7 +211,7 @@ $context = [
 
             <?php if ( ! empty( $all_tec ) ) : ?>
             <div class="pl-filter-col pl-filter-col--accent-2">
-                <h5 class="pl-filter-label">Tecnica</h5>
+                <h5 class="pl-filter-label"><?php esc_html_e( 'Tecnica', 'jerus-organo' ); ?></h5>
                 <div class="pl-pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pl-pill"
@@ -219,7 +233,7 @@ $context = [
     <!-- ═══ FILTRI ATTIVI ═══ -->
     <div class="pl-active-filters" data-wp-class--pl-hidden="!state.hasActiveFilters">
         <button class="pl-btn pl-btn--link"
-                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
+                data-wp-on--click="actions.clearFilters"><?php esc_html_e( '× Azzera filtri', 'jerus-organo' ); ?></button>
         <button class="pl-active-tag pl-filter-col--accent-4"
                 data-wp-class--pl-hidden="!state.hasCategoriaFilter"
                 data-wp-on--click="actions.clearCategoria">
@@ -260,10 +274,10 @@ $context = [
                     <?php if ( ! empty( $post['data'] ) || ! empty( $post['ubicazione'] ) ) : ?>
                     <div class="pl-card-meta">
                         <?php if ( ! empty( $post['data'] ) ) : ?>
-                        <div class="pl-card-meta__row"><span class="pl-card-meta__label">Data:</span><?php echo esc_html( $post['data'] ); ?></div>
+                        <div class="pl-card-meta__row"><span class="pl-card-meta__label"><?php esc_html_e( 'Data:', 'jerus-organo' ); ?></span><?php echo esc_html( $post['data'] ); ?></div>
                         <?php endif; ?>
                         <?php if ( ! empty( $post['ubicazione'] ) ) : ?>
-                        <div class="pl-card-meta__row"><span class="pl-card-meta__label">Ubicazione:</span><?php echo esc_html( $post['ubicazione'] ); ?></div>
+                        <div class="pl-card-meta__row"><span class="pl-card-meta__label"><?php esc_html_e( 'Ubicazione:', 'jerus-organo' ); ?></span><?php echo esc_html( $post['ubicazione'] ); ?></div>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
@@ -284,7 +298,7 @@ $context = [
     <div class="pl-sentinel" aria-hidden="true"></div>
 
     <!-- ═══ MESSAGGI STATO ═══ -->
-    <p class="pl-status-msg" data-wp-class--pl-hidden="!state.showEndMessage">Fine dei risultati</p>
-    <p class="pl-status-msg" data-wp-class--pl-hidden="!state.showEmptyMessage">Nessun risultato trovato</p>
+    <p class="pl-status-msg" data-wp-class--pl-hidden="!state.showEndMessage"><?php esc_html_e( 'Fine dei risultati', 'jerus-organo' ); ?></p>
+    <p class="pl-status-msg" data-wp-class--pl-hidden="!state.showEmptyMessage"><?php esc_html_e( 'Nessun risultato trovato', 'jerus-organo' ); ?></p>
 
 </div><!-- .pl-wrap -->

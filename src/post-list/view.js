@@ -51,7 +51,8 @@ store( 'post-list', {
 
         // ── Ordinamento ───────────────────────────────────────────────────────
         get sortLabel() {
-            return getContext().sortAsc ? 'Ordina ↑↓' : 'Ordina ↓↑';
+            const ctx = getContext();
+            return ctx.sortAsc ? ctx.i18n.sortAsc : ctx.i18n.sortDesc;
         },
 
         // ── Filtri ────────────────────────────────────────────────────────────
@@ -60,7 +61,8 @@ store( 'post-list', {
         },
 
         get filterToggleLabel() {
-            return getContext().filtersOpen ? 'Filtra ↑' : 'Filtra ↓';
+            const ctx = getContext();
+            return ctx.filtersOpen ? ctx.i18n.filtersOpen : ctx.i18n.filtersClose;
         },
 
         get hasActiveFilters() {

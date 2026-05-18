@@ -28,7 +28,7 @@
             "default": true
         }
     },
-    "textdomain": "timeline",
+    "textdomain": "jerus-organo",
     "editorScript": "file:./index.js",
     "viewScriptModule": "file:./view.js",
     "style": "file:./style-index.css",

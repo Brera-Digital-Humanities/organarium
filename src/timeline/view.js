@@ -53,7 +53,8 @@ store( 'timeline-3d', {
         },
 
         get filterToggleLabel() {
-            return getContext().filtersOpen ? 'Filtra ↑' : 'Filtra ↓';
+            const ctx = getContext();
+            return ctx.filtersOpen ? ctx.i18n.filtersOpen : ctx.i18n.filtersClose;
         },
 
         // ── Stato di una singola pill (contesto locale: filterGroup + filterVal) ──
@@ -151,7 +152,8 @@ store( 'timeline-3d', {
 
         // ── Ordinamento ───────────────────────────────────────────────────────
         get sortLabel() {
-            return getContext().sortAsc ? 'Ordina ↑↓' : 'Ordina ↓↑';
+            const ctx = getContext();
+            return ctx.sortAsc ? ctx.i18n.sortAsc : ctx.i18n.sortDesc;
         },
 
         // Posizione CSS order nella griglia (contesto locale: postIndex)

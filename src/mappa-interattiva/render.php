@@ -17,7 +17,9 @@ $query_args = [
     'order'          => 'ASC',
 ];
 
-$query         = new WP_Query( $query_args );
+$query         = function_exists( 'jerus_query_with_lang_fallback' )
+    ? jerus_query_with_lang_fallback( $query_args )
+    : new WP_Query( $query_args );
 $posts_data    = [];
 $first_post_id = false;
 
@@ -126,8 +128,14 @@ $context = [
     'matOptions'  => array_values( $all_mat ),
     'tecOptions'  => array_values( $all_tec ),
     'periOptions' => [
-        [ 'value' => 'tardo-antico',     'label' => 'Tardo Antico' ],
-        [ 'value' => 'medioevo-moderno', 'label' => 'Medioevo / Moderno' ],
+        [ 'value' => 'tardo-antico',     'label' => __( 'Tardo Antico', 'jerus-organo' ) ],
+        [ 'value' => 'medioevo-moderno', 'label' => __( 'Medioevo / Moderno', 'jerus-organo' ) ],
+    ],
+    // Etichette dinamiche per il JS (vedi view.js: state.filterToggleLabel, makeCard)
+    'i18n'        => [
+        'filtersOpen'   => __( 'Filtra ↑', 'jerus-organo' ),
+        'filtersClose'  => __( 'Filtra ↓', 'jerus-organo' ),
+        'ubicazione'    => __( 'UBICAZIONE:', 'jerus-organo' ),
     ],
 ];
 ?>
@@ -146,17 +154,17 @@ $context = [
         <button class="map-sidebar__toggle"
                 data-wp-on--click="actions.toggleFilters"
                 data-wp-text="state.filterToggleLabel"
-                data-wp-bind--aria-expanded="state.filtersOpen">Filtra ↓</button>
+                data-wp-bind--aria-expanded="state.filtersOpen"><?php esc_html_e( 'Filtra ↓', 'jerus-organo' ); ?></button>
 
         <div class="map-sidebar__panel">
 
             <?php if ( ! empty( $all_cat ) ) : ?>
             <div class="filter-col filter-col--accent-4">
-                <h5 class="filter-label">Categoria</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Categoria', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <button class="pill"
                             data-wp-class--active="!state.hasActiveFilters"
-                            data-wp-on--click="actions.clearFilters">Tutte</button>
+                            data-wp-on--click="actions.clearFilters"><?php esc_html_e( 'Tutte', 'jerus-organo' ); ?></button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pill"
                             data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
@@ -171,7 +179,7 @@ $context = [
 
             <?php if ( ! empty( $all_mat ) ) : ?>
             <div class="filter-col filter-col--accent-1">
-                <h5 class="filter-label">Materiale</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Materiale', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pill"
@@ -187,7 +195,7 @@ $context = [
 
             <?php if ( ! empty( $all_tec ) ) : ?>
             <div class="filter-col filter-col--accent-2">
-                <h5 class="filter-label">Tecnica</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Tecnica', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pill"
@@ -202,20 +210,20 @@ $context = [
             <?php endif; ?>
 
             <div class="filter-col filter-col--accent-3">
-                <h5 class="filter-label">Periodo</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Periodo', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <button class="pill"
                             data-wp-context='{"filterGroup":"periodo","filterVal":"tardo-antico"}'
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
-                            data-wp-on--click="actions.togglePill">Tardo Antico</button>
+                            data-wp-on--click="actions.togglePill"><?php esc_html_e( 'Tardo Antico', 'jerus-organo' ); ?></button>
                     <button class="pill"
                             data-wp-context='{"filterGroup":"periodo","filterVal":"medioevo-moderno"}'
                             data-wp-class--active="state.isPillActive"
                             data-wp-class--disabled="state.isPillDisabled"
                             data-wp-bind--disabled="state.isPillDisabled"
-                            data-wp-on--click="actions.togglePill">Medioevo</button>
+                            data-wp-on--click="actions.togglePill"><?php esc_html_e( 'Medioevo', 'jerus-organo' ); ?></button>
                 </div>
             </div>
 
@@ -226,7 +234,7 @@ $context = [
     <div class="tl-active-filters">
         <button class="tl-btn tl-btn--link"
                 data-wp-class--tl-hidden="!state.hasActiveFilters"
-                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
+                data-wp-on--click="actions.clearFilters"><?php esc_html_e( '× Azzera filtri', 'jerus-organo' ); ?></button>
         <button class="active-filter-tag filter-col--accent-4"
                 data-wp-class--tl-hidden="!state.hasCategoriaFilter"
                 data-wp-on--click="actions.clearCategoria">
@@ -258,7 +266,7 @@ $context = [
 
         <!-- Info panel (overlay) -->
         <div class="mp-info-panel">
-            <button class="mp-info-panel__close" aria-label="Chiudi">×</button>
+            <button class="mp-info-panel__close" aria-label="<?php esc_attr_e( 'Chiudi', 'jerus-organo' ); ?>">×</button>
             <div class="mp-info-panel__content"></div>
         </div>
 

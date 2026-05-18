@@ -91,7 +91,8 @@ store('mappa-interattiva', {
         },
 
         get filterToggleLabel() {
-            return getContext().filtersOpen ? 'Filtra ↑' : 'Filtra ↓';
+            const ctx = getContext();
+            return ctx.filtersOpen ? ctx.i18n.filtersOpen : ctx.i18n.filtersClose;
         },
 
         // Stato singola pill (ctx locale: filterGroup + filterVal)
@@ -246,8 +247,9 @@ store('mappa-interattiva', {
                     refs.selectedMarker = marker;
 
                     const postsInPanel = filterPostsForPanel(group, ctx.filters.periodo);
+                    const labels = ctx.i18n || {};
                     panelContent.innerHTML = postsInPanel
-                        .map(makeCard).join('<div class="mp-divider"></div>');
+                        .map((p) => makeCard(p, labels)).join('<div class="mp-divider"></div>');
                     panel.classList.add('is-open');
                     panel.scrollTop = 0;
                 });

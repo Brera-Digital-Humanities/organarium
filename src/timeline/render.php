@@ -71,16 +71,11 @@ if ( $query->have_posts() ) {
     wp_reset_postdata();
 }
 
-// Map valore→label ACF — richiede $post_id reale (su pagine statiche $post globale = page senza i custom field)
-$acf_choices = static function ( string $field_name, $post_id ): array {
-    if ( ! function_exists( 'get_field_object' ) ) return [];
-    $obj = get_field_object( $field_name, $post_id );
-    return ( is_array( $obj ) && ! empty( $obj['choices'] ) ) ? $obj['choices'] : [];
-};
-
-$cat_choices = $acf_choices( 'categorie_generali', $first_post_id );
-$mat_choices = $acf_choices( 'materiale', $first_post_id );
-$tec_choices = $acf_choices( 'tecniche', $first_post_id );
+// Map valore→label: usa l'helper i18n del theme (sempre coerente con la locale
+// corrente, indipendente da ACF cache e da $first_post_id).
+$cat_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'categorie_generali' ) : [];
+$mat_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'materiale' )          : [];
+$tec_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'tecniche' )           : [];
 
 // ── Opzioni filtro: array di {value, label} ───────────────────────────────────
 $unique_vals = static function ( array $posts_data, string $key ): array {

@@ -8,7 +8,7 @@ Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentaz
 
 - WordPress 6.5+
 - Parent theme: **Twenty Twenty-Five**
-- Plugin: **Advanced Custom Fields (ACF)** + **ACF Extended** (per il campo Open Street Map)
+- Plugin: **Advanced Custom Fields (ACF)** + **ACF Extended** (per il campo Open Street Map); **Polylang** (versione free) per il multilingua
 - Node.js 24 e npm (per la compilazione — versione fissata in `.nvmrc`)
 
 ---
@@ -26,7 +26,9 @@ jerus-organo/
 │   ├── shared/               # Logica di filtraggio condivisa tra timeline, post-list e mappa-interattiva
 │   └── style/                # Stile globale del child theme (SCSS)
 ├── build/                    # File compilati (generati da wp-scripts, non versionati)
-├── functions.php             # Registrazione blocchi, enqueue stili, custom excerpt length
+├── languages/                # File di traduzione (.pot template, .po sorgenti, .mo compilati)
+├── parts/                    # Template part FSE custom (varianti per lingua: header-{lang}.html, ecc.)
+├── functions.php             # Registrazione blocchi, enqueue stili, helper i18n
 ├── style.css                 # Header child theme (regole in src/style/)
 ├── webpack.config.js         # Estende wp-scripts per aggiungere l'entry SCSS globale
 └── package.json
@@ -137,6 +139,54 @@ $font-baloo:     var(--wp--preset--font-family--baloo-2);
 Così cambi alla palette o alla tipografia in `theme.json` (o nel Site Editor) si propagano automaticamente all'SCSS senza dover ricompilare. Stili specifici di blocchi core andrebbero preferibilmente messi in `theme.json` → `styles.blocks.*`; l'SCSS è riservato a selettori complessi, hover/transizioni e regole che il Site Editor non copre.
 
 > Gli stili dei blocchi custom (`src/<block>/style.scss`) restano separati: wp-scripts li compila tramite il loro `block.json`.
+
+---
+
+## Multilingua
+
+Il sito è multilingua tramite **Polylang** (versione free). Tema internazionalizzato con text-domain `jerus-organo`; i file di traduzione vivono in `languages/` nel formato `jerus-organo-{locale}.{po,mo}`. Lingue configurate: italiano (slug `it`, default) e inglese (slug `en`, locale `en_GB`). Gli helper PHP verificano `function_exists('pll_*')` prima di chiamare le funzioni Polylang: disattivando il plugin il codice degrada in modo trasparente (`__()` restituisce l'originale, gli helper ritornano l'input invariato), il che è utile in fase di sviluppo locale senza Polylang installato.
+
+**Stringhe coperte**
+
+- UI dei 4 blocchi interattivi: etichette filtri, bottoni, messaggi di stato
+- Choices dei campi ACF (`categorie_generali`, `materiale`, `tecniche`) nelle pill dei filtri e nei tag delle card. I value (slug) restano lingua-agnostici per non rompere filtri salvati o preferenze utente cross-lingua
+- Label preset del blocco `acf-field` quando coincidono esattamente con i default IT — le label custom restano intatte
+- Label dei field ACF in admin via filtro `acf/load_field`
+
+**Helper PHP** (in `functions.php`):
+
+| Funzione | Cosa fa |
+|---|---|
+| `jerus_load_textdomain()` | Ricarica il `.mo` per la locale corrente; agganciato a `init`/`wp`/`admin_init`/`rest_api_init` per coprire i diversi momenti in cui la lingua viene risolta |
+| `jerus_localize_term_ids()` | Mappa un `term_id` (o array) all'equivalente nella lingua corrente |
+| `jerus_query_with_lang_fallback()` | Esegue `WP_Query` con fallback alla lingua di default se la corrente è vuota; ri-mappa i term ID di `tax_query` perché Polylang/i18n li tiene distinti per lingua |
+| `jerus_acf_choices_translations()` / `jerus_get_translated_choices()` | Mappa `field_name` → `[value => label tradotta]` per i campi radio/checkbox. Usata dai 3 blocchi al posto di `get_field_object()` per non dipendere dalla cache ACF |
+| `jerus_resolve_acf_field_block_label()` | Traduce la label salvata del blocco `acf-field` se coincide col preset IT; altrimenti la lascia |
+| `jerus_remap_tax_query_terms()` | Ri-mappa ricorsivamente i term ID di una `tax_query` (anche annidata) a una lingua specifica |
+
+**Header/footer per lingua (FSE)**
+
+Il filtro `render_block_data` riscrive lo slug di `core/template-part` aggiungendo il suffisso della lingua corrente (es. `header` → `header-en`) quando la lingua non è il default. La variante può essere un file `parts/header-en.html` nel child theme o un post `wp_template_part` salvato dal Site Editor; se non esiste si ricade sullo slug originale. Per estendere oltre `header`/`footer` modificare l'array `$swappable` nel filtro.
+
+**Fallback contenuti**
+
+Quando la lingua corrente non ha post:
+- Pagine **archive/category/tag/home**: un filtro `the_posts` sulla main query restituisce i post della lingua di default
+- I 3 blocchi (**timeline**, **post-list**, **mappa-interattiva**): le loro `WP_Query` passano per `jerus_query_with_lang_fallback()`
+
+In tutti i casi le etichette UI restano nella lingua corrente: il fallback agisce solo sui contenuti dei post.
+
+**Aggiungere/aggiornare una locale**
+
+```bash
+msgfmt languages/jerus-organo-{locale}.po -o languages/jerus-organo-{locale}.mo
+```
+
+I `.mo` vanno committati (sono ciò che WordPress legge a runtime).
+
+**Manutenzione delle label del blocco `acf-field`**
+
+I preset di label sono **duplicati per design** tra `src/acf-field/index.js` (array `FIELDS`) e `functions.php` (`jerus_acf_field_block_labels()`). Le due fonti devono essere identiche carattere per carattere: il render PHP traduce solo se la label salvata coincide esattamente col preset IT (`===`). Aggiungere o rinominare un campo richiede di aggiornare entrambe le mappe più le voci `msgid` nel `.pot`/`.po`.
 
 ---
 

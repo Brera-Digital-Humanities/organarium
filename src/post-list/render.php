@@ -76,16 +76,11 @@ if ( $query->have_posts() ) {
 
 usort( $posts_data, static fn( $a, $b ) => $a['sort_key'] <=> $b['sort_key'] );
 
-// ── Map valore→label dai field object ACF ────────────────────────────────────
-$acf_choices = static function ( string $field_name, $post_id ): array {
-    if ( ! function_exists( 'get_field_object' ) || ! $post_id ) return [];
-    $obj = get_field_object( $field_name, $post_id );
-    return ( is_array( $obj ) && ! empty( $obj['choices'] ) ) ? $obj['choices'] : [];
-};
-
-$cat_choices = $acf_choices( 'categorie_generali', $first_post_id );
-$mat_choices = $acf_choices( 'materiale', $first_post_id );
-$tec_choices = $acf_choices( 'tecniche', $first_post_id );
+// ── Map valore→label: usiamo l'helper i18n del theme (indipendente da ACF
+// e dal $first_post_id, quindi resiste anche al fallback in lingua di default). ─
+$cat_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'categorie_generali' ) : [];
+$mat_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'materiale' )          : [];
+$tec_choices = function_exists( 'jerus_get_translated_choices' ) ? jerus_get_translated_choices( 'tecniche' )           : [];
 
 // ── Opzioni filtro ────────────────────────────────────────────────────────────
 $unique_vals = static function ( array $data, string $key ): array {

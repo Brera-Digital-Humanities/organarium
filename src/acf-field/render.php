@@ -9,6 +9,12 @@ if ( ! $field_key || ! function_exists( 'get_field' ) ) {
     return;
 }
 
+// Traduce la label se coincide con il preset IT salvato dall'editor del blocco.
+// Le label custom restano invariate.
+if ( $label !== '' && function_exists( 'jerus_resolve_acf_field_block_label' ) ) {
+    $label = jerus_resolve_acf_field_block_label( $field_key, $label );
+}
+
 $value = get_field( $field_key );
 
 if ( empty( $value ) ) {

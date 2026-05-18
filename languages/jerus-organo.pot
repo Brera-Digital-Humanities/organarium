@@ -207,6 +207,34 @@ msgstr ""
 msgid "Piombo"
 msgstr ""
 
+# ─── Blocco acf-field: label preset (senza ":", aggiunto al render) ─────────
+msgid "Data"
+msgstr ""
+
+msgid "Ubicazione"
+msgstr ""
+
+msgid "Autore"
+msgstr ""
+
+msgid "Tecnica e materiali"
+msgstr ""
+
+msgid "Dimensioni"
+msgstr ""
+
+msgid "Edizione"
+msgstr ""
+
+msgid "Trattato completo"
+msgstr ""
+
+msgid "Provenienza"
+msgstr ""
+
+msgid "Fonti"
+msgstr ""
+
 # ─── ACF: choices di tecniche ───────────────────────────────────────────────
 msgid "Affresco"
 msgstr ""

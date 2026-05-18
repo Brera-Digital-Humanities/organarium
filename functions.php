@@ -5,11 +5,24 @@
 
 /**
  * Carica le traduzioni del child theme da /languages.
- * I file .mo devono essere nominati jerus-organo-{locale}.mo (es. jerus-organo-en_US.mo).
+ * I file .mo devono essere nominati jerus-organo-{locale}.mo (es. jerus-organo-en_GB.mo).
+ *
+ * Carichiamo su più hook per coprire i diversi momenti in cui Polylang può
+ * determinare la lingua corrente (frontend URL: su `parse_request`; admin: su
+ * user profile; REST: su `rest_api_init`). Ogni invocazione è idempotente:
+ * unload + load forzano un reload con la locale corretta del momento.
  */
-add_action( 'after_setup_theme', 'jerus_load_textdomain' );
+add_action( 'init',           'jerus_load_textdomain', 100 ); // dopo Polylang::init (priorità 1)
+add_action( 'wp',             'jerus_load_textdomain', 0 );   // dopo parse_request → curlang settato
+add_action( 'admin_init',     'jerus_load_textdomain' );
+add_action( 'rest_api_init',  'jerus_load_textdomain' );
 function jerus_load_textdomain() {
-	load_child_theme_textdomain( 'jerus-organo', get_stylesheet_directory() . '/languages' );
+	$locale = determine_locale();
+	$mofile = get_stylesheet_directory() . '/languages/jerus-organo-' . $locale . '.mo';
+	if ( file_exists( $mofile ) ) {
+		unload_textdomain( 'jerus-organo' );
+		load_textdomain( 'jerus-organo', $mofile, $locale );
+	}
 }
 
 /**
@@ -32,8 +45,55 @@ function jerus_localize_term_ids( $term_id ) {
 }
 
 /**
+ * Ri-mappa i term IDs di una tax_query alla lingua specificata.
+ *
+ * Why: Polylang usa term IDs distinti per lingua (la categoria "Pittura" IT ha
+ * un term_id diverso dalla sua traduzione EN). Quindi `tax_query` con term IDs EN
+ * non restituirebbe post IT anche forzando `lang=it`. Durante il fallback occorre
+ * mappare i term IDs della lingua corrente al loro equivalente nella lingua di
+ * default. Gestisce sia tax_query "piatte" sia annidate (con 'relation').
+ *
+ * @param array  $tax_query   Struttura tax_query di WP_Query.
+ * @param string $target_lang Slug Polylang della lingua di destinazione.
+ * @return array tax_query con term IDs ri-mappati.
+ */
+function jerus_remap_tax_query_terms( array $tax_query, string $target_lang ): array {
+	if ( ! function_exists( 'pll_get_term' ) ) {
+		return $tax_query;
+	}
+	foreach ( $tax_query as $key => &$clause ) {
+		if ( $key === 'relation' || ! is_array( $clause ) ) {
+			continue;
+		}
+		// tax_query annidate: ricorsione
+		if ( ! isset( $clause['taxonomy'] ) && ! isset( $clause['terms'] ) ) {
+			$clause = jerus_remap_tax_query_terms( $clause, $target_lang );
+			continue;
+		}
+		$field = $clause['field'] ?? 'term_id';
+		if ( $field !== 'term_id' && $field !== 'id' ) {
+			continue;
+		}
+		if ( ! isset( $clause['terms'] ) ) {
+			continue;
+		}
+		$terms  = (array) $clause['terms'];
+		$mapped = [];
+		foreach ( $terms as $tid ) {
+			$translated = pll_get_term( (int) $tid, $target_lang );
+			$mapped[] = $translated ? (int) $translated : (int) $tid;
+		}
+		$clause['terms'] = $mapped;
+	}
+	unset( $clause );
+	return $tax_query;
+}
+
+/**
  * Esegue WP_Query con fallback alla lingua di default se la lingua corrente
- * non ha risultati. Funziona anche senza Polylang (ritorna la query normale).
+ * non ha risultati. Quando fa fallback, ri-mappa anche i term IDs della
+ * tax_query (vedi jerus_remap_tax_query_terms). Funziona anche senza Polylang
+ * (in quel caso ritorna semplicemente la query normale).
  *
  * @param array $args  Argomenti di WP_Query.
  * @return WP_Query
@@ -54,8 +114,13 @@ function jerus_query_with_lang_fallback( array $args ): WP_Query {
 		return $query;
 	}
 
-	$fallback_args = $args;
+	$fallback_args         = $args;
 	$fallback_args['lang'] = $default; // forza la lingua di default su Polylang
+
+	if ( ! empty( $fallback_args['tax_query'] ) && is_array( $fallback_args['tax_query'] ) ) {
+		$fallback_args['tax_query'] = jerus_remap_tax_query_terms( $fallback_args['tax_query'], $default );
+	}
+
 	return new WP_Query( $fallback_args );
 }
 
@@ -137,8 +202,72 @@ function jerus_acf_field_labels(): array {
 }
 
 /**
+ * Mappa fieldKey → coppia [label IT preset, label tradotta] per il blocco
+ * `ttf-child/acf-field`. La "label IT preset" è la stringa salvata come
+ * attributo del blocco quando l'editor sceglie un campo dal SelectControl
+ * in src/acf-field/index.js (es. selezionando 'data' → label "Data").
+ *
+ * Why: il blocco salva la label come attributo statico per consentire override
+ * custom da editor. Senza questa mappa, su /en/ continuerebbe a mostrare la
+ * label italiana. Il render.php usa questa mappa per sostituire la label se
+ * (e solo se) coincide con il preset — eventuali label custom restano intatte.
+ *
+ * @return array<string,array{it:string, localized:string}>
+ */
+function jerus_acf_field_block_labels(): array {
+	return [
+		'data'                => [ 'it' => 'Data',                'localized' => __( 'Data',                'jerus-organo' ) ],
+		'ubicazione'          => [ 'it' => 'Ubicazione',          'localized' => __( 'Ubicazione',          'jerus-organo' ) ],
+		'autore'              => [ 'it' => 'Autore',              'localized' => __( 'Autore',              'jerus-organo' ) ],
+		'tecnica_e_materiali' => [ 'it' => 'Tecnica e materiali', 'localized' => __( 'Tecnica e materiali', 'jerus-organo' ) ],
+		'dimensioni'          => [ 'it' => 'Dimensioni',          'localized' => __( 'Dimensioni',          'jerus-organo' ) ],
+		'edizione'            => [ 'it' => 'Edizione',            'localized' => __( 'Edizione',            'jerus-organo' ) ],
+		'trattato_completo'   => [ 'it' => 'Trattato completo',   'localized' => __( 'Trattato completo',   'jerus-organo' ) ],
+		'provenienza'         => [ 'it' => 'Provenienza',         'localized' => __( 'Provenienza',         'jerus-organo' ) ],
+		'fonti'               => [ 'it' => 'Fonti',               'localized' => __( 'Fonti',               'jerus-organo' ) ],
+	];
+}
+
+/**
+ * Risolve la label da mostrare nel blocco acf-field.
+ * Se la label salvata coincide con il preset IT del fieldKey, ritorna la
+ * versione tradotta (in base alla locale corrente). Altrimenti restituisce
+ * la label salvata invariata — così le label custom non vengono toccate.
+ *
+ * @param string $field_key   Slug del campo ACF (es. 'data', 'ubicazione').
+ * @param string $saved_label Label salvata come attributo del blocco.
+ * @return string Label da renderizzare.
+ */
+function jerus_resolve_acf_field_block_label( string $field_key, string $saved_label ): string {
+	$labels = jerus_acf_field_block_labels();
+	if ( ! isset( $labels[ $field_key ] ) ) {
+		return $saved_label;
+	}
+	if ( $saved_label === $labels[ $field_key ]['it'] ) {
+		return $labels[ $field_key ]['localized'];
+	}
+	return $saved_label;
+}
+
+/**
+ * Restituisce la mappa value→label tradotta per un field ACF radio/checkbox.
+ * Funzione "stateless" per il frontend: NON dipende da get_field_object()
+ * (e quindi nemmeno dalla cache di ACF) ed è sempre coerente con la locale
+ * corrente di WordPress (e quindi con il .mo caricato).
+ *
+ * @param string $field_name  Nome del campo ACF (es. 'categorie_generali').
+ * @return array<string,string> Mappa value=>label tradotta.
+ */
+function jerus_get_translated_choices( string $field_name ): array {
+	$map = jerus_acf_choices_translations();
+	return $map[ $field_name ] ?? [];
+}
+
+/**
  * Filtro globale acf/load_field: traduce label + choices in base al text-domain.
  * Si applica a ogni campo; il lookup costa pochissimo e centralizza tutto.
+ * Utile soprattutto per la UI admin (label/choices nel post editor). Il frontend
+ * usa direttamente jerus_get_translated_choices().
  */
 add_filter( 'acf/load_field', 'jerus_acf_translate_field' );
 function jerus_acf_translate_field( $field ) {

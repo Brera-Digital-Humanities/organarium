@@ -9,7 +9,7 @@ Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentaz
 - WordPress 6.5+
 - Parent theme: **Twenty Twenty-Five**
 - Plugin: **Advanced Custom Fields (ACF)** + **ACF Extended** (per il campo Open Street Map)
-- Node.js 20 e npm (per la compilazione — versione fissata in `.nvmrc`)
+- Node.js 24 e npm (per la compilazione — versione fissata in `.nvmrc`)
 
 ---
 
@@ -36,10 +36,10 @@ jerus-organo/
 
 ## Build
 
-**Prerequisito:** il progetto richiede Node.js 20. Attivare la versione corretta con nvm prima di qualsiasi altro comando:
+**Prerequisito:** il progetto richiede Node.js 24. Attivare la versione corretta con nvm prima di qualsiasi altro comando:
 
 ```bash
-nvm use 20
+nvm use 24
 ```
 
 Installare le dipendenze e compilare:
@@ -65,7 +65,7 @@ Suite di unit test basata su `wp-scripts test-unit-js` (Jest + jsdom, già inclu
 **Esecuzione:**
 
 ```bash
-nvm use 20
+nvm use 24
 npm run test:unit
 ```
 

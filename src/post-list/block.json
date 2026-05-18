@@ -29,7 +29,7 @@
             "default": "4/3"
         }
     },
-    "textdomain": "post-list",
+    "textdomain": "jerus-organo",
     "editorScript": "file:./index.js",
     "viewScriptModule": "file:./view.js",
     "style": "file:./style-index.css",

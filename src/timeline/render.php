@@ -29,14 +29,21 @@ if ( $post_source === 'current_category' ) {
         ] ];
     }
 } elseif ( $post_source === 'fixed_category' && $selected_category > 0 ) {
+    // Polylang: mappa il term_id al termine equivalente nella lingua corrente
+    $localized_category = function_exists( 'jerus_localize_term_ids' )
+        ? (int) jerus_localize_term_ids( $selected_category )
+        : (int) $selected_category;
+
     $query_args['tax_query'] = [ [
         'taxonomy' => 'category',
         'field'    => 'term_id',
-        'terms'    => $selected_category,
+        'terms'    => $localized_category,
     ] ];
 }
 
-$query = new WP_Query( $query_args );
+$query = function_exists( 'jerus_query_with_lang_fallback' )
+    ? jerus_query_with_lang_fallback( $query_args )
+    : new WP_Query( $query_args );
 
 $posts_data    = [];
 $first_post_id = false;
@@ -193,6 +200,13 @@ $context = [
     'matOptions'  => array_values( $all_mat ),
     'tecOptions'  => array_values( $all_tec ),
     'centuryScrollLeft' => $_pref_century_scroll,
+    // Etichette dinamiche per il JS (vedi view.js: state.sortLabel, state.filterToggleLabel)
+    'i18n'        => [
+        'sortAsc'      => __( 'Ordina ↑↓', 'jerus-organo' ),
+        'sortDesc'     => __( 'Ordina ↓↑', 'jerus-organo' ),
+        'filtersOpen'  => __( 'Filtra ↑', 'jerus-organo' ),
+        'filtersClose' => __( 'Filtra ↓', 'jerus-organo' ),
+    ],
 ];
 ?>
 
@@ -211,35 +225,35 @@ $context = [
         <div class="tl-bar-left">
             <button class="tl-btn"
                     data-wp-on--click="actions.toggleFilters"
-                    data-wp-text="state.filterToggleLabel">Filtra ↓</button>
+                    data-wp-text="state.filterToggleLabel"><?php esc_html_e( 'Filtra ↓', 'jerus-organo' ); ?></button>
         </div>
 
         <div class="tl-bar-right">
             <button class="tl-btn"
                     data-wp-on--click="actions.toggleSort"
-                    data-wp-text="state.sortLabel">Ordina ↑↓</button>
+                    data-wp-text="state.sortLabel"><?php esc_html_e( 'Ordina ↑↓', 'jerus-organo' ); ?></button>
             <?php if ( $allowed_views === 'both' ) : ?>
-            <div class="view-toggle" role="group" aria-label="Vista">
+            <div class="view-toggle" role="group" aria-label="<?php esc_attr_e( 'Vista', 'jerus-organo' ); ?>">
                 <button class="v-btn"
                         data-wp-on--click="actions.setViewTimeline"
                         data-wp-class--active="state.isViewTimeline"
-                        title="Vista timeline">
+                        title="<?php esc_attr_e( 'Vista timeline', 'jerus-organo' ); ?>">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 -960 960 960" fill="currentColor">
                         <path d="M240-280h240v-80H240v80Zm120-160h240v-80H360v80Zm120-160h240v-80H480v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/>
                     </svg>
-                    <span class="sr-only">Timeline</span>
+                    <span class="sr-only"><?php esc_html_e( 'Timeline', 'jerus-organo' ); ?></span>
                 </button>
                 <button class="v-btn"
                         data-wp-on--click="actions.setViewGrid"
                         data-wp-class--active="state.isViewGrid"
-                        title="Vista griglia">
+                        title="<?php esc_attr_e( 'Vista griglia', 'jerus-organo' ); ?>">
                     <svg width="16" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
                         <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
                         <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor"/>
                         <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor"/>
                         <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor"/>
                     </svg>
-                    <span class="sr-only">Griglia</span>
+                    <span class="sr-only"><?php esc_html_e( 'Griglia', 'jerus-organo' ); ?></span>
                 </button>
             </div>
             <?php endif; ?>
@@ -253,11 +267,11 @@ $context = [
 
             <?php if ( ! empty( $all_cat ) ) : ?>
             <div class="filter-col filter-col--accent-4">
-                <h5 class="filter-label">Categoria</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Categoria', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <button class="pill"
                             data-wp-class--active="!state.hasActiveFilters"
-                            data-wp-on--click="actions.clearFilters">Tutte</button>
+                            data-wp-on--click="actions.clearFilters"><?php esc_html_e( 'Tutte', 'jerus-organo' ); ?></button>
                     <?php foreach ( $all_cat as $opt ) : ?>
                     <button class="pill"
                             data-wp-context="<?php echo esc_attr( wp_json_encode( [ 'filterGroup' => 'categoria', 'filterVal' => $opt['value'] ] ) ); ?>"
@@ -273,7 +287,7 @@ $context = [
 
             <?php if ( ! empty( $all_mat ) ) : ?>
             <div class="filter-col filter-col--accent-1">
-                <h5 class="filter-label">Materiale</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Materiale', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <?php foreach ( $all_mat as $opt ) : ?>
                     <button class="pill"
@@ -290,7 +304,7 @@ $context = [
 
             <?php if ( ! empty( $all_tec ) ) : ?>
             <div class="filter-col filter-col--accent-2">
-                <h5 class="filter-label">Tecnica</h5>
+                <h5 class="filter-label"><?php esc_html_e( 'Tecnica', 'jerus-organo' ); ?></h5>
                 <div class="pills">
                     <?php foreach ( $all_tec as $opt ) : ?>
                     <button class="pill"
@@ -315,10 +329,10 @@ $context = [
     <p class="tl-counter">
             <span data-wp-text="state.counterCurrent">1</span>&thinsp;/&thinsp;<span data-wp-text="state.visibleCount"><?php echo count( $posts_data ); ?></span>
         </p>
-        <span class="tl-current-century">Anni: <span data-wp-text="state.activeCenturyLabel"></span></span>
+        <span class="tl-current-century"><?php esc_html_e( 'Anni:', 'jerus-organo' ); ?> <span data-wp-text="state.activeCenturyLabel"></span></span>
         <button class="tl-btn tl-btn--link"
                 data-wp-class--tl-hidden="!state.hasActiveFilters"
-                data-wp-on--click="actions.clearFilters">× Azzera filtri</button>
+                data-wp-on--click="actions.clearFilters"><?php esc_html_e( '× Azzera filtri', 'jerus-organo' ); ?></button>
         <button class="active-filter-tag filter-col--accent-4"
                 data-wp-class--tl-hidden="!state.hasCategoriaFilter"
                 data-wp-on--click="actions.clearCategoria">
@@ -396,7 +410,7 @@ $context = [
                         </div>
                         <?php endif; ?>
                         <?php if ( ! empty( $post['data'] ) ) : ?>
-                        <time class="card-date">DATA: <?php echo esc_html( $post['data'] ); ?></time>
+                        <time class="card-date"><?php esc_html_e( 'DATA:', 'jerus-organo' ); ?> <?php echo esc_html( $post['data'] ); ?></time>
                         <?php endif; ?>
                         <h3 class="card-title"><?php echo esc_html( $post['title'] ); ?></h3>
                         </a>
@@ -413,7 +427,7 @@ $context = [
             </div><!-- .cards-container -->
         </div><!-- .timeline-viewport -->
 
-        <nav class="nav-buttons" aria-label="Navigazione timeline"
+        <nav class="nav-buttons" aria-label="<?php esc_attr_e( 'Navigazione timeline', 'jerus-organo' ); ?>"
                 data-wp-class--tl-hidden="!state.showNavBtn">
             <button class="nav-btn nav-btn--prev"
                     data-wp-on--click="actions.prev"
@@ -421,9 +435,9 @@ $context = [
                 <span aria-hidden="true">
                     <svg width="24px" height="24px" viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M15 20L7 12L15 4" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>             
+                    </svg>
                 </span>
-                <span class="sr-only">Precedente</span>
+                <span class="sr-only"><?php esc_html_e( 'Precedente', 'jerus-organo' ); ?></span>
             </button>
             <button class="nav-btn nav-btn--next"
                     data-wp-on--click="actions.next"
@@ -433,7 +447,7 @@ $context = [
                     <path d="M9 20L17 12L9 4" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 </span>
-                <span class="sr-only">Successivo</span>
+                <span class="sr-only"><?php esc_html_e( 'Successivo', 'jerus-organo' ); ?></span>
             </button>
         </nav>
 
@@ -487,7 +501,7 @@ $context = [
             </div>
             <div class="gc-body">
                 <?php if ( ! empty( $post['data'] ) ) : ?>
-                <div class="gc-year">DATA: <?php echo esc_html( $post['data'] ); ?></div>
+                <div class="gc-year"><?php esc_html_e( 'DATA:', 'jerus-organo' ); ?> <?php echo esc_html( $post['data'] ); ?></div>
                 <?php endif; ?>
                 <div class="gc-title"><?php echo esc_html( $post['title'] ); ?></div>
                 <?php if ( ! empty( $post['excerpt'] ) ) : ?>

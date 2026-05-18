@@ -70,12 +70,14 @@ export function filterPostsForPanel( group, periodo ) {
 }
 
 // Costruisce l'HTML della card mostrata nel pannello informativo.
-export function makeCard( post ) {
+// `labels` contiene le etichette i18n ({ ubicazione: '...' }).
+export function makeCard( post, labels = {} ) {
+	const ubicazioneLabel = labels.ubicazione || 'UBICAZIONE:';
 	const thumb = post.thumb
 		? `<div class="mp-thumb"><a class="mp-title" href="${ escapeHtml( post.url ) }"><img src="${ escapeHtml( post.thumb ) }" alt="${ escapeHtml( post.title ) }" loading="lazy"></a></div>`
 		: '';
 	const ubicazione = post.ubicazione
-		? `<span class="mp-ubicazione">UBICAZIONE: ${ escapeHtml( post.ubicazione ) }</span>`
+		? `<span class="mp-ubicazione">${ escapeHtml( ubicazioneLabel ) } ${ escapeHtml( post.ubicazione ) }</span>`
 		: '';
 	const excerpt = post.excerpt
 		? `<p class="mp-excerpt">${ escapeHtml( post.excerpt ) }</p>`

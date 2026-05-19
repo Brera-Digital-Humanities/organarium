@@ -1,4 +1,4 @@
-# Repertory of the Ancient Organ
+# Repository of the Ancient Organ
 
 [🇮🇹 Italiano](README.md) · **🇬🇧 English**
 

@@ -1,5 +1,7 @@
 # Repertorio dell'Organo antico
 
+**🇮🇹 Italiano** · [🇬🇧 English](README-en.md)
+
 Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra cinque blocchi Gutenberg custom: quattro interattivi basati sulla **WordPress Interactivity API** (`featured-zoom`, `timeline`, `post-list`, `mappa-interattiva` — quest'ultimo integra anche **Leaflet.js** per la visualizzazione cartografica) e uno dinamico server-side (`acf-field`) per la visualizzazione dei campi ACF nei template del singolo post.
 
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)

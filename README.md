@@ -2,6 +2,10 @@
 
 Child theme WordPress di **Twenty Twenty-Five** per la catalogazione e presentazione del repertorio musicale dell'organo antico. Il tema integra cinque blocchi Gutenberg custom: quattro interattivi basati sulla **WordPress Interactivity API** (`featured-zoom`, `timeline`, `post-list`, `mappa-interattiva` — quest'ultimo integra anche **Leaflet.js** per la visualizzazione cartografica) e uno dinamico server-side (`acf-field`) per la visualizzazione dei campi ACF nei template del singolo post.
 
+[![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
+
+Rilasciato sotto **GNU General Public License v2 o successiva** ([GPL-2.0-or-later](LICENSE)) — in quanto child theme di WordPress eredita la licenza GPL per derivazione: ogni redistribuzione e opera derivata deve mantenere termini compatibili con la GPL.
+
 ---
 
 ## Requisiti

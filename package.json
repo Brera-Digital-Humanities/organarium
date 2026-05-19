@@ -1,6 +1,7 @@
 {
   "name": "jerus-organo",
   "version": "1.0.0",
+  "license": "GPL-2.0-or-later",
   "main": "build/index.js",
   "scripts": {
     "build": "wp-scripts build --experimental-modules --blocks-manifest",

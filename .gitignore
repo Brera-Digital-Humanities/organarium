@@ -11,7 +11,7 @@ wp-config-sample.php
 .htaccess
 .htpasswd
 
-# Variabili d'ambiente
+# Variabili d'ambientegit log --format="%ae %an" | head -10
 .env
 .env.*
 !.env.example
